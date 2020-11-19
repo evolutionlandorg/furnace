@@ -4,10 +4,10 @@ import "ds-stop/stop.sol";
 import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/ISettingsRegistry.sol";
-import "./FurnanceSettingIds.sol";
+import "./FurnaceSettingIds.sol";
 import "./ItemBoxPrice.sol";
 
-contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnanceSettingIds {
+contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
     //TODO: backend CHECK.
     event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
     event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);

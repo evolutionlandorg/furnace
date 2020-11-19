@@ -5,9 +5,9 @@ import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IItemBase.sol";
-import "./FurnanceSettingIds.sol";
+import "./FurnaceSettingIds.sol";
 
-contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
+contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
     event TakeBackNFT(
         address indexed user,
         uint256 indexed nonce,
