@@ -87,7 +87,7 @@ contract ItemBase is DSAuth, FurnanceSettingIds {
         uint256[] memory _amounts,
         address _owner
     ) public auth returns (uint256) {
-        _createItem(
+        return _createItem(
             _class,
             _grade,
             _prefer,
