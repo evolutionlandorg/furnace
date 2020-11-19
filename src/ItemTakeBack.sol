@@ -81,14 +81,13 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
         require(_grades.length > 0, "no item.");
         for (uint256 i = 0; i < _grades.length; i++) {
             uint16 grade = _grades[i];
-            (, uint256 prefer, ) = random(_nonce, i);
             uint256 tokenId;
             if (grade == 1) {
-                tokenId = rewardLevel1Item(prefer, _user);
+                tokenId = rewardLevel1Item(_user);
             } else if (grade == 2) {
-                tokenId = rewardLevel2Item(prefer, _user);
+                tokenId = rewardLevel2Item(_user);
             } else if (grade == 3) {
-                tokenId = rewardLevel3Item(prefer, _user);
+                tokenId = rewardLevel3Item(_user);
             }
             emit TakeBackNFT(_user, _nonce, tokenId);
         }
@@ -144,8 +143,8 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
         uint256 _nonce,
         uint256 _boxId,
         uint256 _amount
-    ) internal auth {
-        (uint256 prizeNFT, uint256 prefer, uint256 prizeFT) = random(
+    ) internal {
+        (uint256 prizeNFT, uint256 prizeFT) = random(
             _nonce,
             _boxId
         );
@@ -160,26 +159,25 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
                 IERC20(ring).transfer(_user, value);
             }
             if (prizeNFT < 10) {
-                tokenId = rewardLevel3Item(prefer, _user);
+                tokenId = rewardLevel3Item(_user);
             } else {
-                tokenId = rewardLevel2Item(prefer, _user);
+                tokenId = rewardLevel2Item(_user);
             }
         } else {
             // silver box
             if (prizeNFT == 0) {
-                tokenId = rewardLevel3Item(prefer, _user);
+                tokenId = rewardLevel3Item(_user);
             } else if (prizeNFT < 10) {
-                tokenId = rewardLevel2Item(prefer, _user);
+                tokenId = rewardLevel2Item(_user);
             } else {
-                tokenId = rewardLevel1Item(prefer, _user);
+                tokenId = rewardLevel1Item(_user);
             }
         }
         emit OpenBox(_user, _nonce, _boxId, tokenId, value);
     }
 
-    function rewardLevel1Item(uint256 _prefer, address _owner)
+    function rewardLevel1Item(address _owner)
         internal
-        auth
         returns (uint256)
     {
         address item = registry.addressOf(CONTRACT_ITEM_BASE);
@@ -187,7 +185,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             IItemBase(item).createItem(
                 0,
                 1,
-                uint16(_prefer),
+                0,
                 2,
                 0,
                 false,
@@ -198,9 +196,8 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             );
     }
 
-    function rewardLevel2Item(uint256 _prefer, address _owner)
+    function rewardLevel2Item(address _owner)
         internal
-        auth
         returns (uint256)
     {
         address item = registry.addressOf(CONTRACT_ITEM_BASE);
@@ -208,7 +205,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             IItemBase(item).createItem(
                 0,
                 2,
-                uint16(_prefer),
+                0,
                 3,
                 0,
                 false,
@@ -219,9 +216,8 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             );
     }
 
-    function rewardLevel3Item(uint256 _prefer, address _owner)
+    function rewardLevel3Item(address _owner)
         internal
-        auth
         returns (uint256)
     {
         address item = registry.addressOf(CONTRACT_ITEM_BASE);
@@ -229,7 +225,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             IItemBase(item).createItem(
                 0,
                 3,
-                uint16(_prefer),
+                0,
                 4,
                 0,
                 false,
@@ -246,7 +242,6 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
         view
         returns (
             uint256,
-            uint256,
             uint256
         )
     {
@@ -260,7 +255,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
                 )
             )
         );
-        return (seed % 100, seed % 5, seed & (1 << 255));
+        return (seed % 100, seed & (1 << 255));
     }
 
     function verify(

@@ -87,18 +87,19 @@ contract ItemBase is DSAuth, FurnanceSettingIds {
         uint256[] memory _amounts,
         address _owner
     ) public auth returns (uint256) {
-        return _createItem(
-            _class,
-            _grade,
-            _prefer,
-            _index,
-            _rate,
-            _canDisenchant,
-            _major,
-            _tokens,
-            _amounts,
-            _owner
-        );
+        return
+            _createItem(
+                _class,
+                _grade,
+                _prefer,
+                _index,
+                _rate,
+                _canDisenchant,
+                _major,
+                _tokens,
+                _amounts,
+                _owner
+            );
     }
 
     function _createItem(
@@ -112,7 +113,7 @@ contract ItemBase is DSAuth, FurnanceSettingIds {
         address[] memory _tokens,
         uint256[] memory _amounts,
         address _owner
-    ) internal auth returns (uint256) {
+    ) internal returns (uint256) {
         require(
             _tokens.length == _amounts.length,
             "Item: invalid token or amount length"
@@ -135,7 +136,10 @@ contract ItemBase is DSAuth, FurnanceSettingIds {
             tokens: _tokens,
             amounts: _amounts
         });
-        uint256 tokenId = IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).mintObject(_owner, uint128(lastItemObjectId));
+        uint256 tokenId = IObjectOwnership(
+            registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)
+        )
+            .mintObject(_owner, uint128(lastItemObjectId));
         tokenId2Item[tokenId] = item;
         emit Create(
             _owner,
@@ -160,7 +164,10 @@ contract ItemBase is DSAuth, FurnanceSettingIds {
      * @param _tokenId tokenId of the item.
      */
     function destroyItem(address _to, uint256 _tokenId) public auth {
-        IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).burn(_to, _tokenId);
+        IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).burn(
+            _to,
+            _tokenId
+        );
         emit Destroy(_to, _tokenId);
     }
 }

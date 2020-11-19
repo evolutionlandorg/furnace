@@ -40,6 +40,35 @@ contract Formula is DSAuth {
 
     FormulaBase[] public formulas;
 
+    constructor() public {
+        FormulaBase memory formula0 = FormulaBase({
+            name: "",
+            class: 0,
+            grade: 0,
+            prefer: 0,
+            canDisenchant: false,
+            disable: true,
+            majorIndex: 0,
+            tokens: new address[](0),
+            mins: new uint256[](0),
+            maxs: new uint256[](0)
+        });
+        formulas.push(formula0);
+        // FormulaBase memory formula1 = FormulaBase({
+        //     name: "铸铁钻头",
+        //     class: 0,
+        //     grade: 1,
+        //     prefer: 0,
+        //     canDisenchant: false,
+        //     disable: true,
+        //     majorIndex: 0,
+        //     tokens: new address[](0),
+        //     mins: new uint256[](0),
+        //     maxs: new uint256[](0)
+        // });
+        // formulas.push(formula0);
+    }
+
     function add(
         string memory _name,
         uint16 _class,
@@ -50,7 +79,7 @@ contract Formula is DSAuth {
         address[] memory _tokens,
         uint256[] memory _mins,
         uint256[] memory _maxs
-    ) public auth {
+    ) public auth returns (bool) {
         require(_tokens.length == _mins.length, "length invalid");
         require(_mins.length == _maxs.length, "length invalid");
         FormulaBase memory formula = FormulaBase({

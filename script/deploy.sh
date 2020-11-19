@@ -29,11 +29,11 @@ ITEMBASE_PROXY=0x588abe3F7EE935137102C5e2B8042788935f4CB0
 # ItemBase
 ITEMBASE=0x841dAc53Bd3cb199d5f453BEf03dB6c4f9de999a
 # ItemBaseAuthority 
-ITEMBASEAUTHORITY=0x1559Bf123D300f244ABdA95aefDA14F54C37B9B6
+ITEMBASEAUTHORITY=0xf62c4cfb52e2a3356d59a28db0201bfceb7e8478
 # ItemLuckyBox
-ITEMLUCKYBOX=0x21fc4bca4b2173f7ea392589e9d3ff478aa48791
+ITEMLUCKYBOX=0x75774d78306a847f5cfc7630f37bd4ed649784b3
 # ItemTakeBack
-ITEMTAKEBACK=0x20c3b4a6cb3319d14ffb0c2d4c7b035f16c4b7d3
+ITEMTAKEBACK=0xda66771a4e7a6aa6cbaf5526ccb9a3159cf64e03
 # ECDSA
 ECDSA=0xa2d2d90d03b0876a4883fb6c95b3c6dbaeb24def
 
@@ -78,31 +78,12 @@ OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$IT
 
 # open box
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-nonce=$(seth --to-uint256 0)
-expireTime=$(seth --to-uint256 1605787415)
-networkId=$(seth --to-uint256 3)
-boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
-amount=$(seth --to-uint256 $(seth --to-wei 1000 ether))
-msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${boxId:2}${amount:2}" 
-hashmsg=$(seth keccak $msg)
-signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
-prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
-signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
-dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
-sup=$(echo $dec | cut -d' ' -f 1)
-r=$(echo $dec | cut -d' ' -f 2)
-s=$(echo $dec | cut -d' ' -f 3)
-v=$(echo $dec | cut -d' ' -f 4)
-seth send -F $AUTH $ITEMTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId] [$amount] $hashmsg $v $r $s  
-
-# take back 
-# _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
-# nonce=$(seth --to-uint256 4)
+# nonce=$(seth --to-uint256 0)
 # expireTime=$(seth --to-uint256 1605787415)
 # networkId=$(seth --to-uint256 3)
-# grade=$(seth --to-uint256 2)
-# msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${grade:2}" 
-# # abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
+# boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
+# amount=$(seth --to-uint256 $(seth --to-wei 1000 ether))
+# msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${boxId:2}${amount:2}" 
 # hashmsg=$(seth keccak $msg)
 # signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
 # prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
@@ -112,7 +93,29 @@ seth send -F $AUTH $ITEMTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],
 # r=$(echo $dec | cut -d' ' -f 2)
 # s=$(echo $dec | cut -d' ' -f 3)
 # v=$(echo $dec | cut -d' ' -f 4)
-# seth send -F $AUTH $ITEMTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade] $hashmsg $v $r $s  
+# seth send -F $AUTH $ITEMTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId] [$amount] $hashmsg $v $r $s  
+
+# take back 
+# _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
+nonce=$(seth --to-uint256 1)
+expireTime=$(seth --to-uint256 1605787415)
+networkId=$(seth --to-uint256 3)
+grade=$(seth --to-uint256 2)
+msg="${OWNER}${nonce:2}${expireTime:2}${networkId:2}${grade:2}" 
+# abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
+hashmsg=$(seth keccak $msg)
+signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
+prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
+signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
+dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
+sup=$(echo $dec | cut -d' ' -f 1)
+r=$(echo $dec | cut -d' ' -f 2)
+s=$(echo $dec | cut -d' ' -f 3)
+v=$(echo $dec | cut -d' ' -f 4)
+seth send -F $OWNER $ITEMTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade] $hashmsg $v $r $s  
 
 # init formula
-# seth send -F $AUTH $FORMULA "add(string,uint16,uint16,uint16,bool,uint16,address[],uint256[],uint256[])" $ITEMBASEAUTHORITY 
+# 0
+
+# name=$(seth --to-hexdata "普通GEGO镐子")
+# seth send -F $AUTH $FORMULA "add(string,uint16,uint16,uint16,bool,uint16,address[],uint256[],uint256[])"  

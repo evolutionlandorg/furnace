@@ -20,10 +20,6 @@ contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnanceSettingIds {
 
     address payable public wallet;
 
-    //TODO: the record is needed?
-    mapping(address => uint256) public goldSalesRecord;
-    mapping(address => uint256) public silverSalesRecord;
-
     uint256 public priceIncreaseBeginTime;
 
     ISettingsRegistry public registry;
@@ -76,14 +72,9 @@ contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnanceSettingIds {
         IERC20(ring).transfer(wallet, charge);
 
         if (goldBoxAmount > 0) {
-            goldSalesRecord[_from] = add(goldSalesRecord[_from], goldBoxAmount);
             emit GoldBoxSale(_from, goldBoxAmount, priceGoldBox);
         }
         if (silverBoxAmount > 0) {
-            silverSalesRecord[_from] = add(
-                silverSalesRecord[_from],
-                silverBoxAmount
-            );
             emit SilverBoxSale(_from, silverBoxAmount, priceSilverBox);
         }
         if (_amount > charge) {
