@@ -5,9 +5,9 @@ pragma solidity ^0.6.7;
 import "ds-auth/auth.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
-import "./FurnanceSettingIds.sol";
+import "./FurnaceSettingIds.sol";
 
-contract ItemBase is DSAuth, FurnanceSettingIds {
+contract ItemBase is DSAuth, FurnaceSettingIds {
     event Create(
         address indexed owner,
         uint256 indexed tokenId,

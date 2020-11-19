@@ -1,6 +1,6 @@
 pragma solidity ^0.6.7;
  
-contract FurnanceSettingIds {
+contract FurnaceSettingIds {
 
 	uint256 internal constant PREFER_GOLD = 1 << 0;
 	uint256 internal constant PREFER_WOOD = 1 << 1;
