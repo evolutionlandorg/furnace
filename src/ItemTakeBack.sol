@@ -149,36 +149,32 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
             _nonce,
             _boxId
         );
-        // The top bit is a flag to tell it is a gold or silver box.
+        uint256 tokenId;
+        uint256 value;
         uint256 boxType = (_boxId >> 255) & 1;
         if (boxType == 1) {
             // gold box
             if (prizeFT == 1 && _amount > 1) {
                 address ring = registry.addressOf(CONTRACT_RING_ERC20_TOKEN);
-                uint256 value = _amount / 2;
+                value = _amount / 2;
                 IERC20(ring).transfer(_user, value);
-        		emit OpenBox(_user, _nonce, _boxId, 0, value);
             }
             if (prizeNFT < 10) {
-                uint256 tokenId = rewardLevel3Item(prefer, _user);
-        		emit OpenBox(_user, _nonce, _boxId, tokenId, 0);
+                tokenId = rewardLevel3Item(prefer, _user);
             } else {
-                uint256 tokenId = rewardLevel2Item(prefer, _user);
-        		emit OpenBox(_user, _nonce, _boxId, tokenId, 0);
+                tokenId = rewardLevel2Item(prefer, _user);
             }
         } else {
             // silver box
             if (prizeNFT == 0) {
-                uint256 tokenId = rewardLevel3Item(prefer, _user);
-        		emit OpenBox(_user, _nonce, _boxId, tokenId, 0);
+                tokenId = rewardLevel3Item(prefer, _user);
             } else if (prizeNFT < 10) {
-                uint256 tokenId = rewardLevel2Item(prefer, _user);
-        		emit OpenBox(_user, _nonce, _boxId, tokenId, 0);
+                tokenId = rewardLevel2Item(prefer, _user);
             } else {
-                uint256 tokenId = rewardLevel1Item(prefer, _user);
-        		emit OpenBox(_user, _nonce, _boxId, tokenId, 0);
+                tokenId = rewardLevel1Item(prefer, _user);
             }
         }
+        emit OpenBox(_user, _nonce, _boxId, tokenId, value);
     }
 
     function rewardLevel1Item(uint256 _prefer, address _owner)
