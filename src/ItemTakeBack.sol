@@ -97,7 +97,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnanceSettingIds {
     }
 
     // _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-    function openBoxs(
+    function openBoxes(
         uint256 _nonce,
         uint256 _expireTime,
         uint256[] memory _boxIds,

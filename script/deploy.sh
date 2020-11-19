@@ -29,11 +29,11 @@ ITEMBASE_PROXY=0x588abe3F7EE935137102C5e2B8042788935f4CB0
 # ItemBase
 ITEMBASE=0x841dAc53Bd3cb199d5f453BEf03dB6c4f9de999a
 # ItemBaseAuthority 
-ITEMBASEAUTHORITY=0x6A2c7Fa3aBE1a95E985fcA1517A3258f79b1769f
+ITEMBASEAUTHORITY=0x1559Bf123D300f244ABdA95aefDA14F54C37B9B6
 # ItemLuckyBox
 ITEMLUCKYBOX=0x21fc4bca4b2173f7ea392589e9d3ff478aa48791
 # ItemTakeBack
-ITEMTAKEBACK=0xa681492dbad5a3999cfce2d72196d5784dd08d0c
+ITEMTAKEBACK=0x20c3b4a6cb3319d14ffb0c2d4c7b035f16c4b7d3
 # ECDSA
 ECDSA=0xa2d2d90d03b0876a4883fb6c95b3c6dbaeb24def
 
@@ -42,7 +42,7 @@ OWNER=0xcC5E48BEb33b83b8bD0D9d9A85A8F6a27C51F5C5
 SUPERVISOR=0x00a1537d251a6a4c4effAb76948899061FeA47b9
 OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
 
-dapp create src/Formula.sol:Formula  -C ropsten --verify
+# dapp create src/Formula.sol:Formula  -C ropsten --verify
 # dapp create src/ItemBase.sol:ItemBase  -C ropsten --verify
 # seth send $ITEMBASE_PROXY "upgradeTo(address)" $ITEMBASE
 # seth send $ITEMBASE_PROXY "initializeContract(address)" $ISETTINGSREGISTRY
@@ -78,26 +78,26 @@ dapp create src/Formula.sol:Formula  -C ropsten --verify
 
 # open box
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-# nonce=$(seth --to-uint256 2)
-# expireTime=$(seth --to-uint256 1605787415)
-# networkId=$(seth --to-uint256 3)
-# boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
-# amount=$(seth --to-uint256 $(seth --to-wei 1000 ether))
-# msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${boxId:2}${amount:2}" 
-# hashmsg=$(seth keccak $msg)
-# signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
-# prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
-# signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
-# dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
-# sup=$(echo $dec | cut -d' ' -f 1)
-# r=$(echo $dec | cut -d' ' -f 2)
-# s=$(echo $dec | cut -d' ' -f 3)
-# v=$(echo $dec | cut -d' ' -f 4)
-# seth send -F $AUTH $ITEMTAKEBACK "openBoxs(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId] [$amount] $hashmsg $v $r $s  
+nonce=$(seth --to-uint256 0)
+expireTime=$(seth --to-uint256 1605787415)
+networkId=$(seth --to-uint256 3)
+boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
+amount=$(seth --to-uint256 $(seth --to-wei 1000 ether))
+msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${boxId:2}${amount:2}" 
+hashmsg=$(seth keccak $msg)
+signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
+prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
+signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
+dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
+sup=$(echo $dec | cut -d' ' -f 1)
+r=$(echo $dec | cut -d' ' -f 2)
+s=$(echo $dec | cut -d' ' -f 3)
+v=$(echo $dec | cut -d' ' -f 4)
+seth send -F $AUTH $ITEMTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId] [$amount] $hashmsg $v $r $s  
 
 # take back 
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
-# nonce=$(seth --to-uint256 3)
+# nonce=$(seth --to-uint256 4)
 # expireTime=$(seth --to-uint256 1605787415)
 # networkId=$(seth --to-uint256 3)
 # grade=$(seth --to-uint256 2)
@@ -113,3 +113,6 @@ dapp create src/Formula.sol:Formula  -C ropsten --verify
 # s=$(echo $dec | cut -d' ' -f 3)
 # v=$(echo $dec | cut -d' ' -f 4)
 # seth send -F $AUTH $ITEMTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade] $hashmsg $v $r $s  
+
+# init formula
+# seth send -F $AUTH $FORMULA "add(string,uint16,uint16,uint16,bool,uint16,address[],uint256[],uint256[])" $ITEMBASEAUTHORITY 
