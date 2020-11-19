@@ -41,7 +41,7 @@ contract Formula is DSAuth {
     FormulaBase[] public formulas;
 
     constructor() public {
-        FormulaBase memory formula0 = FormulaBase({
+        FormulaBase memory f0 = FormulaBase({
             name: "",
             class: 0,
             grade: 0,
@@ -53,20 +53,59 @@ contract Formula is DSAuth {
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
-        formulas.push(formula0);
-        // FormulaBase memory formula1 = FormulaBase({
-        //     name: "铸铁钻头",
-        //     class: 0,
-        //     grade: 1,
-        //     prefer: 0,
-        //     canDisenchant: false,
-        //     disable: true,
-        //     majorIndex: 0,
-        //     tokens: new address[](0),
-        //     mins: new uint256[](0),
-        //     maxs: new uint256[](0)
-        // });
-        // formulas.push(formula0);
+        formulas.push(f0);
+        FormulaBase memory f1 = FormulaBase({
+            name: "普通GEGO镐",
+            class: 0,
+            grade: 1,
+            prefer: 0,
+            canDisenchant: false,
+            disable: false,
+            majorIndex: 0,
+            tokens: new address[](0),
+            mins: new uint256[](0),
+            maxs: new uint256[](0)
+        });
+        formulas.push(f1);
+        FormulaBase memory f2 = FormulaBase({
+            name: "铸铁钻头",
+            class: 0,
+            grade: 1,
+            prefer: 0,
+            canDisenchant: false,
+            disable: false,
+            majorIndex: 0,
+            tokens: new address[](0),
+            mins: new uint256[](0),
+            maxs: new uint256[](0)
+        });
+        formulas.push(f2);
+        FormulaBase memory f3 = FormulaBase({
+            name: "钨钢钻头",
+            class: 0,
+            grade: 2,
+            prefer: 0,
+            canDisenchant: false,
+            disable: false,
+            majorIndex: 0,
+            tokens: new address[](0),
+            mins: new uint256[](0),
+            maxs: new uint256[](0)
+        });
+        formulas.push(f3);
+        FormulaBase memory f4 = FormulaBase({
+            name: "金刚钻头",
+            class: 0,
+            grade: 3,
+            prefer: 0,
+            canDisenchant: false,
+            disable: false,
+            majorIndex: 0,
+            tokens: new address[](0),
+            mins: new uint256[](0),
+            maxs: new uint256[](0)
+        });
+        formulas.push(f4);
     }
 
     function add(

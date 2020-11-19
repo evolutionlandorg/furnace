@@ -23,7 +23,7 @@ APOSTLEBASE_PROXY=0x2E1dd56F118505a9D420Bf50D3bbAd80B3Aa2Ef3
 # ERC721Bridge Proxy
 ERC721BRIDGE_PROXY=0xFBCf09250Ca11B2142D40Fa39521b334C1d7Cb17
 # Formula
-FORMULA=0x3217F36AE34aCA2CE60d218af8F47d29101204a8
+FORMULA=0x0E27e673b1398FB189C2d516775E1195AF665e1E
 # ItemBase Proxy
 ITEMBASE_PROXY=0x588abe3F7EE935137102C5e2B8042788935f4CB0
 # ItemBase
@@ -42,7 +42,7 @@ OWNER=0xcC5E48BEb33b83b8bD0D9d9A85A8F6a27C51F5C5
 SUPERVISOR=0x00a1537d251a6a4c4effAb76948899061FeA47b9
 OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
 
-# dapp create src/Formula.sol:Formula  -C ropsten --verify
+dapp create src/Formula.sol:Formula  -C ropsten --verify
 # dapp create src/ItemBase.sol:ItemBase  -C ropsten --verify
 # seth send $ITEMBASE_PROXY "upgradeTo(address)" $ITEMBASE
 # seth send $ITEMBASE_PROXY "initializeContract(address)" $ISETTINGSREGISTRY
@@ -78,7 +78,7 @@ OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$IT
 
 # open box
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-# nonce=$(seth --to-uint256 0)
+# nonce=$(seth --to-uint256 2)
 # expireTime=$(seth --to-uint256 1605787415)
 # networkId=$(seth --to-uint256 3)
 # boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
@@ -97,22 +97,22 @@ OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$IT
 
 # take back 
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
-nonce=$(seth --to-uint256 1)
-expireTime=$(seth --to-uint256 1605787415)
-networkId=$(seth --to-uint256 3)
-grade=$(seth --to-uint256 2)
-msg="${OWNER}${nonce:2}${expireTime:2}${networkId:2}${grade:2}" 
-# abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
-hashmsg=$(seth keccak $msg)
-signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
-prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
-signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
-dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
-sup=$(echo $dec | cut -d' ' -f 1)
-r=$(echo $dec | cut -d' ' -f 2)
-s=$(echo $dec | cut -d' ' -f 3)
-v=$(echo $dec | cut -d' ' -f 4)
-seth send -F $OWNER $ITEMTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade] $hashmsg $v $r $s  
+# nonce=$(seth --to-uint256 1)
+# expireTime=$(seth --to-uint256 1605787415)
+# networkId=$(seth --to-uint256 3)
+# grade=$(seth --to-uint256 2)
+# msg="${OWNER}${nonce:2}${expireTime:2}${networkId:2}${grade:2}" 
+# # abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
+# hashmsg=$(seth keccak $msg)
+# signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
+# prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
+# signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
+# dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
+# sup=$(echo $dec | cut -d' ' -f 1)
+# r=$(echo $dec | cut -d' ' -f 2)
+# s=$(echo $dec | cut -d' ' -f 3)
+# v=$(echo $dec | cut -d' ' -f 4)
+# seth send -F $OWNER $ITEMTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade] $hashmsg $v $r $s  
 
 # init formula
 # 0
