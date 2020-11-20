@@ -8,7 +8,6 @@ import "./FurnaceSettingIds.sol";
 import "./ItemBoxPrice.sol";
 
 contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
-    //TODO: backend CHECK.
     event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
     event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
     event RingRefunded(address indexed buyer, uint256 value);
@@ -40,7 +39,7 @@ contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
      * @dev ERC223 fallback function, make sure to check the msg.sender is from target token contracts
      * @param _from - person who transfer token in for buying box.
      * @param _amount - amount of token.
-     * @param _data - data which indicate the operations.
+     * @param _data - data which the gold box amount and silver box amount arrange.
      */
     function tokenFallback(
         address _from,
@@ -49,7 +48,6 @@ contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
     ) public stoppable {
         uint256 goldBoxAmount;
         uint256 silverBoxAmount;
-        //TODO:: check
         assembly {
             let ptr := mload(0x40)
             calldatacopy(ptr, 0, calldatasize())

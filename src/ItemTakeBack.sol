@@ -70,7 +70,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
             supervisor == verify(_hashmessage, _v, _r, _s),
             "verify failed"
         );
-        // verify that the _user, _nonce, _value are exactly what they should be
+        // verify that the _user, _nonce, _expireTime, networkId, _grades are exactly what they should be
         require(
             keccak256(
                 abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
@@ -114,7 +114,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
             supervisor == verify(_hashmessage, _v, _r, _s),
             "verify failed"
         );
-        // verify that the _user, _nonce, _value are exactly what they should be
+        // verify that the _user, _nonce, _expireTime, networkId, _boxIds, _amounts are exactly what they should be
         require(
             keccak256(
                 abi.encodePacked(
