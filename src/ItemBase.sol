@@ -1,13 +1,13 @@
 pragma solidity ^0.6.7;
 
 // import "zeppelin-solidity/introspection/SupportsInterfaceWithLookup.sol";
-
+import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
 import "./FurnaceSettingIds.sol";
 
-contract ItemBase is DSAuth, FurnaceSettingIds {
+contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
     event Create(
         address indexed owner,
         uint256 indexed tokenId,
@@ -41,18 +41,7 @@ contract ItemBase is DSAuth, FurnaceSettingIds {
         uint256[] amounts;
     }
 
-    /*
-     *  Modifiers
-     */
-    modifier singletonLockCall() {
-        require(!singletonLock, "Only can call once");
-        _;
-        singletonLock = true;
-    }
-
     /*** STORAGE ***/
-    bool private singletonLock = false;
-
     uint128 public lastItemObjectId;
 
     ISettingsRegistry public registry;
@@ -62,7 +51,7 @@ contract ItemBase is DSAuth, FurnaceSettingIds {
     /**
      * @dev Same with constructor, but is used and called by storage proxy as logic contract.
      */
-    function initializeContract(address _registry) public singletonLockCall {
+    function initialize(address _registry) public initializer {
         owner = msg.sender;
         emit LogSetOwner(msg.sender);
 

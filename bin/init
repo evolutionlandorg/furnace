@@ -4,8 +4,6 @@ set -e
 
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 
-export SETH_CHAIN=${SETH_CHAIN-ropsten}
-
 if ! [[ $SETH_INIT ]]; then
   export SETH_INIT=1
   # shellcheck source=/dev/null
@@ -15,6 +13,8 @@ if ! [[ $SETH_INIT ]]; then
   # shellcheck source=/dev/null
   [[ $(pwd) != ~ && -e .sethrc ]] && . .sethrc
 fi
+
+export SETH_CHAIN=${SETH_CHAIN-ropsten}
 
 [[ $(pwd) != ~ && -e .fncrc ]] && . .fncrc
 

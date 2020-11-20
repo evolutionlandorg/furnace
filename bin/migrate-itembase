@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$FNC_VERBOSE" ]; then set -x; fi
+
+. $(PWD)/script/init
+
+OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
+
+address=$(dapp create src/ItemBase.sol:ItemBase)
+seth send $ITEMBASE_PROXY "upgradeTo(address)" $address
+# seth send $ITEMBASE_PROXY "initializeContract(address)" $ISETTINGSREGISTRY
+
+path=$FNC_CONFIG
+cat $path | jq '.ITEMBASE = $address' --arg address $address | sponge $path
+

@@ -2,7 +2,7 @@
 
 set -ex
 
-. $(PWD)/script/init.sh
+. $(PWD)/script/init
 
 # open box
 _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")

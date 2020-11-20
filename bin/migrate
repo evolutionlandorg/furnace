@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$FURNANCE_VERBOSE" ]; then set -x; fi
+if [ "$FNC_VERBOSE" ]; then set -x; fi
 
 if [ -z "$1" ]
   then
@@ -12,7 +12,7 @@ fi
 
 [[ $(pwd) != ~ && -e .fncrc ]] && . .fncrc
 
-address=$(dapp create src/$1.sol:$1  -C ropsten --verify)
+address=$(dapp create src/$1.sol:$1)
 path=$FNC_CONFIG
 cat $path | jq '.[''"'"${1^^}"'"''] = $address' --arg address $address | sponge $path
 cat $path
