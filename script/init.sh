@@ -16,6 +16,8 @@ if ! [[ $SETH_INIT ]]; then
   [[ $(pwd) != ~ && -e .sethrc ]] && . .sethrc
 fi
 
+[[ $(pwd) != ~ && -e .fncrc ]] && . .fncrc
+
 config-init() {
   path=${FNC_CONFIG:-$1}
   if [[ ! -e "$path" ]]; then
@@ -82,8 +84,8 @@ chain-verify() {
   fi
 }
 
-if ! [[ $MCD_INIT ]]; then
+if ! [[ $FNC_INIT ]]; then
   TESTNET="${TESTNET:-~/.dapp/testnet}"
-  export MCD_INIT=1
+  export FNC_INIT=1
   fnc-init
 fi
