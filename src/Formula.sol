@@ -8,10 +8,9 @@ contract Formula is DSAuth {
         string name,
         uint16 class,
         uint16 grade,
-        uint16 prefer,
         bool canDisenchant,
         uint16 majorIndex,
-        address[] tokens,
+        bytes32[] tokens,
         uint256[] mins,
         uint256[] maxs
     );
@@ -23,14 +22,13 @@ contract Formula is DSAuth {
         string name;
         uint16 class;
         uint16 grade;
-        uint16 prefer;
         bool canDisenchant;
         // if it is removed
         bool disable;
         // major meterail of the Formula index
         uint16 majorIndex;
         // minor meterail info
-        address[] tokens;
+        bytes32[] tokens;
         uint256[] mins;
         uint256[] maxs;
         // uint256 smeltTime;
@@ -45,11 +43,10 @@ contract Formula is DSAuth {
             name: "",
             class: 0,
             grade: 0,
-            prefer: 0,
             canDisenchant: false,
             disable: true,
             majorIndex: 0,
-            tokens: new address[](0),
+            tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
@@ -58,11 +55,10 @@ contract Formula is DSAuth {
             name: "普通GEGO镐",
             class: 0,
             grade: 1,
-            prefer: 0,
             canDisenchant: false,
             disable: false,
             majorIndex: 0,
-            tokens: new address[](0),
+            tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
@@ -71,11 +67,10 @@ contract Formula is DSAuth {
             name: "铸铁钻头",
             class: 0,
             grade: 1,
-            prefer: 0,
             canDisenchant: false,
             disable: false,
             majorIndex: 0,
-            tokens: new address[](0),
+            tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
@@ -84,11 +79,10 @@ contract Formula is DSAuth {
             name: "钨钢钻头",
             class: 0,
             grade: 2,
-            prefer: 0,
             canDisenchant: false,
             disable: false,
             majorIndex: 0,
-            tokens: new address[](0),
+            tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
@@ -97,11 +91,10 @@ contract Formula is DSAuth {
             name: "金刚钻头",
             class: 0,
             grade: 3,
-            prefer: 0,
             canDisenchant: false,
             disable: false,
             majorIndex: 0,
-            tokens: new address[](0),
+            tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
         });
@@ -115,7 +108,7 @@ contract Formula is DSAuth {
         uint16 _prefer,
         bool _canDisenchant,
         uint16 _majorIndex,
-        address[] memory _tokens,
+        bytes32[] memory _tokens,
         uint256[] memory _mins,
         uint256[] memory _maxs
     ) public auth returns (bool) {
@@ -125,7 +118,6 @@ contract Formula is DSAuth {
             name: _name,
             class: _class,
             grade: _grade,
-            prefer: _prefer,
             canDisenchant: _canDisenchant,
             disable: false,
             majorIndex: _majorIndex,
@@ -139,7 +131,6 @@ contract Formula is DSAuth {
             formula.name,
             formula.class,
             formula.grade,
-            formula.prefer,
             formula.canDisenchant,
             formula.majorIndex,
             formula.tokens,
@@ -165,10 +156,9 @@ contract Formula is DSAuth {
             string memory name,
             uint16 class,
             uint16 grade,
-            uint16 prefer,
             bool canDisenchant,
             uint16 majorIndex,
-            address[] memory tokens,
+            bytes32[] memory tokens,
             uint256[] memory mins,
             uint256[] memory maxs
         )
@@ -179,7 +169,6 @@ contract Formula is DSAuth {
             formula.name,
             formula.class,
             formula.grade,
-            formula.prefer,
             formula.canDisenchant,
             formula.majorIndex,
             formula.tokens,

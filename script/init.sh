@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$FURNANCE_VERBOSE" ]; then set -x; fi
+if [ "$FNC_VERBOSE" ]; then set -x; fi
 
 export SETH_CHAIN=${SETH_CHAIN-ropsten}
 
