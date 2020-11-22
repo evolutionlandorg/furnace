@@ -165,6 +165,18 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
             _to,
             _tokenId
         );
+		delete tokenId2Item[_tokenId];
         emit Destroy(_to, _tokenId);
     }
+
+	function getSmeltInfo(uint256 _tokenId) public view returns (bool, uint16, uint256, address[] memory, uint256[] memory) {
+		Item memory item = tokenId2Item[_tokenId];
+		return (
+			item.canDisenchant,
+			item.class,
+			item.major,
+			item.tokens,
+			item.amounts
+		);
+	}
 }

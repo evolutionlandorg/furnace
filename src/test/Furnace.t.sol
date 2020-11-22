@@ -8,7 +8,7 @@ contract FurnaceTest is DSTest {
     Furnace furnace;
 
     function setUp() public {
-        furnace = new Furnace();
+        furnace = new Furnace(address(0), address(0));
     }
 
     function testFail_basic_sanity() public {

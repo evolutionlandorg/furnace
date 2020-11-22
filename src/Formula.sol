@@ -124,6 +124,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
         uint256[] memory _mins,
         uint256[] memory _maxs
     ) public auth returns (bool) {
+		require(formulas.length >= 65536, "formula is full.");
         require(_tokens.length == _mins.length, "length invalid");
         require(_mins.length == _maxs.length, "length invalid");
         FormulaEntry memory formula = FormulaEntry({
