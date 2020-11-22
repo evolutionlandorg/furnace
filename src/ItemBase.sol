@@ -60,17 +60,17 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 
     /**
      * @dev create a Item.
-     * @param _class the Item class.
-     * @param _grade the Item grade.
-     * @param _prefer the Item element prefer.
-     * @param _index the Item formula index.
-     * @param _rate the Item enhance strength rate.
-     * @param _canDisenchant the Item can disenchant or not.
-     * @param _major the major meterial tokenId of the Item.
-     * @param _tokens the minor meterial token addresses of the Item.
-     * @param _tokens the minor meterial token amountes of the Item.
-     * @param _owner the owner the Item.
-     * @return Item tokenId.
+     * @param _class - Item class.
+     * @param _grade - Item grade.
+     * @param _prefer -  Item element prefer.
+     * @param _index - Item formula index.
+     * @param _rate - Item enhance strength rate.
+     * @param _canDisenchant - Item can disenchant or not.
+     * @param _major - major meterial tokenId of the Item.
+     * @param _tokens - minor meterial token addresses of the Item.
+     * @param _tokens -  minor meterial token amountes of the Item.
+     * @param _owner - owner of the Item.
+     * @return Item - tokenId.
      */
     function createItem(
         uint16 _class,

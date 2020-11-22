@@ -1,8 +1,10 @@
 pragma solidity ^0.6.7;
-
+ 
+import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
+import "./FurnaceSettingIds.sol";
 
-contract Formula is DSAuth {
+contract Formula is Initializable, DSAuth, FurnaceSettingIds {
     event AddFormula(
         uint256 indexed index,
         string name,
@@ -15,8 +17,8 @@ contract Formula is DSAuth {
         uint256[] maxs
     );
     event RemoveFormula(uint256 indexed index);
-
-    struct FormulaBase {
+	event SetFurnaceStrength(uint256 indexed objectClass, uint256 indexed formulaIndex, uint256 base, uint256 enhance);
+    struct FormulaEntry {
         // Item parameter
         // name is needed?
         string name;
@@ -36,10 +38,16 @@ contract Formula is DSAuth {
         // uint256 loseRate;
     }
 
-    FormulaBase[] public formulas;
+	struct Strength {
+		uint256 base;
+		uint256 enhance;
+	}
 
-    constructor() public {
-        FormulaBase memory f0 = FormulaBase({
+    FormulaEntry[] public formulas;
+	mapping(bytes32 => Strength) public strengths;
+
+    function initialize() public initializer {
+        FormulaEntry memory f0 = FormulaEntry({
             name: "",
             class: 0,
             grade: 0,
@@ -51,7 +59,8 @@ contract Formula is DSAuth {
             maxs: new uint256[](0)
         });
         formulas.push(f0);
-        FormulaBase memory f1 = FormulaBase({
+		// setFurnaceStrength(0, 0, 0);
+        FormulaEntry memory f1 = FormulaEntry({
             name: "普通GEGO镐",
             class: 0,
             grade: 1,
@@ -63,7 +72,8 @@ contract Formula is DSAuth {
             maxs: new uint256[](0)
         });
         formulas.push(f1);
-        FormulaBase memory f2 = FormulaBase({
+		// setFurnaceStrength(1, 100, 0);
+        FormulaEntry memory f2 = FormulaEntry({
             name: "铸铁钻头",
             class: 0,
             grade: 1,
@@ -75,7 +85,8 @@ contract Formula is DSAuth {
             maxs: new uint256[](0)
         });
         formulas.push(f2);
-        FormulaBase memory f3 = FormulaBase({
+		// setFurnaceStrength(2, 150, 0);
+        FormulaEntry memory f3 = FormulaEntry({
             name: "钨钢钻头",
             class: 0,
             grade: 2,
@@ -87,7 +98,8 @@ contract Formula is DSAuth {
             maxs: new uint256[](0)
         });
         formulas.push(f3);
-        FormulaBase memory f4 = FormulaBase({
+		// setFurnaceStrength(3, 200, 0);
+        FormulaEntry memory f4 = FormulaEntry({
             name: "金刚钻头",
             class: 0,
             grade: 3,
@@ -99,13 +111,13 @@ contract Formula is DSAuth {
             maxs: new uint256[](0)
         });
         formulas.push(f4);
+		// setFurnaceStrength(4, 300, 0);
     }
 
     function add(
         string memory _name,
         uint16 _class,
         uint16 _grade,
-        uint16 _prefer,
         bool _canDisenchant,
         uint16 _majorIndex,
         bytes32[] memory _tokens,
@@ -114,7 +126,7 @@ contract Formula is DSAuth {
     ) public auth returns (bool) {
         require(_tokens.length == _mins.length, "length invalid");
         require(_mins.length == _maxs.length, "length invalid");
-        FormulaBase memory formula = FormulaBase({
+        FormulaEntry memory formula = FormulaEntry({
             name: _name,
             class: _class,
             grade: _grade,
@@ -164,7 +176,7 @@ contract Formula is DSAuth {
         )
     {
         require(index < formulas.length, "Formula: out of range");
-        FormulaBase memory formula = formulas[index];
+        FormulaEntry memory formula = formulas[index];
         return (
             formula.name,
             formula.class,
@@ -176,4 +188,29 @@ contract Formula is DSAuth {
             formula.maxs
         );
     }
+
+	// util to get key based on object class + formula index + appkey 
+    function _getKey(
+        uint8 _objectClass,
+        uint256 _formulaIndex,
+        bytes32 _appKey
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_objectClass, _formulaIndex, _appKey));
+    }
+
+	function getFurnaceStrength(uint256 _formulaIndex) public view returns(uint256, uint256) {
+		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		Strength memory s = strengths[key];
+		return (s.base, s.enhance);
+	}
+
+	function setFurnaceStrength(uint256 _formulaIndex, uint256 _base, uint256 _enhance) public auth {
+		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		Strength memory s = Strength({
+			base: _base,
+			enhance: _enhance
+		});
+		strengths[key] = s;
+		emit SetFurnaceStrength(ITEM_OBJECT_CLASS, _formulaIndex, _base, _enhance);
+	}
 }

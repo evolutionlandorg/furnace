@@ -2,13 +2,13 @@ pragma solidity ^0.6.7;
 
 import "ds-test/test.sol";
 
-import "./ItemBase.sol";
+import "../Furnace.sol";
 
-contract ItemBaseTest is DSTest {
-    ItemBase item;
+contract FurnaceTest is DSTest {
+    Furnace furnace;
 
     function setUp() public {
-        item = new ItemBase();
+        furnace = new Furnace();
     }
 
     function testFail_basic_sanity() public {
