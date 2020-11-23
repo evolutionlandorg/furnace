@@ -3,11 +3,12 @@ pragma solidity ^0.6.7;
 import "ds-stop/stop.sol";
 import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
+import "./interfaces/IERC223Recipient.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 import "./ItemBoxPrice.sol";
 
-contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
+contract ItemLuckyBox is DSMath, DSStop, IERC223Recipient, ItemBoxPrice, FurnaceSettingIds {
     event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
     event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
     event RingRefunded(address indexed buyer, uint256 value);
@@ -44,28 +45,22 @@ contract ItemLuckyBox is DSMath, DSStop, ItemBoxPrice, FurnaceSettingIds {
     function tokenFallback(
         address _from,
         uint256 _amount,
-        bytes memory _data
-    ) public stoppable {
-        uint256 goldBoxAmount;
-        uint256 silverBoxAmount;
-        assembly {
-            let ptr := mload(0x40)
-            calldatacopy(ptr, 0, calldatasize())
-            goldBoxAmount := mload(add(ptr, 132))
-            silverBoxAmount := mload(add(ptr, 164))
-        }
+        bytes calldata _data
+    ) external override stoppable {
+		require(_data.length == 64, "Transfer data length invalied.");
+		(uint256 goldBoxAmount, uint256 silverBoxAmount) = abi.decode(_data, (uint256, uint256));
         (uint256 priceGoldBox, uint256 priceSilverBox) = getPrice();
         uint256 chargeGoldBox = mul(goldBoxAmount, priceGoldBox);
         uint256 chargeSilverBox = mul(silverBoxAmount, priceSilverBox);
         uint256 charge = add(chargeGoldBox, chargeSilverBox);
         //  Only supported tokens can be called
         address ring = registry.addressOf(CONTRACT_RING_ERC20_TOKEN);
-        require(msg.sender == ring, "Only support ring");
+        require(msg.sender == ring, "Only support ring.");
         require(
             goldBoxAmount > 0 || silverBoxAmount > 0,
             "Buy gold or silver box"
         );
-        require(_amount >= charge, "No enough ring for buying lucky boxs.");
+        require(_amount >= charge, "No enough ring for buying lucky boxes.");
 
         IERC20(ring).transfer(wallet, charge);
 

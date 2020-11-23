@@ -33,11 +33,10 @@ contract Furnace is DSStop, FurnaceSettingIds {
     mapping (address => Element) public LPToken2element;
 
     constructor(
-        address _registry,
-		address _formula
+        address _registry
     ) public {
         registry = ISettingsRegistry(_registry);
-		formula = Formula(_formula);
+		formula = Formula(registry.addressOf(CONTRACT_FORMULA));
         ownership = IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP));
         itemBase = IItemBase(registry.addressOf(CONTRACT_ITEM_BASE));
 		LPToken2element[registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)] = Element.GOLD;

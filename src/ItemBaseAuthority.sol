@@ -11,7 +11,7 @@ contract ItemBaseAuthority {
 
     function canCall(
         address _src,
-        address _dst,
+        address /* _dst */,
         bytes4 _sig
     ) public view returns (bool) {
         return

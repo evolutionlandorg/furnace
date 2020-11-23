@@ -1,5 +1,6 @@
 pragma solidity ^0.6.7;
 
+
 contract ObjectOwnershipAuthorityV3 {
     mapping(address => bool) public whiteList;
 
@@ -11,7 +12,7 @@ contract ObjectOwnershipAuthorityV3 {
 
     function canCall(
         address _src,
-        address _dst,
+        address /* _dst */,
         bytes4 _sig
     ) public view returns (bool) {
         return
