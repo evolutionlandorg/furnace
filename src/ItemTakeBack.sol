@@ -150,7 +150,7 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
         );
         uint256 tokenId;
         uint256 value;
-        uint256 boxType = (_boxId >> 255) & 1;
+        uint256 boxType = _boxId >> 255;
         if (boxType == 1) {
             // gold box
             if (prizeFT == 1 && _amount > 1) {
@@ -249,13 +249,14 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
             keccak256(
                 abi.encodePacked(
                     blockhash(block.number),
+					block.timestamp,
                     block.difficulty,
                     _nonce,
                     _boxId
                 )
             )
         );
-        return (seed % 100, seed & (1 << 255));
+        return (seed % 100, seed >> 255);
     }
 
     function verify(
