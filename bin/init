@@ -15,8 +15,9 @@ if ! [[ $SETH_INIT ]]; then
 fi
 
 export SETH_CHAIN=${SETH_CHAIN-ropsten}
+export CHAINID=${CHAINID-3}
 
-[[ $(pwd) != ~ && -e .fncrc ]] && . .fncrc
+[[ -e .fncrc ]] && . .fncrc
 
 config-init() {
   path=${FNC_CONFIG:-$1}
@@ -77,6 +78,7 @@ rpc-verify() {
 chain-verify() {
   EXPECTED="$1"
   ACTUAL="$(seth rpc net_version)"
+  export CHAINID=$ACTUAL
   if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Ethereum network version is incorrect."
     echo "Verify ETH_RPC_URL is set to $FNC_CHAIN (Expected $EXPECTED, got $ACTUAL)"

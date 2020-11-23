@@ -2,12 +2,12 @@
 
 set -ex
 
-. $(PWD)/script/init
+. $(PWD)/bin/init
 
 # buy box
-amount=$(seth --to-uint256 $(seth --to-wei 150 ether))
-goldBox=$(seth --to-uint256 0)
-silverBox=$(seth --to-uint256 1)
+amount=$(seth --to-uint256 $(seth --to-wei 5500 ether))
+goldBox=$(seth --to-uint256 1)
+silverBox=$(seth --to-uint256 2)
 data=$goldBox${silverBox:2}
 seth send -F $AUTH $TOKEN_RING "transfer(address,uint256,bytes)" $ITEMLUCKYBOX $amount $data 
 

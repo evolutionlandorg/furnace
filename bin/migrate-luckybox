@@ -4,10 +4,10 @@ set -e
 
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 
-. $(PWD)/script/init.sh
+. $(PWD)/bin/init
 
-address=$(dapp create src/ItemLuckyBox.sol:ItemLuckyBox $ISETTINGSREGISTRY $AUTH $(seth --to-uint256 1605657600))
-seth call $address "getPrice()(uint256,uint256)"   # 1000 100  
 path=$FNC_CONFIG
-cat $path | jq '.ITEMLUCKYBOX = $address' --arg address $address | sponge $path
-cat $path
+address=$(dapp create src/ItemLuckyBox.sol:ItemLuckyBox $ISETTINGSREGISTRY $ITEMTAKEBACK $(seth --to-uint256 1605657600))
+export ITEMLUCKYBOX=$address
+seth call $ITEMLUCKYBOX "getPrice()(uint256,uint256)"   # 1000 100  
+cat $path | jq '.ITEMLUCKYBOX = $address' --arg address $ITEMLUCKYBOX | sponge $path

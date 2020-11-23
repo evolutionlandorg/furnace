@@ -2,13 +2,13 @@
 
 set -ex
 
-. $(PWD)/script/init
+. $(PWD)/bin/init
 
 # open box
-_hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-nonce=$(seth --to-uint256 2)
-expireTime=$(seth --to-uint256 1605787415)
-networkId=$(seth --to-uint256 3)
+# _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
+nonce=$(seth --to-uint256 0)
+expireTime=$(seth --to-uint256 1607134151)
+networkId=$(seth --to-uint256 $CHAINID)
 boxId=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000000
 amount=$(seth --to-uint256 $(seth --to-wei 1000 ether))
 msg="${AUTH}${nonce:2}${expireTime:2}${networkId:2}${boxId:2}${amount:2}" 

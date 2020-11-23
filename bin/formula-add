@@ -2,7 +2,7 @@
 
 set -ex
 
-. $(PWD)/script/init
+. $(PWD)/bin/init
 
 # add formula
 # 0

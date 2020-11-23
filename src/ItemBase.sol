@@ -56,6 +56,8 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         emit LogSetOwner(msg.sender);
 
         registry = ISettingsRegistry(_registry);
+		//TODO:: trick
+		lastItemObjectId = 1000;
     }
 
     /**
