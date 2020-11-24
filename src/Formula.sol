@@ -11,7 +11,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
         uint16 class,
         uint16 grade,
         bool canDisenchant,
-        uint16 majorIndex,
+        uint16[] majorIndex,
         bytes32[] tokens,
         uint256[] mins,
         uint256[] maxs
@@ -28,7 +28,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
         // if it is removed
         bool disable;
         // major meterail of the Formula index
-        uint16 majorIndex;
+        uint16[] majorIndex;
         // minor meterail info
         bytes32[] tokens;
         uint256[] mins;
@@ -53,7 +53,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             grade: 0,
             canDisenchant: false,
             disable: true,
-            majorIndex: 0,
+            majorIndex: new uint16[](0),
             tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
@@ -66,7 +66,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             grade: 1,
             canDisenchant: false,
             disable: false,
-            majorIndex: 0,
+            majorIndex: new uint16[](0),
             tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
@@ -79,7 +79,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             grade: 1,
             canDisenchant: false,
             disable: false,
-            majorIndex: 0,
+            majorIndex: new uint16[](0),
             tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
@@ -92,7 +92,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             grade: 2,
             canDisenchant: false,
             disable: false,
-            majorIndex: 0,
+            majorIndex: new uint16[](0),
             tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
@@ -105,7 +105,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             grade: 3,
             canDisenchant: false,
             disable: false,
-            majorIndex: 0,
+            majorIndex: new uint16[](0),
             tokens: new bytes32[](0),
             mins: new uint256[](0),
             maxs: new uint256[](0)
@@ -119,13 +119,14 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
         uint16 _class,
         uint16 _grade,
         bool _canDisenchant,
-        uint16 _majorIndex,
+        uint16[] memory _majorIndex,
         bytes32[] memory _tokens,
         uint256[] memory _mins,
         uint256[] memory _maxs
     ) public auth returns (bool) {
-		require(formulas.length >= 65536, "formula is full.");
-        require(_tokens.length == _mins.length, "length invalid");
+		require(formulas.length < 65536, "formula is full.");
+		require(_majorIndex.length > 0, "Major length invalid");
+        require(_tokens.length == _mins.length, "Token length invalid");
         require(_mins.length == _maxs.length, "length invalid");
         FormulaEntry memory formula = FormulaEntry({
             name: _name,
@@ -170,7 +171,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
             uint16 class,
             uint16 grade,
             bool canDisenchant,
-            uint16 majorIndex,
+            uint16[] memory majorIndex,
             bytes32[] memory tokens,
             uint256[] memory mins,
             uint256[] memory maxs

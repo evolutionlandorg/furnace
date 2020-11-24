@@ -188,10 +188,6 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
                 0,
                 2,
                 0,
-                false,
-                0,
-                new address[](0),
-                new uint256[](0),
                 _owner
             );
     }
@@ -208,10 +204,6 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
                 0,
                 3,
                 0,
-                false,
-                0,
-                new address[](0),
-                new uint256[](0),
                 _owner
             );
     }
@@ -228,10 +220,6 @@ contract ItemTakeBack is DSMath, DSStop, FurnaceSettingIds {
                 0,
                 4,
                 0,
-                false,
-                0,
-                new address[](0),
-                new uint256[](0),
                 _owner
             );
     }

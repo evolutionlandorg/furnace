@@ -16,6 +16,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         uint16 prefer,
         uint16 formulaIndex,
         uint16 rate,
+        bool canDisenchant,
+        uint256[] major,
+        address[] tokens,
+        uint256[] amounts,
         uint256 createTime
     );
     event Destroy(address indexed owner, uint256 indexed tokenId);
@@ -29,6 +33,12 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         uint16 index;
         // enchance rate
         uint16 rate;
+        bool canDisenchant;
+        // tokenId of the major meterail.
+        uint256[] major;
+        // minor meterail of the Item.
+        address[] tokens;
+        uint256[] amounts;
     }
 
     /*** STORAGE ***/
@@ -57,6 +67,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
      * @param _prefer -  Item element prefer.
      * @param _index - Item formula index.
      * @param _rate - Item enhance strength rate.
+     * @param _canDisenchant - Item can disenchant or not.
+     * @param _major - major meterial tokenId of the Item.
+     * @param _tokens - minor meterial token addresses of the Item.
+     * @param _tokens -  minor meterial token amountes of the Item.
      * @param _owner - owner of the Item.
      * @return Item - tokenId.
      */
@@ -66,6 +80,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         uint16 _prefer,
         uint16 _index,
         uint16 _rate,
+        bool _canDisenchant,
+        uint256[] memory _major,
+        address[] memory _tokens,
+        uint256[] memory _amounts,
         address _owner
     ) public auth returns (uint256) {
         return
@@ -75,6 +93,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
                 _prefer,
                 _index,
                 _rate,
+                _canDisenchant,
+                _major,
+                _tokens,
+                _amounts,
                 _owner
             );
     }
@@ -85,8 +107,17 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         uint16 _prefer,
         uint16 _index,
         uint16 _rate,
+        bool _canDisenchant,
+        uint256[] memory _major,
+        address[] memory _tokens,
+        uint256[] memory _amounts,
         address _owner
     ) internal returns (uint256) {
+        require(
+            _tokens.length == _amounts.length,
+            "Item: invalid token or amount length"
+        );
+
         lastItemObjectId += 1;
         require(
             lastItemObjectId <= 340282366920938463463374607431768211455,
@@ -98,7 +129,11 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
             grade: _grade,
             prefer: _prefer,
             index: _index,
-            rate: _rate
+            rate: _rate,
+            canDisenchant: _canDisenchant,
+            major: _major,
+            tokens: _tokens,
+            amounts: _amounts
         });
         uint256 tokenId = IObjectOwnership(
             registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)
@@ -113,6 +148,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
             item.prefer,
             item.index,
             item.rate,
+            item.canDisenchant,
+            item.major,
+            item.tokens,
+            item.amounts,
             now
         );
         return tokenId;
@@ -147,4 +186,24 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
         return (item.class, item.grade, item.prefer, item.index, item.rate);
     }
 
+    function getSmeltInfo(uint256 _tokenId)
+        public
+        view
+        returns (
+            bool,
+            uint16,
+            uint256[] memory,
+            address[] memory,
+            uint256[] memory
+        )
+    {
+        Item memory item = tokenId2Item[_tokenId];
+        return (
+            item.canDisenchant,
+            item.class,
+            item.major,
+            item.tokens,
+            item.amounts
+        );
+    }
 }

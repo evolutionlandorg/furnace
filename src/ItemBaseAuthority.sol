@@ -19,7 +19,7 @@ contract ItemBaseAuthority {
                 _sig ==
                 bytes4(
                     keccak256(
-                        "createItem(uint16,uint16,uint16,uint16,uint16,bool,uint256,address[],uint256[],address)"
+                        "createItem(uint16,uint16,uint16,uint16,uint16,address)"
                     )
                 )) ||
             (whiteList[_src] &&

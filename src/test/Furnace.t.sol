@@ -5,10 +5,10 @@ import "ds-test/test.sol";
 import "../Furnace.sol";
 
 contract FurnaceTest is DSTest {
-    Furnace furnace;
+    // Furnace furnace;
 
     function setUp() public {
-        furnace = new Furnace(address(0));
+        // furnace = new Furnace(address(0));
     }
 
     function testFail_basic_sanity() public {
