@@ -12,23 +12,4 @@ export ITEMBASE=$address
 seth send $FURNACEPROXYAUTH "upgrade(address,address)" $ITEMBASE_PROXY $ITEMBASE
 cat $path | jq '.ITEMBASE = $address' --arg address $ITEMBASE | sponge $path
 
-OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
-allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $ITEMBASE_PROXY)
-ownerShipAuth=$(dapp create src/ObjectOwnershipAuthorityV3.sol:ObjectOwnershipAuthorityV3 $OWNERSHIPV3WHITELIST)
-export OBJECTOWNERSHIPAUTHORITY=$ownerShipAuth
-
-cat $path | jq '.OBJECTOWNERSHIPAUTHORITY = $address' --arg address $OBJECTOWNERSHIPAUTHORITY | sponge $path
-echo >&2 "${0##*/}: info: ObjectOwnershipAuthority created."
-
-seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPAUTHORITY 
-if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPAUTHORITY ; then
-  (echo "migrate OBJECTOWNERSHIPAUTHORITY failed ${auth}"; exit 1;)
-fi
-
-for allow in "${allowlist[@]}"; do
-  res=$(seth call $OBJECTOWNERSHIPAUTHORITY "whiteList(address)(bool)" $allow)
-  if test "$res" != true; then
-    (echo "migrate OWNERSHIPV3WHITELIST failed ${allow}"; exit 1;)
-  fi
-done
 

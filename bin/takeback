@@ -7,8 +7,10 @@ set -ex
 # take back 
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
 
-nonce=$(seth --to-uint256 1)
-expireTime=$(seth --to-uint256 1605787415)
+n=$(seth call $ITEMTAKEBACK "userToNonce(address)(uint256)" $OWNER)
+nonce=$(seth --to-uint256 $n)
+d=$(($(date +%s) + 100))
+expireTime=$(seth --to-uint256 $d)
 networkId=$(seth --to-uint256 3)
 grade=$(seth --to-uint256 2)
 msg="${OWNER}${nonce:2}${expireTime:2}${networkId:2}${grade:2}" 
