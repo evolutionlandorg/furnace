@@ -24,7 +24,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 		uint256 enhance
 	);
 	struct FormulaEntry {
-		// Item parameter
+		// Drill parameter
 		string name;
 		uint16 class;
 		uint16 grade;
@@ -216,7 +216,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 		view
 		returns (uint256, uint256)
 	{
-		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
 		Strength memory s = strengths[key];
 		return (s.base, s.enhance);
 	}
@@ -226,11 +226,11 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 		uint256 _base,
 		uint256 _enhance
 	) public auth {
-		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
 		Strength memory s = Strength({ base: _base, enhance: _enhance });
 		strengths[key] = s;
 		emit SetFurnaceStrength(
-			ITEM_OBJECT_CLASS,
+			DRILL_OBJECT_CLASS,
 			_formulaIndex,
 			_base,
 			_enhance

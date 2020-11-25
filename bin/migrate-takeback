@@ -10,12 +10,12 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 # ring=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_RING_ERC20_TOKEN")))
 # seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $ring 
 path=$FNC_CONFIG
-address=$(dapp create src/ItemTakeBack.sol:ItemTakeBack $ISETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $CHAINID))
-export ITEMTAKEBACK=$address
-cat $path | jq '.ITEMTAKEBACK = $address' --arg address $ITEMTAKEBACK | sponge $path
+address=$(dapp create src/DrillTakeBack.sol:DrillTakeBack $ISETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $CHAINID))
+export DRILLTAKEBACK=$address
+cat $path | jq '.DRILLTAKEBACK = $address' --arg address $DRILLTAKEBACK | sponge $path
 
-authAddress=$(dapp create src/ItemBaseAuthority.sol:ItemBaseAuthority [$ITEMTAKEBACK])
-export ITEMBASEAUTHORITY=$authAddress
-seth call $ITEMBASEAUTHORITY "whiteList(address)" $ITEMTAKEBACK   
-seth send -F $AUTH $ITEMBASE_PROXY "setAuthority(address)" $ITEMBASEAUTHORITY 
-cat $path | jq '.ITEMBASEAUTHORITY = $address' --arg address $ITEMBASEAUTHORITY | sponge $path
+authAddress=$(dapp create src/DrillBaseAuthority.sol:DrillBaseAuthority [$DRILLTAKEBACK])
+export DRILLBASEAUTHORITY=$authAddress
+seth call $DRILLBASEAUTHORITY "whiteList(address)" $DRILLTAKEBACK   
+seth send -F $AUTH $DRILLBASE_PROXY "setAuthority(address)" $DRILLBASEAUTHORITY 
+cat $path | jq '.DRILLBASEAUTHORITY = $address' --arg address $DRILLBASEAUTHORITY | sponge $path

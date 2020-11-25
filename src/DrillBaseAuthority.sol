@@ -1,6 +1,6 @@
 pragma solidity ^0.6.7;
 
-contract ItemBaseAuthority {
+contract DrillBaseAuthority {
 	mapping(address => bool) public whiteList;
 
 	constructor(address[] memory _whitelists) public {
@@ -19,10 +19,10 @@ contract ItemBaseAuthority {
 				_sig ==
 				bytes4(
 					keccak256(
-						"createItem(uint16,uint16,uint16,uint16,uint16,address)"
+						"createDrill(uint16,uint16,uint16,uint16,uint16,address)"
 					)
 				)) ||
 			(whiteList[_src] &&
-				_sig == bytes4(keccak256("destroyItem(address,uint256)")));
+				_sig == bytes4(keccak256("destroyDrill(address,uint256)")));
 	}
 }

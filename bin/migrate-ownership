@@ -8,8 +8,8 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 
 path=$FNC_CONFIG
 
-# OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
-# allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $ITEMBASE_PROXY)
+# OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
+# allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY)
 # ownerShipAuth=$(dapp create src/ObjectOwnershipAuthorityV3.sol:ObjectOwnershipAuthorityV3 $OWNERSHIPV3WHITELIST)
 # export OBJECTOWNERSHIPAUTHORITY=$ownerShipAuth
 
@@ -28,10 +28,10 @@ path=$FNC_CONFIG
 #   fi
 # done
 
-# item=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ITEM_BASE")))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
-# if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $item) != $ITEMBASE_PROXY; then
-#   (echo "check regist ${item} failed."; exit 1;)
+# drill=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_DRILL_BASE")))
+# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $drill $DRILLBASE_PROXY 
+# if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $drill) != $DRILLBASE_PROXY; then
+#   (echo "check regist ${drill} failed."; exit 1;)
 # fi
 # echo >&2 "${0##*/}: info: installerEncoder register finished."
 

@@ -2,13 +2,13 @@ pragma solidity ^0.6.7;
 
 import "ds-test/test.sol";
 
-import "../ItemBase.sol";
+import "../DrillBase.sol";
 
-contract ItemBaseTest is DSTest {
-    ItemBase item;
+contract DrillBaseTest is DSTest {
+    DrillBase item;
 
     function setUp() public {
-        item = new ItemBase();
+        item = new DrillBase();
     }
 
     function testFail_basic_sanity() public {

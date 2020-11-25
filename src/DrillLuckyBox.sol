@@ -6,13 +6,13 @@ import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/IERC223Recipient.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
-import "./ItemBoxPrice.sol";
+import "./DrillBoxPrice.sol";
 
-contract ItemLuckyBox is
+contract DrillLuckyBox is
 	DSMath,
 	DSStop,
 	IERC223Recipient,
-	ItemBoxPrice,
+	DrillBoxPrice,
 	FurnaceSettingIds
 {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);

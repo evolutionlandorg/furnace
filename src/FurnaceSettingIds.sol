@@ -7,7 +7,7 @@ contract FurnaceSettingIds {
 	uint256 public constant PREFER_FIRE = 1 << 4;
 	uint256 public constant PREFER_SOIL = 1 << 5;
 
-	uint8 public constant ITEM_OBJECT_CLASS = 100; // Item
+	uint8 public constant DRILL_OBJECT_CLASS = 100; // Drill
 
 	//0x4655524e4143455f415050000000000000000000000000000000000000000000
 	bytes32 public constant FURNACE_APP = "FURNACE_APP";
@@ -28,7 +28,7 @@ contract FurnaceSettingIds {
 	bytes32 public constant CONTRACT_FORMULA = "CONTRACT_FORMULA";
 
 	// 0x434f4e54524143545f4954454d5f424153450000000000000000000000000000
-	bytes32 public constant CONTRACT_ITEM_BASE = "CONTRACT_ITEM_BASE";
+	bytes32 public constant CONTRACT_DRILL_BASE = "CONTRACT_DRILL_BASE";
 
 	// 0x434f4e54524143545f4745474f5f4552433732315f544f4b454e000000000000
 	bytes32 public constant CONTRACT_GEGO_ERC721_TOKEN =

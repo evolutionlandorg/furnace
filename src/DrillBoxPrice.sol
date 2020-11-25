@@ -1,6 +1,6 @@
 pragma solidity ^0.6.7;
 
-contract ItemBoxPrice {
+contract DrillBoxPrice {
 	uint256 public constant DECIMALS = 10**18;
 
 	uint256 public constant GOLD_BOX_BASE_PRICE = 1000;

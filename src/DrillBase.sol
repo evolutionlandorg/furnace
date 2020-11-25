@@ -1,13 +1,12 @@
 pragma solidity ^0.6.7;
 
-// import "zeppelin-solidity/introspection/SupportsInterfaceWithLookup.sol";
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
 import "./FurnaceSettingIds.sol";
 
-contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
+contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 	event Create(
 		address indexed owner,
 		uint256 indexed tokenId,
@@ -20,10 +19,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 	);
 	event Destroy(address indexed owner, uint256 indexed tokenId);
 
-	struct Item {
+	struct Drill {
 		uint16 class;
 		uint16 grade;
-		// which element the Item prefer.
+		// which element the Drill prefer.
 		uint16 prefer;
 		// index of the formula.
 		uint16 index;
@@ -32,11 +31,11 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 	}
 
 	/*** STORAGE ***/
-	uint128 public lastItemObjectId;
+	uint128 public lastDrillObjectId;
 
 	ISettingsRegistry public registry;
 
-	mapping(uint256 => Item) public tokenId2Item;
+	mapping(uint256 => Drill) public tokenId2Drill;
 
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
@@ -47,20 +46,20 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 
 		registry = ISettingsRegistry(_registry);
 		//TODO:: trick
-		lastItemObjectId = 1000;
+		lastDrillObjectId = 1000;
 	}
 
 	/**
-	 * @dev create a Item.
-	 * @param _class - Item class.
-	 * @param _grade - Item grade.
-	 * @param _prefer -  Item element prefer.
-	 * @param _index - Item formula index.
-	 * @param _rate - Item enhance strength rate.
-	 * @param _owner - owner of the Item.
-	 * @return Item - tokenId.
+	 * @dev create a Drill.
+	 * @param _class - Drill class.
+	 * @param _grade - Drill grade.
+	 * @param _prefer -  Drill element prefer.
+	 * @param _index - Drill formula index.
+	 * @param _rate - Drill enhance strength rate.
+	 * @param _owner - owner of the Drill.
+	 * @return Drill - tokenId.
 	 */
-	function createItem(
+	function createDrill(
 		uint16 _class,
 		uint16 _grade,
 		uint16 _prefer,
@@ -68,10 +67,10 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 		uint16 _rate,
 		address _owner
 	) public auth returns (uint256) {
-		return _createItem(_class, _grade, _prefer, _index, _rate, _owner);
+		return _createDrill(_class, _grade, _prefer, _index, _rate, _owner);
 	}
 
-	function _createItem(
+	function _createDrill(
 		uint16 _class,
 		uint16 _grade,
 		uint16 _prefer,
@@ -79,14 +78,14 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 		uint16 _rate,
 		address _owner
 	) internal returns (uint256) {
-		lastItemObjectId += 1;
+		lastDrillObjectId += 1;
 		require(
-			lastItemObjectId <= 340282366920938463463374607431768211455,
-			"Item: object id overflow."
+			lastDrillObjectId <= 340282366920938463463374607431768211455,
+			"Drill: object id overflow."
 		);
 
-		Item memory item =
-			Item({
+		Drill memory drill =
+			Drill({
 				class: _class,
 				grade: _grade,
 				prefer: _prefer,
@@ -95,32 +94,32 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 			});
 		uint256 tokenId =
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
-				.mintObject(_owner, uint128(lastItemObjectId));
-		tokenId2Item[tokenId] = item;
+				.mintObject(_owner, uint128(lastDrillObjectId));
+		tokenId2Drill[tokenId] = drill;
 		emit Create(
 			_owner,
 			tokenId,
-			item.class,
-			item.grade,
-			item.prefer,
-			item.index,
-			item.rate,
+			drill.class,
+			drill.grade,
+			drill.prefer,
+			drill.index,
+			drill.rate,
 			now // solhint-disable-line
 		);
 		return tokenId;
 	}
 
 	/**
-	 * @dev destroy a Item.
-	 * @param _to owner of the item.
-	 * @param _tokenId tokenId of the item.
+	 * @dev destroy a Drill.
+	 * @param _to owner of the drill.
+	 * @param _tokenId tokenId of the drill.
 	 */
-	function destroyItem(address _to, uint256 _tokenId) public auth {
+	function destroyDrill(address _to, uint256 _tokenId) public auth {
 		IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).burn(
 			_to,
 			_tokenId
 		);
-		delete tokenId2Item[_tokenId];
+		delete tokenId2Drill[_tokenId];
 		emit Destroy(_to, _tokenId);
 	}
 
@@ -135,7 +134,7 @@ contract ItemBase is Initializable, DSAuth, FurnaceSettingIds {
 			uint16
 		)
 	{
-		Item memory item = tokenId2Item[_tokenId];
-		return (item.class, item.grade, item.prefer, item.index, item.rate);
+		Drill memory drill = tokenId2Drill[_tokenId];
+		return (drill.class, drill.grade, drill.prefer, drill.index, drill.rate);
 	}
 }

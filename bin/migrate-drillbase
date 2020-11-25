@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$FNC_VERBOSE" ]; then set -x; fi
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+address=$(dapp create src/DrillBase.sol:DrillBase)
+export DRILLBASE=$address
+seth send $FURNACEPROXYAUTH "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
+cat $path | jq '.DRILLBASE = $address' --arg address $DRILLBASE | sponge $path
+
+

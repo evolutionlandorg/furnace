@@ -14,28 +14,28 @@ export FURNACEPROXYAUTH=$admin
 cat $path | jq '.FURNACEPROXYAUTH = $address' --arg address $FURNACEPROXYAUTH | sponge $path
 echo >&2 "${0##*/}: info: FurnaceProxyAuth created."
 
-itembase=$(dapp create src/ItemBase.sol:ItemBase)
-export ITEMBASE=$itembase
+drillbase=$(dapp create src/DrillBase.sol:DrillBase)
+export DRILLBASE=$drillbase
 
-cat $path | jq '.ITEMBASE = $address' --arg address $ITEMBASE | sponge $path
-echo >&2 "${0##*/}: info: ItemBase created."
+cat $path | jq '.DRILLBASE = $address' --arg address $DRILLBASE | sponge $path
+echo >&2 "${0##*/}: info: DrillBase created."
 
 # 1
 calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
-itemBaseProxy=$(dapp create src/ItemBaseProxy.sol:ItemBaseProxy $ITEMBASE $FURNACEPROXYAUTH $calldata)
-export ITEMBASE_PROXY=$itemBaseProxy
+drillBaseProxy=$(dapp create src/DrillBaseProxy.sol:DrillBaseProxy $DRILLBASE $FURNACEPROXYAUTH $calldata)
+export DRILLBASE_PROXY=$drillBaseProxy
 
-cat $path | jq '.ITEMBASE_PROXY = $address' --arg address $ITEMBASE_PROXY | sponge $path
-echo >&2 "${0##*/}: info: ItemBaseProxy inited."
+cat $path | jq '.DRILLBASE_PROXY = $address' --arg address $DRILLBASE_PROXY | sponge $path
+echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 
 # 2
-# seth send $FURNACEPROXYAUTH "upgradeAndCall(address,address,bytes)" $ITEMBASE_PROXY $ITEMBASE $calldata 
+# seth send $FURNACEPROXYAUTH "upgradeAndCall(address,address,bytes)" $DRILLBASE_PROXY $DRILLBASE $calldata 
 # 3
-# seth send $FURNACEPROXYAUTH "upgrade(address,address)" $ITEMBASE_PROXY $ITEMBASE
-# seth send $ITEMBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
+# seth send $FURNACEPROXYAUTH "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
+# seth send $DRILLBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
 
-OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$ITEMBASE_PROXY]
-allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $ITEMBASE_PROXY)
+OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
+allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY)
 ownerShipAuth=$(dapp create src/ObjectOwnershipAuthorityV3.sol:ObjectOwnershipAuthorityV3 $OWNERSHIPV3WHITELIST)
 export OBJECTOWNERSHIPAUTHORITY=$ownerShipAuth
 
@@ -56,8 +56,8 @@ done
 
 echo >&2 "${0##*/}: info: setauthority finished."
 
-seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $ITEMBASE_PROXY $(seth --to-hex 100) 
-if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $ITEMBASE_PROXY) != 100; then
+seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 100) 
+if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 100; then
   (echo "check classAddress2Id failed."; exit 1;)
 fi
 
@@ -66,9 +66,9 @@ if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $
 fi
   
 # setting registry
-item=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ITEM_BASE")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $item) != $ITEMBASE_PROXY; then
-  (echo "check regist ${item} failed."; exit 1;)
+drill=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_DRILL_BASE")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $drill $DRILLBASE_PROXY 
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $drill) != $DRILLBASE_PROXY; then
+  (echo "check regist ${drill} failed."; exit 1;)
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."

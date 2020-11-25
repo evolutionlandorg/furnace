@@ -6,7 +6,7 @@ set -ex
 
 # open box
 # _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
-n=$(seth call $ITEMTAKEBACK "userToNonce(address)(uint256)" $AUTH)
+n=$(seth call $DRILLTAKEBACK "userToNonce(address)(uint256)" $AUTH)
 nonce=$(seth --to-uint256 $n)
 d=$(($(date +%s) + 100))
 expireTime=$(seth --to-uint256 $d)
@@ -25,5 +25,5 @@ sup=$(echo $dec | cut -d' ' -f 1)
 r=$(echo $dec | cut -d' ' -f 2)
 s=$(echo $dec | cut -d' ' -f 3)
 v=$(echo $dec | cut -d' ' -f 4)
-seth send -F $AUTH $ITEMTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId1,$boxId2] [$amount1,$amount2] $hashmsg $v $r $s  
+seth send -F $AUTH $DRILLTAKEBACK "openBoxes(uint256,uint256,uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$boxId1,$boxId2] [$amount1,$amount2] $hashmsg $v $r $s  
 
