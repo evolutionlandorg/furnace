@@ -20,7 +20,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 	event SetFurnaceStrength(uint256 indexed objectClass, uint256 indexed formulaIndex, uint256 base, uint256 enhance);
     struct FormulaEntry {
         // Item parameter
-        // name is needed?
         string name;
         uint16 class;
         uint16 grade;
