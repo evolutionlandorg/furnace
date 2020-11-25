@@ -2,6 +2,7 @@
 
 set -e
 
+. .fncrc
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 
 if [ -z "$1" ]
@@ -10,7 +11,6 @@ if [ -z "$1" ]
     exit 1
 fi
 
-[[ $(pwd) != ~ && -e .fncrc ]] && . .fncrc
 
 address=$(dapp create src/$1.sol:$1)
 path=$FNC_CONFIG

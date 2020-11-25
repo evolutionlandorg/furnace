@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 . $(PWD)/bin/init
 
 # buy box
-amount=$(seth --to-uint256 $(seth --to-wei 5500 ether))
-goldBox=$(seth --to-uint256 1)
+amount=$(seth --to-uint256 $(seth --to-wei 7500 ether))
+goldBox=$(seth --to-uint256 4)
 silverBox=$(seth --to-uint256 2)
 data=$goldBox${silverBox:2}
 seth send -F $AUTH $TOKEN_RING "transfer(address,uint256,bytes)" $DRILLLUCKYBOX $amount $data 

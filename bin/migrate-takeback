@@ -2,8 +2,6 @@
 
 set -e
 
-if [ "$FNC_VERBOSE" ]; then set -x; fi
-
 . $(PWD)/bin/init
 
 

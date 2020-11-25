@@ -2,6 +2,8 @@
 
 set -e
 
+. .fncrc
+
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 
 if ! [[ $SETH_INIT ]]; then
@@ -16,8 +18,6 @@ fi
 
 export SETH_CHAIN=${SETH_CHAIN-ropsten}
 export CHAINID=${CHAINID-3}
-
-[[ -e .fncrc ]] && . .fncrc
 
 config-init() {
   path=${FNC_CONFIG:-$1}
