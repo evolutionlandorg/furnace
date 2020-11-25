@@ -1,18 +1,18 @@
 pragma solidity ^0.6.7;
 
-interface IFST {
+interface IELIP002 {
     /**
-        @notice Caller must be owner of tokens to be smlted.
-        @dev Smelt function, Smelt a new NFT token from ERC721 tokens and ERC20 tokens. Smelt rule is according to `Formula`.
+        @notice Caller must be owner of tokens to be enchanted.
+        @dev Enchant function, Enchant a new NFT token from ERC721 tokens and ERC20 tokens. Enchant rule is according to `Formula`.
         MUST revert if `_index` is not in `formula`.
         MUST revert if length of `_ids` is not the same as length of `formula` index rules.
         MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
         @param _ids     IDs of NFT tokens(order and length must match `formula` index rules).
         @param _values  Amounts of FT tokens(order and length must match `formula` index rules).
-        @return         New Token ID of smelting.
+        @return         New Token ID of Enchanting.
     */
-    function smelt(
+    function enchant(
         uint256 _index,
         uint256[] calldata _ids,
         uint256[] calldata _values
@@ -28,13 +28,13 @@ interface IFST {
 
     /**
         @notice Caller must be owner of token id to be disenchated.
-        @dev Disenchant function, A smelted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
-        MUST revert if  _depth is larger than the depth of _id token smleted.
+        @dev Disenchant function, A enchanted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
+        MUST revert if  _depth is larger than the depth of _id token enchanted.
         MUST revert on any other error.        
         @param _id     token ID to disenchant.
         @param _depth  recursion depth token disenchant.
     */
-    function disenchat(uint256 _id, uint256 _depth) external;
+    function disenchant(uint256 _id, uint256 _depth) external;
     // {
     // 	### disenchant
     //  1. tranfer _id to address(this)

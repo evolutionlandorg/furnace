@@ -10,7 +10,7 @@ interface IFormula {
         bool disable;
         // counter
         uint256 total;
-        // uint256 smeltTime;
+        // uint256 enchantTime;
         // uint256 disenchantTime;
         // uint256 loseRate;
 
@@ -30,16 +30,16 @@ interface IFormula {
         MUST revert if length of `_nfts` is not the same as length of `_class`.
         MUST revert if length of `_fts` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name    New smleted NFT name.
-        @param _class    New smleted NFT class.
-        @param _grade    New smleted NFT grade.
-        @param _nfts    NFT token addresses of major meterail for smelting.
-        @param _class   NFT token classes of major meterail for smelting(order and length must match `_nfts`).
-        @param _grade   NFT token grades of major meterail for smelting(order and length must match `_nfts`).
-        @param _fts     FT Token addresses of minor meterail for smelting.
-        @param _mins    FT Token min amounts of minor meterail for smelting(order and length must match `_fts`).
-        @param _maxs    FT Token max amounts of minor meterail for smelting(order and length must match `_fts`).
-        @param _canDisenchant    New smleted NFT can disenchant or not.
+        @param _name    New enchanted NFT name.
+        @param _class   New enchanted NFT class.
+        @param _grade   New enchanted NFT grade.
+        @param _nfts    NFT token addresses of major meterail for enchanting.
+        @param _class   NFT token classes of major meterail for enchanting(order and length must match `_nfts`).
+        @param _grade   NFT token grades of major meterail for enchanting(order and length must match `_nfts`).
+        @param _fts     FT Token addresses of minor meterail for enchanting.
+        @param _mins    FT Token min amounts of minor meterail for enchanting(order and length must match `_fts`).
+        @param _maxs    FT Token max amounts of minor meterail for enchanting(order and length must match `_fts`).
+        @param _canDisenchant    New enchanted NFT can disenchant or not.
     */
     function addFormula(
         string name,
