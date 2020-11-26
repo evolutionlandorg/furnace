@@ -19,7 +19,7 @@ contract DrillBaseAuthority {
 				_sig ==
 				bytes4(
 					keccak256(
-						"createDrill(uint16,uint16,uint16,uint16,uint16,address)"
+						"createDrill(uint16,address)"
 					)
 				)) ||
 			(whiteList[_src] &&

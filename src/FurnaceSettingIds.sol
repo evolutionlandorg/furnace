@@ -7,7 +7,7 @@ contract FurnaceSettingIds {
 	uint256 public constant PREFER_FIRE = 1 << 4;
 	uint256 public constant PREFER_SOIL = 1 << 5;
 
-	uint8 public constant DRILL_OBJECT_CLASS = 100; // Drill
+	uint8 public constant DRILL_OBJECT_CLASS = 4; // Drill
 
 	//0x4655524e4143455f415050000000000000000000000000000000000000000000
 	bytes32 public constant FURNACE_APP = "FURNACE_APP";

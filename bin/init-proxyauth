@@ -54,8 +54,8 @@ done
 
 echo >&2 "${0##*/}: info: setauthority finished."
 
-seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 100) 
-if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 100; then
+seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 4) 
+if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 4; then
   (echo "check classAddress2Id failed."; exit 1;)
 fi
 

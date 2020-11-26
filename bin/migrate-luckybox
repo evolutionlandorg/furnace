@@ -2,12 +2,9 @@
 
 set -e
 
-if [ "$FNC_VERBOSE" ]; then set -x; fi
-
 . $(PWD)/bin/init
 
 path=$FNC_CONFIG
 address=$(dapp create src/DrillLuckyBox.sol:DrillLuckyBox $ISETTINGSREGISTRY $DRILLTAKEBACK $(seth --to-uint256 1605657600))
 export DRILLLUCKYBOX=$address
-seth call $DRILLLUCKYBOX "getPrice()(uint256,uint256)"   # 1000 100  
 cat $path | jq '.DRILLLUCKYBOX = $address' --arg address $DRILLLUCKYBOX | sponge $path

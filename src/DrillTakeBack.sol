@@ -15,7 +15,6 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 	);
 	event OpenBox(
 		address indexed user,
-		uint256 indexed nonce,
 		uint256 indexed boxId,
 		uint256 tokenId,
 		uint256 value
@@ -31,6 +30,9 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 	uint256 public networkId;
 
 	mapping(address => uint256) public userToNonce;
+
+	// store opened box id.
+	mapping(uint256 => bool) public openedBoxId;
 
 	ISettingsRegistry public registry;
 
@@ -97,9 +99,8 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 		userToNonce[_user] += 1;
 	}
 
-	// _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${boxId[]}${amount[]}")
+	// _hashmessage = hash("${_user}${_expireTime}${networkId}${boxId[]}${amount[]}")
 	function openBoxes(
-		uint256 _nonce,
 		uint256 _expireTime,
 		uint256[] memory _boxIds,
 		uint256[] memory _amounts,
@@ -109,19 +110,16 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 		bytes32 _s
 	) public isHuman stoppable {
 		address _user = msg.sender;
-		// verify the _nonce is right
-		require(userToNonce[_user] == _nonce, "nonce invalid");
 		// verify the _hashmessage is signed by supervisor
 		require(
 			supervisor == _verify(_hashmessage, _v, _r, _s),
 			"verify failed"
 		);
-		// verify that the _user, _nonce, _value are exactly what they should be
+		// verify that the _user, _value are exactly what they should be
 		require(
 			keccak256(
 				abi.encodePacked(
 					_user,
-					_nonce,
 					_expireTime,
 					networkId,
 					_boxIds,
@@ -132,10 +130,13 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 		);
 		// solhint-disable-next-line not-rely-on-time
 		require(now <= _expireTime, "you are expired.");
-		require(_boxIds.length == _amounts.length, "invalid box or amount");
+		require(_boxIds.length == _amounts.length, "invalid box or amount.");
 		require(_boxIds.length > 0, "no box.");
 		for (uint256 i = 0; i < _boxIds.length; i++) {
-			_openBox(_user, _nonce, _boxIds[i], _amounts[i]);
+			uint256 boxId = _boxIds[i];
+			require(openedBoxId[boxId] == false, "box already opened.");
+			_openBox(_user, boxId, _amounts[i]);
+			openedBoxId[boxId] = true;
 		}
 		// after the claiming operation succeeds
 		userToNonce[_user] += 1;
@@ -143,11 +144,10 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 
 	function _openBox(
 		address _user,
-		uint256 _nonce,
 		uint256 _boxId,
 		uint256 _amount
 	) internal {
-		(uint256 prizeNFT, uint256 prizeFT) = _random(_nonce, _boxId);
+		(uint256 prizeNFT, uint256 prizeFT) = _random(_boxId);
 		uint256 tokenId;
 		uint256 value;
 		uint256 boxType = _boxId >> 255;
@@ -173,26 +173,26 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 				tokenId = _rewardLevel1Drill(_user);
 			}
 		}
-		emit OpenBox(_user, _nonce, _boxId, tokenId, value);
+		emit OpenBox(_user, _boxId, tokenId, value);
 	}
 
 	function _rewardLevel1Drill(address _owner) internal returns (uint256) {
 		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(0, 1, 0, 2, 0, _owner);
+		return IDrillBase(drill).createDrill(1, _owner);
 	}
 
 	function _rewardLevel2Drill(address _owner) internal returns (uint256) {
 		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(0, 2, 0, 3, 0, _owner);
+		return IDrillBase(drill).createDrill(2, _owner);
 	}
 
 	function _rewardLevel3Drill(address _owner) internal returns (uint256) {
 		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(0, 3, 0, 4, 0, _owner);
+		return IDrillBase(drill).createDrill(3, _owner);
 	}
 
 	// random algorithm
-	function _random(uint256 _nonce, uint256 _boxId)
+	function _random(uint256 _boxId)
 		internal
 		view
 		returns (uint256, uint256)
@@ -204,7 +204,6 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 						blockhash(block.number),
 						block.timestamp, // solhint-disable-line not-rely-on-time
 						block.difficulty,
-						_nonce,
 						_boxId
 					)
 				)
