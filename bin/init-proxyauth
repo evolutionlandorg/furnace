@@ -6,11 +6,11 @@ set -e
 
 path=$FNC_CONFIG
 
-admin=$(dapp create src/FurnaceProxyAuth.sol:FurnaceProxyAuth)
-export FURNACEPROXYAUTH=$admin
+admin=$(dapp create src/FurnaceProxyAdmin.sol:FurnaceProxyAdmin)
+export FURNACEPROXYADMIN=$admin
 
-cat $path | jq '.FURNACEPROXYAUTH = $address' --arg address $FURNACEPROXYAUTH | sponge $path
-echo >&2 "${0##*/}: info: FurnaceProxyAuth created."
+cat $path | jq '.FURNACEPROXYADMIN = $address' --arg address $FURNACEPROXYADMIN | sponge $path
+echo >&2 "${0##*/}: info: FurnaceProxyAdmin created."
 
 drillbase=$(dapp create src/DrillBase.sol:DrillBase)
 export DRILLBASE=$drillbase
@@ -20,16 +20,16 @@ echo >&2 "${0##*/}: info: DrillBase created."
 
 # 1
 calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
-drillBaseProxy=$(dapp create src/DrillBaseProxy.sol:DrillBaseProxy $DRILLBASE $FURNACEPROXYAUTH $calldata)
+drillBaseProxy=$(dapp create src/DrillBaseProxy.sol:DrillBaseProxy $DRILLBASE $FURNACEPROXYADMIN $calldata)
 export DRILLBASE_PROXY=$drillBaseProxy
 
 cat $path | jq '.DRILLBASE_PROXY = $address' --arg address $DRILLBASE_PROXY | sponge $path
 echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 
 # 2
-# seth send $FURNACEPROXYAUTH "upgradeAndCall(address,address,bytes)" $DRILLBASE_PROXY $DRILLBASE $calldata 
+# seth send $FURNACEPROXYADMIN "upgradeAndCall(address,address,bytes)" $DRILLBASE_PROXY $DRILLBASE $calldata 
 # 3
-# seth send $FURNACEPROXYAUTH "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
+# seth send $FURNACEPROXYADMIN "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
 # seth send $DRILLBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
 
 OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]

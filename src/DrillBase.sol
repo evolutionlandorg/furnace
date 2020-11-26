@@ -37,6 +37,9 @@ contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 
 	mapping(uint256 => Drill) public tokenId2Drill;
 
+	// counter for per grade
+	mapping(uint16 => uint256) public grade2count;
+
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
@@ -96,6 +99,7 @@ contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
 				.mintObject(_owner, uint128(lastDrillObjectId));
 		tokenId2Drill[tokenId] = drill;
+		grade2count[_grade] += 1;
 		emit Create(
 			_owner,
 			tokenId,
@@ -135,6 +139,12 @@ contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 		)
 	{
 		Drill memory drill = tokenId2Drill[_tokenId];
-		return (drill.class, drill.grade, drill.prefer, drill.index, drill.rate);
+		return (
+			drill.class,
+			drill.grade,
+			drill.prefer,
+			drill.index,
+			drill.rate
+		);
 	}
 }
