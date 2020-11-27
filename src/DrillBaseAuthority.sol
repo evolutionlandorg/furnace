@@ -1,6 +1,6 @@
 pragma solidity ^0.6.7;
 
-contract ObjectOwnershipAuthorityV3 {
+contract DrillBaseAuthority {
 	mapping(address => bool) public whiteList;
 
 	constructor(address[] memory _whitelists) public {
@@ -16,12 +16,13 @@ contract ObjectOwnershipAuthorityV3 {
 	) public view returns (bool) {
 		return
 			(whiteList[_src] &&
-				_sig == bytes4(keccak256("mintObject(address,uint128)"))) ||
+				_sig ==
+				bytes4(
+					keccak256(
+						"createDrill(uint16,address)"
+					)
+				)) ||
 			(whiteList[_src] &&
-				_sig == bytes4(keccak256("burnObject(address,uint128)"))) ||
-			(whiteList[_src] &&
-				_sig == bytes4(keccak256("mint(address,uint256)"))) ||
-			(whiteList[_src] &&
-				_sig == bytes4(keccak256("burn(address,uint256)")));
+				_sig == bytes4(keccak256("destroyDrill(address,uint256)")));
 	}
 }

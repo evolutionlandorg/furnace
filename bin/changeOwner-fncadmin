@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+seth send -F $AUTH $FURNACEPROXYADMIN "transferOwnership(address)" $MUILTISIG   
