@@ -5,9 +5,8 @@ import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IDrillBase.sol";
-import "./FurnaceSettingIds.sol";
 
-contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
+contract DrillTakeBack is DSMath, DSStop {
 	event TakeBackNFT(
 		address indexed user,
 		uint256 indexed nonce,
@@ -24,6 +23,13 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 		address indexed to,
 		uint256 amount
 	);
+
+	// 0x434f4e54524143545f52494e475f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_RING_ERC20_TOKEN =
+		"CONTRACT_RING_ERC20_TOKEN";
+
+	// 0x434f4e54524143545f4954454d5f424153450000000000000000000000000000
+	bytes32 public constant CONTRACT_DRILL_BASE = "CONTRACT_DRILL_BASE";
 
 	address public supervisor;
 
@@ -85,14 +91,7 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 		require(_grades.length > 0, "no drill.");
 		for (uint256 i = 0; i < _grades.length; i++) {
 			uint16 grade = _grades[i];
-			uint256 tokenId;
-			if (grade == 1) {
-				tokenId = _rewardLevel1Drill(_user);
-			} else if (grade == 2) {
-				tokenId = _rewardLevel2Drill(_user);
-			} else if (grade == 3) {
-				tokenId = _rewardLevel3Drill(_user);
-			}
+			uint256 tokenId = _rewardDrill(grade, _user);
 			emit TakeBackNFT(_user, _nonce, tokenId);
 		}
 		// after the claiming operation succeeds
@@ -159,44 +158,33 @@ contract DrillTakeBack is DSMath, DSStop, FurnaceSettingIds {
 				IERC20(ring).transfer(_user, value);
 			}
 			if (prizeNFT < 10) {
-				tokenId = _rewardLevel3Drill(_user);
+				tokenId = _rewardDrill(3, _user);
 			} else {
-				tokenId = _rewardLevel2Drill(_user);
+				tokenId = _rewardDrill(2, _user);
 			}
 		} else {
 			// silver box
 			if (prizeNFT == 0) {
-				tokenId = _rewardLevel3Drill(_user);
+				tokenId = _rewardDrill(3, _user);
 			} else if (prizeNFT < 10) {
-				tokenId = _rewardLevel2Drill(_user);
+				tokenId = _rewardDrill(2, _user);
 			} else {
-				tokenId = _rewardLevel1Drill(_user);
+				tokenId = _rewardDrill(1, _user);
 			}
 		}
 		emit OpenBox(_user, _boxId, tokenId, value);
 	}
 
-	function _rewardLevel1Drill(address _owner) internal returns (uint256) {
+	function _rewardDrill(uint16 _grade, address _owner)
+		internal
+		returns (uint256)
+	{
 		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(1, _owner);
-	}
-
-	function _rewardLevel2Drill(address _owner) internal returns (uint256) {
-		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(2, _owner);
-	}
-
-	function _rewardLevel3Drill(address _owner) internal returns (uint256) {
-		address drill = registry.addressOf(CONTRACT_DRILL_BASE);
-		return IDrillBase(drill).createDrill(3, _owner);
+		return IDrillBase(drill).createDrill(_grade, _owner);
 	}
 
 	// random algorithm
-	function _random(uint256 _boxId)
-		internal
-		view
-		returns (uint256, uint256)
-	{
+	function _random(uint256 _boxId) internal view returns (uint256, uint256) {
 		uint256 seed =
 			uint256(
 				keccak256(

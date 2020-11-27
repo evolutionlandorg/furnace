@@ -5,15 +5,13 @@ import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/IERC223Recipient.sol";
 import "./interfaces/ISettingsRegistry.sol";
-import "./FurnaceSettingIds.sol";
 import "./DrillBoxPrice.sol";
 
 contract DrillLuckyBox is
 	DSMath,
 	DSStop,
 	IERC223Recipient,
-	DrillBoxPrice,
-	FurnaceSettingIds
+	DrillBoxPrice
 {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
@@ -23,6 +21,10 @@ contract DrillLuckyBox is
 		address indexed to,
 		uint256 amount
 	);
+
+	// 0x434f4e54524143545f52494e475f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_RING_ERC20_TOKEN =
+		"CONTRACT_RING_ERC20_TOKEN";
 
 	address payable public wallet;
 

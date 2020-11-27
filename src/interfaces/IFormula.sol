@@ -15,7 +15,9 @@ interface IFormula {
         // uint256 loseRate;
 
         // major meterail of the Formula index
-        uint256[] majorIndexes;
+		address[] nfts;
+		uint256 classes;
+		uint256 gradees;
         // minor meterail info
         address[] fts;
         uint256[] mins;

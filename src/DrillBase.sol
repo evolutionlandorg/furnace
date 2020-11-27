@@ -4,9 +4,8 @@ import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
-import "./FurnaceSettingIds.sol";
 
-contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
+contract DrillBase is Initializable, DSAuth {
 	event Create(
 		address indexed owner,
 		uint256 indexed tokenId,
@@ -17,6 +16,10 @@ contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 
 	uint256 internal constant _CLEAR_HIGH =
 		0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff;
+
+	// 0x434f4e54524143545f4f424a4543545f4f574e45525348495000000000000000
+	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
+		"CONTRACT_OBJECT_OWNERSHIP";
 
 	/*** STORAGE ***/
 	uint128 public lastDrillObjectId;
@@ -40,7 +43,7 @@ contract DrillBase is Initializable, DSAuth, FurnaceSettingIds {
 	 * @dev create a Drill.
 	 * @param grade - Drill grade.
 	 * @param to - owner of the Drill.
-	 * @return       - tokenId.
+	 * @return   - tokenId.
 	 */
 	function createDrill(uint16 grade, address to)
 		public
