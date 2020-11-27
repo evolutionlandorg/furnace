@@ -5,17 +5,15 @@ set -e
 . $(PWD)/bin/init
 
 # take back 
-# _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
+# _hashmessage = hash("${address(this)}{_user}${networkId}${ids[]}${grade[]}")
 
-n=$(seth call $DRILLTAKEBACK "userToNonce(address)(uint256)" $OWNER)
-nonce=$(seth --to-uint256 $n)
-d=$(($(date +%s) + 100))
-expireTime=$(seth --to-uint256 $d)
+boxId1=0xfffffffff14143545f52494e475f45524332305f544f4b454e00000000000001
+boxId2=0x0ffffffff14143545f52494e475f45524332305f544f4b454e00000000000001
 networkId=$(seth --to-uint256 3)
 grade1=$(seth --to-uint256 2)
 grade2=$(seth --to-uint256 3)
-msg="${OWNER}${nonce:2}${expireTime:2}${networkId:2}${grade1:2}${grade2:2}" 
-# abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
+msg="${DRILLTAKEBACK}${OWNER:2}${networkId:2}${boxId1:2}${boxId2:2}${grade1:2}${grade2:2}" 
+# abi.encodePacked(address(this), _user, networkId, _ids, _grades)
 hashmsg=$(seth keccak $msg)
 signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
 prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
@@ -25,4 +23,4 @@ sup=$(echo $dec | cut -d' ' -f 1)
 r=$(echo $dec | cut -d' ' -f 2)
 s=$(echo $dec | cut -d' ' -f 3)
 v=$(echo $dec | cut -d' ' -f 4)
-seth send -F $OWNER $DRILLTAKEBACK "takeBack(uint256,uint256,uint16[],bytes32,uint8,bytes32,bytes32)" $nonce $expireTime [$grade1,$grade2] $hashmsg $v $r $s  
+seth send -F $OWNER $DRILLTAKEBACK "takeBack(uint256[],uint16[],bytes32,uint8,bytes32,bytes32)" [$boxId1,$boxId2] [$grade1,$grade2] $hashmsg $v $r $s  

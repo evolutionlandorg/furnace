@@ -15,9 +15,9 @@ interface IFormula {
         // uint256 loseRate;
 
         // major meterail of the Formula index
-		address[] nfts;
-		uint256 classes;
-		uint256 gradees;
+        address[] nfts;
+        uint256[] classes;
+        uint256[] grades;
         // minor meterail info
         address[] fts;
         uint256[] mins;
@@ -33,7 +33,9 @@ interface IFormula {
         @param _name    New enchanted NFT name.
         @param _class   New enchanted NFT class.
         @param _grade   New enchanted NFT grade.
-        @param _majorIndexes    Formula indexes of major meterail for enchanting.
+        @param _nfts    NFT token addresses of major meterail for enchanting.
+        @param _classes   NFT token classes of major meterail for enchanting(order and length must match `_nfts`).
+        @param _grades   NFT token grades of major meterail for enchanting(order and length must match `_nfts`).
         @param _fts     FT Token addresses of minor meterail for enchanting.
         @param _mins    FT Token min amounts of minor meterail for enchanting(order and length must match `_fts`).
         @param _maxs    FT Token max amounts of minor meterail for enchanting(order and length must match `_fts`).
@@ -43,7 +45,9 @@ interface IFormula {
         string calldata _name,
         uint256 _class,
         uint256 _grade,
-        uint256[] calldata _majorIndexes,
+        address[] calldata _nfts,
+        uint256[] calldata _classes,
+        uint256[] calldata _grades,
         address[] calldata _fts,
         uint256[] calldata _mins,
         uint256[] calldata _maxs,

@@ -26,9 +26,6 @@ contract DrillBase is Initializable, DSAuth {
 
 	ISettingsRegistry public registry;
 
-	// counter for per grade
-	mapping(uint16 => uint256) public grade2count;
-
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
@@ -65,7 +62,6 @@ contract DrillBase is Initializable, DSAuth {
 		uint256 tokenId =
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
 				.mintObject(to, objectId);
-		grade2count[grade] += 1;
 		emit Create(
 			to,
 			tokenId,
