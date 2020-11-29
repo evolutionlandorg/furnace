@@ -1,10 +1,10 @@
 # ROI
 
 <!-- $$
-ROI = \frac {Current Value of Investment - Cost of Investment} {Cost of Investment}
-$$ -->
+ROI = \frac {Current \ Value \ of \ Investment - Cost \ of \ Investment} {Cost \ of \ Investment}  
+$$ --> 
 
-<div align="center"><img src="svg/jbYNESOZW9.svg"/></div>
+<div align="center"><img src="svg/HHAtckrr2q.svg"/></div>
 
 ## LP_TOKEN
 
@@ -45,11 +45,10 @@ LP: 1.29
 
 - supply > 0
   <!-- $$
-  liquidity = total * amount / reserve \\
-  amount = liquidity * reserve / total
-  $$ -->
+  \frac {liquidity} {total} = \frac {amount} {reserve} 
+  $$ --> 
 
-<div align="center"><img src="svg/nXQArmDQkH.svg"/></div>
+<div align="center"><img src="svg/9CzUbKN25u.svg"/></div> 
 
 ## Land Base
 
