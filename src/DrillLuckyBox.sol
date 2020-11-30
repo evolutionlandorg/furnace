@@ -7,12 +7,7 @@ import "./interfaces/IERC223Recipient.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./DrillBoxPrice.sol";
 
-contract DrillLuckyBox is
-	DSMath,
-	DSStop,
-	IERC223Recipient,
-	DrillBoxPrice
-{
+contract DrillLuckyBox is DSMath, DSStop, IERC223Recipient, DrillBoxPrice {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event RingRefunded(address indexed buyer, uint256 value);

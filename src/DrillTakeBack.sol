@@ -7,14 +7,14 @@ import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IDrillBase.sol";
 
 contract DrillTakeBack is DSMath, DSStop {
-	event TakeBackNFT(
+	event TakeBackDrill(
 		address indexed user,
-		uint256 indexed nonce,
+		uint256 indexed id,
 		uint256 tokenId
 	);
 	event OpenBox(
 		address indexed user,
-		uint256 indexed boxId,
+		uint256 indexed id,
 		uint256 tokenId,
 		uint256 value
 	);
@@ -35,10 +35,7 @@ contract DrillTakeBack is DSMath, DSStop {
 
 	uint256 public networkId;
 
-	mapping(address => uint256) public userToNonce;
-
-	// store opened box id.
-	mapping(uint256 => bool) public openedBoxId;
+	mapping(uint256 => bool) public ids;
 
 	ISettingsRegistry public registry;
 
@@ -58,13 +55,12 @@ contract DrillTakeBack is DSMath, DSStop {
 		registry = ISettingsRegistry(_registry);
 	}
 
-	// _hashmessage = hash("${_user}${_nonce}${_expireTime}${networkId}${grade[]}")
+	// _hashmessage = hash("${address(this)}{_user}${networkId}${ids[]}${grade[]}")
 	// _v, _r, _s are from supervisor's signature on _hashmessage
 	// takeBack(...) is invoked by the user who want to clain drill.
 	// while the _hashmessage is signed by supervisor
 	function takeBack(
-		uint256 _nonce,
-		uint256 _expireTime,
+		uint256[] memory _ids,
 		uint16[] memory _grades,
 		bytes32 _hashmessage,
 		uint8 _v,
@@ -72,36 +68,33 @@ contract DrillTakeBack is DSMath, DSStop {
 		bytes32 _s
 	) public isHuman stoppable {
 		address _user = msg.sender;
-		// verify the _nonce is right
-		require(userToNonce[_user] == _nonce, "nonce invalid");
 		// verify the _hashmessage is signed by supervisor
 		require(
 			supervisor == _verify(_hashmessage, _v, _r, _s),
 			"verify failed"
 		);
-		// verify that the _user, _nonce,  are exactly what they should be
+		// verify that the address(this), _user, networkId, _ids, _grades are exactly what they should be
 		require(
 			keccak256(
-				abi.encodePacked(_user, _nonce, _expireTime, networkId, _grades)
+				abi.encodePacked(address(this), _user, networkId, _ids, _grades)
 			) == _hashmessage,
 			"hash invaild"
 		);
-		// solhint-disable-next-line not-rely-on-time
-		require(now <= _expireTime, "you are expired.");
+		require(_ids.length == _grades.length, "length invalid.");
 		require(_grades.length > 0, "no drill.");
-		for (uint256 i = 0; i < _grades.length; i++) {
+		for (uint256 i = 0; i < _ids.length; i++) {
+			uint256 id = _ids[i];
+			require(ids[id] == false, "already taked back.");
 			uint16 grade = _grades[i];
 			uint256 tokenId = _rewardDrill(grade, _user);
-			emit TakeBackNFT(_user, _nonce, tokenId);
+			ids[id] = true;
+			emit TakeBackDrill(_user, id, tokenId);
 		}
-		// after the claiming operation succeeds
-		userToNonce[_user] += 1;
 	}
 
-	// _hashmessage = hash("${_user}${_expireTime}${networkId}${boxId[]}${amount[]}")
+	// _hashmessage = hash("${address(this)}${_user}${networkId}${boxId[]}${amount[]}")
 	function openBoxes(
-		uint256 _expireTime,
-		uint256[] memory _boxIds,
+		uint256[] memory _ids,
 		uint256[] memory _amounts,
 		bytes32 _hashmessage,
 		uint8 _v,
@@ -118,27 +111,23 @@ contract DrillTakeBack is DSMath, DSStop {
 		require(
 			keccak256(
 				abi.encodePacked(
+					address(this),
 					_user,
-					_expireTime,
 					networkId,
-					_boxIds,
+					_ids,
 					_amounts
 				)
 			) == _hashmessage,
 			"hash invaild"
 		);
-		// solhint-disable-next-line not-rely-on-time
-		require(now <= _expireTime, "you are expired.");
-		require(_boxIds.length == _amounts.length, "invalid box or amount.");
-		require(_boxIds.length > 0, "no box.");
-		for (uint256 i = 0; i < _boxIds.length; i++) {
-			uint256 boxId = _boxIds[i];
-			require(openedBoxId[boxId] == false, "box already opened.");
-			_openBox(_user, boxId, _amounts[i]);
-			openedBoxId[boxId] = true;
+		require(_ids.length == _amounts.length, "length invalid.");
+		require(_ids.length > 0, "no box.");
+		for (uint256 i = 0; i < _ids.length; i++) {
+			uint256 id = _ids[i];
+			require(ids[id] == false, "box already opened.");
+			_openBox(_user, id, _amounts[i]);
+			ids[id] = true;
 		}
-		// after the claiming operation succeeds
-		userToNonce[_user] += 1;
 	}
 
 	function _openBox(
@@ -146,27 +135,27 @@ contract DrillTakeBack is DSMath, DSStop {
 		uint256 _boxId,
 		uint256 _amount
 	) internal {
-		(uint256 prizeNFT, uint256 prizeFT) = _random(_boxId);
+		(uint256 prizeDrill, uint256 prizeRing) = _random(_boxId);
 		uint256 tokenId;
 		uint256 value;
 		uint256 boxType = _boxId >> 255;
 		if (boxType == 1) {
 			// gold box
-			if (prizeFT == 1 && _amount > 1) {
+			if (prizeRing == 1 && _amount > 1) {
 				address ring = registry.addressOf(CONTRACT_RING_ERC20_TOKEN);
 				value = _amount / 2;
 				IERC20(ring).transfer(_user, value);
 			}
-			if (prizeNFT < 10) {
+			if (prizeDrill < 10) {
 				tokenId = _rewardDrill(3, _user);
 			} else {
 				tokenId = _rewardDrill(2, _user);
 			}
 		} else {
 			// silver box
-			if (prizeNFT == 0) {
+			if (prizeDrill == 0) {
 				tokenId = _rewardDrill(3, _user);
-			} else if (prizeNFT < 10) {
+			} else if (prizeDrill < 10) {
 				tokenId = _rewardDrill(2, _user);
 			} else {
 				tokenId = _rewardDrill(1, _user);
