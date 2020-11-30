@@ -7,8 +7,8 @@ set -e
 # take back 
 # _hashmessage = hash("${address(this)}{_user}${networkId}${ids[]}${grade[]}")
 
-boxId1=0xfffffffff14143545f52494e475f45524332305f544f4b454e00000000000001
-boxId2=0x0ffffffff14143545f52494e475f45524332305f544f4b454e00000000000001
+boxId1=0xfffffffff14143545f52494e475f45524332305f544f4b454e00000000000002
+boxId2=0x0ffffffff14143545f52494e475f45524332305f544f4b454e00000000000002
 networkId=$(seth --to-uint256 3)
 grade1=$(seth --to-uint256 2)
 grade2=$(seth --to-uint256 3)

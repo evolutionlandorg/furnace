@@ -7,8 +7,8 @@ set -e
 # open box
 # _hashmessage = hash("${address(this)}${_user}${networkId}${boxId[]}${amount[]}")
 networkId=$(seth --to-uint256 $CHAINID)
-boxId1=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000002
-boxId2=0x0fffffffff4143545f52494e475f45524332305f544f4b454e00000000000002
+boxId1=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000003
+boxId2=0x0fffffffff4143545f52494e475f45524332305f544f4b454e00000000000003
 amount1=$(seth --to-uint256 $(seth --to-wei 1000 ether))
 amount2=$(seth --to-uint256 $(seth --to-wei 100 ether))
 # abi.encodePacked( address(this), _user, networkId, _ids, _amounts)
