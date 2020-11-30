@@ -58,7 +58,12 @@ uint16 gold_rate = `i = [31, 32]`
 uint16 wood_rate = `i = [29, 30]`  
 uint16 water_rate = `i = [27, 28]`  
 uint16 fire_rate = `i = [25, 26]`  
-uint16 soil_rate = `i = [23, 24]`
+uint16 soil_rate = `i = [23, 24]`  
+
+resource will decrease 1/10000 every day.  
+startTime = 1544083267 | 2018/12/6 16:1:7  
+remainDays = (now - startTime) / 86400  
+minableBalance = rate * (1 - remainDays/10000)  
 
 Per Apostle BaseStrength <!-- $\approx$ --> <img style="transform: translateY(0.25em);" src="svg/OCcjcm4u1l.svg"/> 1 Element
 
