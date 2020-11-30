@@ -2,13 +2,7 @@
 
 ## flatten
 ```
-hevm flatten --source-file src/DrillBase.sol >> bin/flatten/DrillBase.f.sol
-hevm flatten --source-file src/DrillBaseAuthority.sol >> bin/flatten/DrillBaseAuthority.f.sol
-hevm flatten --source-file src/DrillBaseProxy.sol >> bin/flatten/DrillBaseProxy.f.sol
-hevm flatten --source-file src/DrillLuckyBox.sol >> bin/flatten/DrillLuckyBox.f.sol
-hevm flatten --source-file src/DrillTakeBack.sol >> bin/flatten/DrillTakeBack.f.sol
-hevm flatten --source-file src/FurnaceProxyAdmin.sol >> bin/flatten/FurnaceProxyAdmin.f.sol
-hevm flatten --source-file src/ObjectOwnershipAuthorityV3.sol >> bin/flatten/ObjectOwnershipAuthorityV3.f.sol
+make flatten
 ```
 
 ## Addresses
@@ -24,3 +18,8 @@ hevm flatten --source-file src/ObjectOwnershipAuthorityV3.sol >> bin/flatten/Obj
 
 ### Mainnet
 
+| Name    |      Source      |  ABI |  Address |
+|:--------:|:----------------:|:------:|:-----------:|
+| DrillLuckyBox | DrillLuckyBox.sol | [DrillLuckyBox.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillLuckyBox.abi) | [0xc7D7E731d6bf9182701096adCd5bba3bb0CF76fc](https://etherscan.io/address/0xc7D7E731d6bf9182701096adCd5bba3bb0CF76fc) |
+| DrillTakeBack | DrillTakeBack.sol |[DrillTakeBack.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillTakeBack.abi) | [0x8d7af9d2310016712b8f269df266f957cb12a27b](https://etherscan.io/address/0x8d7af9d2310016712b8f269df266f957cb12a27b) |
+| DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0x5731a6ae4ae4dc582f2e692f1a2c963c6e01c585](https://etherscan.io/address/0x5731a6ae4ae4dc582f2e692f1a2c963c6e01c585) |

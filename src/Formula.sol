@@ -2,9 +2,10 @@ pragma solidity ^0.6.7;
 
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
+import "interfaces/IFormula.sol";
 import "./FurnaceSettingIds.sol";
 
-contract Formula is Initializable, DSAuth, FurnaceSettingIds {
+contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	event AddFormula(
 		uint256 indexed index,
 		string name,
@@ -23,24 +24,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 		uint256 base,
 		uint256 enhance
 	);
-	struct FormulaEntry {
-		// Drill parameter
-		string name;
-		uint16 class;
-		uint16 grade;
-		bool canDisenchant;
-		// if it is removed
-		bool disable;
-		// major meterail of the Formula index
-		uint16[] majorIndex;
-		// minor meterail info
-		bytes32[] tokens;
-		uint256[] mins;
-		uint256[] maxs;
-		// uint256 smeltTime;
-		// uint256 disenchantTime;
-		// uint256 loseRate;
-	}
 
 	struct Strength {
 		uint256 base;
@@ -51,89 +34,90 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds {
 	mapping(bytes32 => Strength) public strengths;
 
 	function initialize() public initializer {
-		FormulaEntry memory f0 =
-			FormulaEntry({
-				name: "",
-				class: 0,
-				grade: 0,
-				canDisenchant: false,
-				disable: true,
-				majorIndex: new uint16[](0),
-				tokens: new bytes32[](0),
-				mins: new uint256[](0),
-				maxs: new uint256[](0)
-			});
-		formulas.push(f0);
-		// setFurnaceStrength(0, 0, 0);
-		FormulaEntry memory f1 =
-			FormulaEntry({
-				name: "普通GEGO镐",
-				class: 0,
-				grade: 1,
-				canDisenchant: false,
-				disable: false,
-				majorIndex: new uint16[](0),
-				tokens: new bytes32[](0),
-				mins: new uint256[](0),
-				maxs: new uint256[](0)
-			});
-		formulas.push(f1);
-		// setFurnaceStrength(1, 100, 0);
-		FormulaEntry memory f2 =
-			FormulaEntry({
-				name: "铸铁钻头",
-				class: 0,
-				grade: 1,
-				canDisenchant: false,
-				disable: false,
-				majorIndex: new uint16[](0),
-				tokens: new bytes32[](0),
-				mins: new uint256[](0),
-				maxs: new uint256[](0)
-			});
-		formulas.push(f2);
-		// setFurnaceStrength(2, 150, 0);
-		FormulaEntry memory f3 =
-			FormulaEntry({
-				name: "钨钢钻头",
-				class: 0,
-				grade: 2,
-				canDisenchant: false,
-				disable: false,
-				majorIndex: new uint16[](0),
-				tokens: new bytes32[](0),
-				mins: new uint256[](0),
-				maxs: new uint256[](0)
-			});
-		formulas.push(f3);
-		// setFurnaceStrength(3, 200, 0);
-		FormulaEntry memory f4 =
-			FormulaEntry({
-				name: "金刚钻头",
-				class: 0,
-				grade: 3,
-				canDisenchant: false,
-				disable: false,
-				majorIndex: new uint16[](0),
-				tokens: new bytes32[](0),
-				mins: new uint256[](0),
-				maxs: new uint256[](0)
-			});
-		formulas.push(f4);
-		// setFurnaceStrength(4, 300, 0);
+		// FormulaEntry memory f0 =
+		// 	FormulaEntry({
+		// 		name: "",
+		// 		class: 0,
+		// 		grade: 0,
+		// 		canDisenchant: false,
+		// 		disable: true,
+		// 		majorIndex: new uint16[](0),
+		// 		tokens: new bytes32[](0),
+		// 		mins: new uint256[](0),
+		// 		maxs: new uint256[](0)
+		// 	});
+		// formulas.push(f0);
+		// // setFurnaceStrength(0, 0, 0);
+		// FormulaEntry memory f1 =
+		// 	FormulaEntry({
+		// 		name: "普通GEGO镐",
+		// 		class: 0,
+		// 		grade: 1,
+		// 		canDisenchant: false,
+		// 		disable: false,
+		// 		majorIndex: new uint16[](0),
+		// 		tokens: new bytes32[](0),
+		// 		mins: new uint256[](0),
+		// 		maxs: new uint256[](0)
+		// 	});
+		// formulas.push(f1);
+		// // setFurnaceStrength(1, 100, 0);
+		// FormulaEntry memory f2 =
+		// 	FormulaEntry({
+		// 		name: "铸铁钻头",
+		// 		class: 0,
+		// 		grade: 1,
+		// 		canDisenchant: false,
+		// 		disable: false,
+		// 		majorIndex: new uint16[](0),
+		// 		tokens: new bytes32[](0),
+		// 		mins: new uint256[](0),
+		// 		maxs: new uint256[](0)
+		// 	});
+		// formulas.push(f2);
+		// // setFurnaceStrength(2, 150, 0);
+		// FormulaEntry memory f3 =
+		// 	FormulaEntry({
+		// 		name: "钨钢钻头",
+		// 		class: 0,
+		// 		grade: 2,
+		// 		canDisenchant: false,
+		// 		disable: false,
+		// 		majorIndex: new uint16[](0),
+		// 		tokens: new bytes32[](0),
+		// 		mins: new uint256[](0),
+		// 		maxs: new uint256[](0)
+		// 	});
+		// formulas.push(f3);
+		// // setFurnaceStrength(3, 200, 0);
+		// FormulaEntry memory f4 =
+		// 	FormulaEntry({
+		// 		name: "金刚钻头",
+		// 		class: 0,
+		// 		grade: 3,
+		// 		canDisenchant: false,
+		// 		disable: false,
+		// 		majorIndex: new uint16[](0),
+		// 		tokens: new bytes32[](0),
+		// 		mins: new uint256[](0),
+		// 		maxs: new uint256[](0)
+		// 	});
+		// formulas.push(f4);
+		// // setFurnaceStrength(4, 300, 0);
 	}
 
-	function add(
-		string memory _name,
-		uint16 _class,
-		uint16 _grade,
-		bool _canDisenchant,
-		uint16[] memory _majorIndex,
-		bytes32[] memory _tokens,
-		uint256[] memory _mins,
-		uint256[] memory _maxs
-	) public auth returns (bool) {
-		require(formulas.length < 65536, "formula is full.");
+	function addFormula(
+        string calldata _name,
+        uint256 _class,
+        uint256 _grade,
+        bool _canDisenchant,
+        address[] calldata _nfts,
+        uint256[] calldata _classes,
+        uint256[] calldata _grades,
+        address[] calldata _fts,
+        uint256[] calldata _mins,
+        uint256[] calldata _maxs
+	) external auth returns {
 		require(_majorIndex.length > 0, "Major length invalid");
 		require(_tokens.length == _mins.length, "Token length invalid");
 		require(_mins.length == _maxs.length, "length invalid");
