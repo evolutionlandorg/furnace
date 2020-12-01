@@ -42,4 +42,6 @@ interface IELIP002 {
 	// 	3. delete track FTs NFTs to new NFT
 	// 	4. transfer FNs NFTs to owner
 	// }
+
+	function getBaseInfo(uint256 _tokenId) external view returns (uint16, uint16);
 }

@@ -2,20 +2,18 @@ pragma solidity ^0.6.7;
 
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
-import "interfaces/IFormula.sol";
+import "ds-math/math.sol";
+import "./interfaces/IFormula.sol";
+import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 
-contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
+contract Formula is Initializable, DSAuth, DSMath, FurnaceSettingIds, IFormula {
 	event AddFormula(
 		uint256 indexed index,
 		string name,
-		uint16 class,
-		uint16 grade,
-		bool canDisenchant,
-		uint16[] majorIndex,
-		bytes32[] tokens,
-		uint256[] mins,
-		uint256[] maxs
+		bytes32 meta,
+		bytes32[] majors,
+		bytes32[] minors
 	);
 	event RemoveFormula(uint256 indexed index);
 	event SetFurnaceStrength(
@@ -29,6 +27,10 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint256 base;
 		uint256 enhance;
 	}
+
+	uint256 public constant DECIMALS = 10**10;
+
+	/*** STORAGE ***/
 
 	FormulaEntry[] public formulas;
 	mapping(bytes32 => Strength) public strengths;
@@ -48,141 +50,113 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		// 	});
 		// formulas.push(f0);
 		// // setFurnaceStrength(0, 0, 0);
-		// FormulaEntry memory f1 =
-		// 	FormulaEntry({
-		// 		name: "普通GEGO镐",
-		// 		class: 0,
-		// 		grade: 1,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f1);
-		// // setFurnaceStrength(1, 100, 0);
-		// FormulaEntry memory f2 =
-		// 	FormulaEntry({
-		// 		name: "铸铁钻头",
-		// 		class: 0,
-		// 		grade: 1,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f2);
-		// // setFurnaceStrength(2, 150, 0);
-		// FormulaEntry memory f3 =
-		// 	FormulaEntry({
-		// 		name: "钨钢钻头",
-		// 		class: 0,
-		// 		grade: 2,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f3);
-		// // setFurnaceStrength(3, 200, 0);
-		// FormulaEntry memory f4 =
-		// 	FormulaEntry({
-		// 		name: "金刚钻头",
-		// 		class: 0,
-		// 		grade: 3,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f4);
-		// // setFurnaceStrength(4, 300, 0);
 	}
 
-	function addFormula(
-        string calldata _name,
-        uint256 _class,
-        uint256 _grade,
-        bool _canDisenchant,
-        address[] calldata _nfts,
-        uint256[] calldata _classes,
-        uint256[] calldata _grades,
-        address[] calldata _fts,
-        uint256[] calldata _mins,
-        uint256[] calldata _maxs
-	) external auth returns {
-		require(_majorIndex.length > 0, "Major length invalid");
-		require(_tokens.length == _mins.length, "Token length invalid");
-		require(_mins.length == _maxs.length, "length invalid");
+	function add(
+		string calldata _name,
+		bytes32 _meta,
+		bytes32[] calldata _majors,
+		bytes32[] calldata _minors
+	) external override auth {
+		// require(_majors.length == _classes.length && _majors.length == _grades.length, "majors length invalid");
+		// require(_minors.length == _mins.length && _minors.length == _maxs.length, "minors length invalid");
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
-				class: _class,
-				grade: _grade,
-				canDisenchant: _canDisenchant,
-				disable: false,
-				majorIndex: _majorIndex,
-				tokens: _tokens,
-				mins: _mins,
-				maxs: _maxs
+				meta: _meta,
+				majors: _majors,
+				minors: _minors,
+				disable: false
 			});
 		formulas.push(formula);
 		emit AddFormula(
 			formulas.length - 1,
 			formula.name,
-			formula.class,
-			formula.grade,
-			formula.canDisenchant,
-			formula.majorIndex,
-			formula.tokens,
-			formula.mins,
-			formula.maxs
+			formula.meta,
+			formula.majors,
+			formula.minors
 		);
 	}
 
-	function remove(uint256 index) public auth {
+	function remove(uint256 index) external override auth {
 		require(index < formulas.length, "Formula: out of range");
 		formulas[index].disable = true;
 		emit RemoveFormula(index);
 	}
 
-	function length() public view returns (uint256) {
+	function length() external view override returns (uint256) {
 		return formulas.length;
 	}
 
-	function at(uint256 index)
-		public
+	function at(uint256 _index)
+		external
 		view
+		override
 		returns (
-			string memory name,
-			uint16 class,
-			uint16 grade,
-			bool canDisenchant,
-			uint16[] memory majorIndex,
-			bytes32[] memory tokens,
-			uint256[] memory mins,
-			uint256[] memory maxs
+			string memory,
+			bytes32,
+			bytes32[] memory,
+			bytes32[] memory,
+			bool
 		)
 	{
-		require(index < formulas.length, "Formula: out of range");
-		FormulaEntry memory formula = formulas[index];
+		require(_index < formulas.length, "Formula: out of range");
+		FormulaEntry memory formula = formulas[_index];
 		return (
 			formula.name,
-			formula.class,
-			formula.grade,
-			formula.canDisenchant,
-			formula.majorIndex,
-			formula.tokens,
-			formula.mins,
-			formula.maxs
+			formula.meta,
+			formula.majors,
+			formula.minors,
+			formula.disable
 		);
+	}
+
+	function getMetaInfo(uint256 _index)
+		external
+		view
+		override
+		returns (
+			string memory,
+			uint16,
+			uint16,
+			bool
+		)
+	{
+		require(_index < formulas.length, "Formula: out of range");
+		FormulaEntry memory formula = formulas[_index];
+		(uint16 class, uint16 grade, bool canDisenchant) =
+			abi.decode(_toBytes(formula.meta), (uint16, uint16, bool));
+		return (formula.name, class, grade, canDisenchant);
+	}
+
+	function getMajorInfo(bytes32 _major)
+		external
+		pure
+		override
+		returns (
+			address,
+			uint16,
+			uint16
+		)
+	{
+		(address majorAddress, uint16 majorClass, uint16 majorGrade) =
+			abi.decode(_toBytes(_major), (address, uint16, uint16));
+		return (majorAddress, majorClass, majorGrade);
+	}
+
+	function getMinorInfo(bytes32 _minor)
+		external
+		pure
+		override
+		returns (
+			address,
+			uint256,
+			uint256
+		)
+	{
+		(address minorAddress, uint48 minorMin, uint48 minorMax) =
+			abi.decode(_toBytes(_minor), (address, uint48, uint48));
+		return (minorAddress, mul(uint256(minorMin), DECIMALS), mul(uint256(minorMax), DECIMALS));
 	}
 
 	// util to get key based on object class + formula index + appkey
@@ -219,5 +193,19 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			_base,
 			_enhance
 		);
+	}
+
+	function _toBytes(bytes32 self) internal pure returns (bytes memory bts) {
+		bts = new bytes(32);
+		assembly {
+			mstore(
+				add(
+					bts,
+					/*BYTES_HEADER_SIZE*/
+					32
+				),
+				self
+			)
+		}
 	}
 }
