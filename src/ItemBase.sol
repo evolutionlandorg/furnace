@@ -1,14 +1,14 @@
 pragma solidity ^0.6.7;
 
+import "ds-math/math.sol";
+import "ds-stop/stop.sol";
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "zeppelin-solidity/token/ERC721/IERC721.sol";
-import "ds-stop/stop.sol";
-import "ds-math/math.sol";
+import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/IELIP002.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
-import "./interfaces/IUniswapV2Pair.sol";
 import "./interfaces/IObjectOwnership.sol";
 import "./FurnaceSettingIds.sol";
 
@@ -28,9 +28,20 @@ contract Itembase is
 		uint16 prefer,
 		uint16 rate,
 		bool canDisenchant,
+		address[] mains,
 		uint256[] ids,
+		address[] pairs,
 		uint256[] amounts,
 		uint256 now
+	);
+
+	event Disenchanted(
+		address indexed user,
+		uint256 tokenId,
+		address[] mains,
+		uint256[] ids,
+		address[] pairs,
+		uint256[] amounts
 	);
 
 	// 金, Evolution Land Gold
@@ -47,7 +58,9 @@ contract Itembase is
 		uint16 prefer;
 		uint16 rate;
 		bool canDisenchant;
+		address[] mains;
 		uint256[] ids;
+		address[] pairs;
 		uint256[] amounts;
 	}
 
@@ -63,10 +76,6 @@ contract Itembase is
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
 	function initialize(address _registry) public initializer {
-		// Ownable constructor
-		owner = msg.sender;
-		emit LogSetOwner(msg.sender);
-
 		registry = ISettingsRegistry(_registry);
 		LPToken2element[
 			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
@@ -83,7 +92,6 @@ contract Itembase is
 		LPToken2element[
 			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
 		] = Element.SOIL;
-
 		LPToken2token[
 			registry.addressOf(CONTRACT_LP_RING_ERC20_TOKEN)
 		] = registry.addressOf(CONTRACT_RING_ERC20_TOKEN);
@@ -112,30 +120,37 @@ contract Itembase is
 		uint256[] calldata _ids,
 		uint256[] calldata _liquidities
 	) external override stoppable returns (uint256) {
+		address[] memory mains = _dealMajor(_index, _ids);
+		(
+			uint16 prefer,
+			uint16 rate,
+			address[] memory pairs,
+			uint256[] memory amounts
+		) = _dealMinor(_index, _liquidities);
+		return
+			_enchanceItem(
+				_index,
+				prefer,
+				rate,
+				mains,
+				_ids,
+				pairs,
+				amounts,
+				msg.sender
+			);
+	}
+
+	function _dealMajor(uint256 _index, uint256[] memory _ids)
+		internal
+		returns (address[] memory)
+	{
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		require(
-			_index > 0 && _index < IFormula(formula).length(),
-			"Invalid index."
-		);
-		(, , bytes32[] memory majors, bytes32[] memory minors, bool disable) =
+		(, , , bytes32[] memory majors, bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Formula disable.");
 		require(_ids.length == majors.length, "Invalid ids length.");
-		require(
-			_liquidities.length == minors.length,
-			"Invalid liquidities length."
-		);
-		_dealMajor(_index, _ids);
-		//TODO: calculate rate.
-		(uint16 prefer, uint16 rate, uint256[] memory amounts) =
-			_dealMinor(_index, _liquidities);
-		_enchanceItem(_index, prefer, rate, _ids, amounts, msg.sender);
-	}
-
-	function _dealMajor(uint256 _index, uint256[] memory _ids) internal {
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , bytes32[] memory majors, ) = IFormula(formula).at(_index);
+		address[] memory mains = new address[](majors.length);
 		for (uint256 i = 0; i < majors.length; i++) {
 			bytes32 major = majors[i];
 			uint256 id = _ids[i];
@@ -146,7 +161,9 @@ contract Itembase is
 			require(class == majorClass, "Invalid Class.");
 			require(grade == majorGrade, "Invalid Grade.");
 			IERC721(majorAddress).transferFrom(msg.sender, address(this), id);
+			mains[i] = majorAddress;
 		}
+		return mains;
 	}
 
 	function _dealMinor(uint256 _index, uint256[] memory _liquidities)
@@ -154,19 +171,30 @@ contract Itembase is
 		returns (
 			uint16,
 			uint16,
+			address[] memory,
 			uint256[] memory
 		)
 	{
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , bytes32[] memory minors, ) = IFormula(formula).at(_index);
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
+		(, , , bytes32[] memory minors, bool disable) =
+			IFormula(formula).at(_index);
+		require(disable == false, "Formula disable.");
+		require(
+			_liquidities.length == minors.length,
+			"Invalid liquidities length."
+		);
 		uint256[] memory amounts = new uint256[](minors.length);
 		uint16 prefer;
+		//TODO: calculate rate.
 		uint16 rate;
+		address[] memory pairs;
 		for (uint256 i = 0; i < minors.length; i++) {
 			bytes32 minor = minors[i];
 			uint256 liquidity = _liquidities[i];
 			(address pair, uint256 minorMin, uint256 minorMax) =
 				IFormula(formula).getMinorInfo(minor);
+			pairs[i] = pair;
 			if (minor == CONTRACT_ELEMENT_ERC20_TOKEN) {
 				uint256 element = uint256(LPToken2element[pair]);
 				require(
@@ -183,18 +211,18 @@ contract Itembase is
 				);
 			}
 			address token = LPToken2token[pair];
-			uint256 value = getLiquidityValue(pair, token, liquidity);
+			uint256 value = IMetaDataTeller(teller).getLiquidityValue(pair, token, liquidity);
 			require(value >= minorMin, "No enough value.");
 			if (value > minorMax) {
-				uint256 amount = getLiquidity(pair, token, minorMax);
-				IUniswapV2Pair(pair).transferFrom(
+				uint256 amount = IMetaDataTeller(teller).getLiquidity(pair, token, minorMax);
+				IERC20(pair).transferFrom(
 					msg.sender,
 					address(this),
 					amount
 				);
 				amounts[i] = amount;
 			} else {
-				IUniswapV2Pair(pair).transferFrom(
+				IERC20(pair).transferFrom(
 					msg.sender,
 					address(this),
 					liquidity
@@ -202,17 +230,19 @@ contract Itembase is
 				amounts[i] = liquidity;
 			}
 		}
-		return (prefer, rate, amounts);
+		return (prefer, rate, pairs, amounts);
 	}
 
 	function _enchanceItem(
 		uint256 _index,
 		uint16 _prefer,
 		uint16 _rate,
+		address[] memory _mains,
 		uint256[] memory _ids,
+		address[] memory _pairs,
 		uint256[] memory _amounts,
 		address _to
-	) internal {
+	) internal returns (uint256) {
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		(, uint16 class, uint16 grade, bool canDisenchant) =
 			IFormula(formula).getMetaInfo(_index);
@@ -230,7 +260,9 @@ contract Itembase is
 				prefer: _prefer,
 				rate: _rate,
 				canDisenchant: canDisenchant,
+				mains: _mains,
 				ids: _ids,
+				pairs: _pairs,
 				amounts: _amounts
 			});
 		uint256 tokenId =
@@ -246,10 +278,59 @@ contract Itembase is
 			item.prefer,
 			item.rate,
 			item.canDisenchant,
+			item.mains,
 			item.ids,
+			item.pairs,
 			item.amounts,
 			now // solhint-disable-line
 		);
+		return tokenId;
+	}
+
+	function _disenchantItem(address to, uint256 tokenId) internal {
+		IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).burn(
+			to,
+			tokenId
+		);
+	}
+
+	function disenchant(uint256[] calldata _ids) external override stoppable {
+		require(_ids.length > 0, "Ids length is zero.");
+		for (uint256 i = 0; i < _ids.length; i++) {
+			_disenchant(_ids[i]);
+		}
+	}
+
+	function _disenchant(uint256 _tokenId) internal returns (uint256) {
+		(
+			,
+			uint16 class,
+			bool canDisenchant,
+			address[] memory mains,
+			uint256[] memory ids,
+			address[] memory pairs,
+			uint256[] memory amounts
+		) = this.getEnchantedInfo(_tokenId);
+		require(canDisenchant == true, "Can not disenchant.");
+		require(class > 0, "Invalid class.");
+		require(ids.length == mains.length, "Invalid mains length.");
+		require(amounts.length == pairs.length, "Invalid pairs length.");
+		_disenchantItem(msg.sender, _tokenId);
+		for (uint256 i = 0; i < mains.length; i++) {
+			address main = mains[i];
+			uint256 id = ids[i];
+			IERC721(main).transferFrom(address(this), msg.sender, id);
+		}
+		for (uint256 i = 0; i < pairs.length; i++) {
+			address pair = pairs[i];
+			uint256 amount = amounts[i];
+			IERC20(pair).transferFrom(
+				address(this),
+				msg.sender,
+				amount
+			);
+		}
+		emit Disenchanted(msg.sender, _tokenId, mains, ids, pairs, amounts);
 	}
 
 	function getBaseInfo(uint256 _tokenId)
@@ -262,44 +343,29 @@ contract Itembase is
 		return (item.class, item.grade);
 	}
 
-	function getLiquidity(
-		address pair,
-		address token,
-		uint256 amount
-	) public view returns (uint256) {
-		require(pair != address(0), "Invalid pair.");
-		require(token != address(0), "Invalid pair.");
-		uint256 totalSupply = IUniswapV2Pair(pair).totalSupply();
-		if (token == IUniswapV2Pair(pair).token0()) {
-			(uint112 reserve0, , ) = IUniswapV2Pair(pair).getReserves();
-			return mul(amount, totalSupply) / uint256(reserve0);
-		} else if (token == IUniswapV2Pair(pair).token1()) {
-			(, uint112 reserve1, ) = IUniswapV2Pair(pair).getReserves();
-			return mul(amount, totalSupply) / uint256(reserve1);
-		} else {
-			revert("Invalid token.");
-		}
+	function getEnchantedInfo(uint256 _tokenId)
+		external
+		view
+		returns (
+			uint256,
+			uint16,
+			bool,
+			address[] memory,
+			uint256[] memory,
+			address[] memory,
+			uint256[] memory
+		)
+	{
+		Item memory item = tokenId2Item[_tokenId];
+		return (
+			item.index,
+			item.class,
+			item.canDisenchant,
+			item.mains,
+			item.ids,
+			item.pairs,
+			item.amounts
+		);
 	}
 
-	// ignore fee
-	function getLiquidityValue(
-		address pair,
-		address token,
-		uint256 liquidity
-	) public view returns (uint256) {
-		require(pair != address(0), "Invalid pair.");
-		require(token != address(0), "Invalid pair.");
-		uint256 totalSupply = IUniswapV2Pair(pair).totalSupply();
-		if (token == IUniswapV2Pair(pair).token0()) {
-			(uint112 reserve0, , ) = IUniswapV2Pair(pair).getReserves();
-			return mul(liquidity, uint256(reserve0)) / totalSupply;
-		} else if (token == IUniswapV2Pair(pair).token1()) {
-			(, uint112 reserve1, ) = IUniswapV2Pair(pair).getReserves();
-			return mul(liquidity, uint256(reserve1)) / totalSupply;
-		} else {
-			revert("Invalid token.");
-		}
-	}
-
-	function disenchant(uint256 _id, uint256 _depth) external override {}
 }

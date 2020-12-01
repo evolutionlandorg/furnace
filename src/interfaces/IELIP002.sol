@@ -29,12 +29,10 @@ interface IELIP002 {
 	/**
         @notice Caller must be owner of token id to be disenchated.
         @dev Disenchant function, A enchanted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
-        MUST revert if  _depth is larger than the depth of _id token enchanted.
         MUST revert on any other error.        
-        @param _id     token ID to disenchant.
-        @param _depth  recursion depth token disenchant.
+        @param _ids     token IDs to disenchant.
     */
-	function disenchant(uint256 _id, uint256 _depth) external;
+	function disenchant(uint256[] calldata _ids) external;
 	// {
 	// 	### disenchant
 	//  1. tranfer _id to address(this)
