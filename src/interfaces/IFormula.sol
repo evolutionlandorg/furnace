@@ -28,7 +28,7 @@ interface IFormula {
         @param _majors    NFT token addresses of major meterail for enchanting.
         @param _minors     FT Token addresses of minor meterail for enchanting.
     */
-	function add(
+	function addFormula(
 		string calldata _name,
 		bytes32 _meta,
 		bytes32[] calldata _majors,
@@ -41,7 +41,7 @@ interface IFormula {
         MUST revert on any other error.        
         @param _index    Disble the formule of index.
     */
-	function remove(uint256 _index) external;
+	function removeFormula(uint256 _index) external;
 
 	function length() external view returns (uint256);
 

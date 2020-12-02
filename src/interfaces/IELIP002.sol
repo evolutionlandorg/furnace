@@ -32,7 +32,7 @@ interface IELIP002 {
         MUST revert on any other error.        
         @param _ids     token IDs to disenchant.
     */
-	function disenchant(uint256[] calldata _ids) external;
+	function disenchant(uint256 _ids, uint256 _depth) external;
 	// {
 	// 	### disenchant
 	//  1. tranfer _id to address(this)

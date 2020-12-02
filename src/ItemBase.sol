@@ -184,11 +184,11 @@ contract Itembase is
 			_liquidities.length == minors.length,
 			"Invalid liquidities length."
 		);
-		uint256[] memory amounts = new uint256[](minors.length);
 		uint16 prefer;
 		//TODO: calculate rate.
 		uint16 rate;
-		address[] memory pairs;
+		uint256[] memory amounts = new uint256[](minors.length);
+		address[] memory pairs = new address[](minors.length);
 		for (uint256 i = 0; i < minors.length; i++) {
 			bytes32 minor = minors[i];
 			uint256 liquidity = _liquidities[i];
@@ -211,22 +211,20 @@ contract Itembase is
 				);
 			}
 			address token = LPToken2token[pair];
-			uint256 value = IMetaDataTeller(teller).getLiquidityValue(pair, token, liquidity);
-			require(value >= minorMin, "No enough value.");
-			if (value > minorMax) {
-				uint256 amount = IMetaDataTeller(teller).getLiquidity(pair, token, minorMax);
-				IERC20(pair).transferFrom(
-					msg.sender,
-					address(this),
-					amount
-				);
-				amounts[i] = amount;
-			} else {
-				IERC20(pair).transferFrom(
-					msg.sender,
-					address(this),
+			uint256 value =
+				IMetaDataTeller(teller).getLiquidityValue(
+					pair,
+					token,
 					liquidity
 				);
+			require(value >= minorMin, "No enough value.");
+			if (value > minorMax) {
+				uint256 amount =
+					IMetaDataTeller(teller).getLiquidity(pair, token, minorMax);
+				IERC20(pair).transferFrom(msg.sender, address(this), amount);
+				amounts[i] = amount;
+			} else {
+				IERC20(pair).transferFrom(msg.sender, address(this), liquidity);
 				amounts[i] = liquidity;
 			}
 		}
@@ -294,14 +292,23 @@ contract Itembase is
 		);
 	}
 
-	function disenchant(uint256[] calldata _ids) external override stoppable {
-		require(_ids.length > 0, "Ids length is zero.");
-		for (uint256 i = 0; i < _ids.length; i++) {
-			_disenchant(_ids[i]);
-		}
+	function disenchant(uint256 _id, uint256 _depth)
+		external
+		override
+		stoppable
+	{
+		IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).transferFrom(
+			msg.sender,
+			address(this),
+			_id
+		);
+		_disenchant(_id, _depth);
 	}
 
-	function _disenchant(uint256 _tokenId) internal returns (uint256) {
+	function _disenchant(uint256 _tokenId, uint256 _depth)
+		internal
+		returns (uint256)
+	{
 		(
 			,
 			uint16 class,
@@ -311,24 +318,25 @@ contract Itembase is
 			address[] memory pairs,
 			uint256[] memory amounts
 		) = this.getEnchantedInfo(_tokenId);
+		require(_depth > 0, "Invalid Depth.");
 		require(canDisenchant == true, "Can not disenchant.");
 		require(class > 0, "Invalid class.");
 		require(ids.length == mains.length, "Invalid mains length.");
 		require(amounts.length == pairs.length, "Invalid pairs length.");
-		_disenchantItem(msg.sender, _tokenId);
+		_disenchantItem(address(this), _tokenId);
 		for (uint256 i = 0; i < mains.length; i++) {
 			address main = mains[i];
 			uint256 id = ids[i];
-			IERC721(main).transferFrom(address(this), msg.sender, id);
+			if (_depth == 1 || class == 0) {
+				IERC721(main).transferFrom(address(this), msg.sender, id);
+			} else {
+				_disenchant(id, _depth - 1);
+			}
 		}
 		for (uint256 i = 0; i < pairs.length; i++) {
 			address pair = pairs[i];
 			uint256 amount = amounts[i];
-			IERC20(pair).transferFrom(
-				address(this),
-				msg.sender,
-				amount
-			);
+			IERC20(pair).transferFrom(address(this), msg.sender, amount);
 		}
 		emit Disenchanted(msg.sender, _tokenId, mains, ids, pairs, amounts);
 	}
@@ -367,5 +375,4 @@ contract Itembase is
 			item.amounts
 		);
 	}
-
 }

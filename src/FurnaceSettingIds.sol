@@ -1,13 +1,14 @@
 pragma solidity ^0.6.7;
 
 contract FurnaceSettingIds {
-	// uint256 public constant PREFER_GOLD = 1 << 1;
-	// uint256 public constant PREFER_WOOD = 1 << 2;
-	// uint256 public constant PREFER_WATER = 1 << 3;
-	// uint256 public constant PREFER_FIRE = 1 << 4;
-	// uint256 public constant PREFER_SOIL = 1 << 5;
+	uint256 public constant PREFER_GOLD = 1 << 1;
+	uint256 public constant PREFER_WOOD = 1 << 2;
+	uint256 public constant PREFER_WATER = 1 << 3;
+	uint256 public constant PREFER_FIRE = 1 << 4;
+	uint256 public constant PREFER_SOIL = 1 << 5;
 
 	uint8 public constant DRILL_OBJECT_CLASS = 4; // Drill
+	uint8 public constant ITEM_OBJECT_CLASS = 5;  // Item 
 
 	//0x4655524e4143455f415050000000000000000000000000000000000000000000
 	bytes32 public constant FURNACE_APP = "FURNACE_APP";

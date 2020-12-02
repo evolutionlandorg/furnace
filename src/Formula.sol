@@ -2,12 +2,11 @@ pragma solidity ^0.6.7;
 
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
-import "ds-math/math.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 
-contract Formula is Initializable, DSAuth, DSMath, FurnaceSettingIds, IFormula {
+contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	event AddFormula(
 		uint256 indexed index,
 		string name,
@@ -52,7 +51,7 @@ contract Formula is Initializable, DSAuth, DSMath, FurnaceSettingIds, IFormula {
 		// // setFurnaceStrength(0, 0, 0);
 	}
 
-	function add(
+	function addFormula(
 		string calldata _name,
 		bytes32 _meta,
 		bytes32[] calldata _majors,
@@ -78,7 +77,7 @@ contract Formula is Initializable, DSAuth, DSMath, FurnaceSettingIds, IFormula {
 		);
 	}
 
-	function remove(uint256 index) external override auth {
+	function removeFormula(uint256 index) external override auth {
 		require(index < formulas.length, "Formula: out of range");
 		formulas[index].disable = true;
 		emit RemoveFormula(index);
@@ -156,7 +155,8 @@ contract Formula is Initializable, DSAuth, DSMath, FurnaceSettingIds, IFormula {
 	{
 		(address minorAddress, uint48 minorMin, uint48 minorMax) =
 			abi.decode(_toBytes(_minor), (address, uint48, uint48));
-		return (minorAddress, mul(uint256(minorMin), DECIMALS), mul(uint256(minorMax), DECIMALS));
+		// * never overflows
+		return (minorAddress, minorMin * DECIMALS, minorMax * DECIMALS);
 	}
 
 	// util to get key based on object class + formula index + appkey
