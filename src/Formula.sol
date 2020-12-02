@@ -9,7 +9,7 @@ import "./FurnaceSettingIds.sol";
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	event AddFormula(
 		uint256 indexed index,
-		string name,
+		bytes32 name,
 		bytes32 meta,
 		bytes32[] majors,
 		bytes32[] minors
@@ -17,14 +17,15 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	event RemoveFormula(uint256 indexed index);
 	event SetFurnaceStrength(
 		uint256 indexed objectClass,
-		uint256 indexed formulaIndex,
-		uint256 base,
-		uint256 enhance
+		uint16 class,
+		uint16 grade,
+		uint128 base,
+		uint128 enhance
 	);
 
 	struct Strength {
-		uint256 base;
-		uint256 enhance;
+		uint128 base;
+		uint128 enhance;
 	}
 
 	uint256 public constant DECIMALS = 10**10;
@@ -51,8 +52,8 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		// // setFurnaceStrength(0, 0, 0);
 	}
 
-	function addFormula(
-		string calldata _name,
+	function insert(
+		bytes32 _name,
 		bytes32 _meta,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors
@@ -77,7 +78,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		);
 	}
 
-	function removeFormula(uint256 index) external override auth {
+	function remove(uint256 index) external override auth {
 		require(index < formulas.length, "Formula: out of range");
 		formulas[index].disable = true;
 		emit RemoveFormula(index);
@@ -92,7 +93,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		view
 		override
 		returns (
-			string memory,
+			bytes32,
 			bytes32,
 			bytes32[] memory,
 			bytes32[] memory,
@@ -115,7 +116,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		view
 		override
 		returns (
-			string memory,
+			bytes32,
 			uint16,
 			uint16,
 			bool
@@ -162,34 +163,37 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	// util to get key based on object class + formula index + appkey
 	function _getKey(
 		uint8 _objectClass,
-		uint256 _formulaIndex,
+		uint16 _class,
+		uint16 _grade,
 		bytes32 _appKey
 	) internal pure returns (bytes32) {
 		return
-			keccak256(abi.encodePacked(_objectClass, _formulaIndex, _appKey));
+			keccak256(abi.encodePacked(_objectClass, _class, _grade, _appKey));
 	}
 
-	function getFurnaceStrength(uint256 _formulaIndex)
+	function getFurnaceStrength(uint16 _class, uint16 _grade)
 		public
 		view
-		returns (uint256, uint256)
+		returns (uint128, uint128)
 	{
-		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _class, _grade , FURNACE_APP);
 		Strength memory s = strengths[key];
 		return (s.base, s.enhance);
 	}
 
 	function setFurnaceStrength(
-		uint256 _formulaIndex,
-		uint256 _base,
-		uint256 _enhance
+		uint16 _class,
+		uint16 _grade,
+		uint128 _base,
+		uint128 _enhance
 	) public auth {
-		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
+		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _class, _grade, FURNACE_APP);
 		Strength memory s = Strength({ base: _base, enhance: _enhance });
 		strengths[key] = s;
 		emit SetFurnaceStrength(
 			DRILL_OBJECT_CLASS,
-			_formulaIndex,
+			_class,
+			_grade,
 			_base,
 			_enhance
 		);

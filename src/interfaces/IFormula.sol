@@ -3,7 +3,7 @@ pragma solidity ^0.6.7;
 interface IFormula {
 	struct FormulaEntry {
 		// Item parameter
-		string name;
+		bytes32 name;
 		bytes32 meta;
 		// if it is removed
 		// uint256 enchantTime;
@@ -28,8 +28,8 @@ interface IFormula {
         @param _majors    NFT token addresses of major meterail for enchanting.
         @param _minors     FT Token addresses of minor meterail for enchanting.
     */
-	function addFormula(
-		string calldata _name,
+	function insert(
+		bytes32 _name,
 		bytes32 _meta,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors
@@ -41,7 +41,7 @@ interface IFormula {
         MUST revert on any other error.        
         @param _index    Disble the formule of index.
     */
-	function removeFormula(uint256 _index) external;
+	function remove(uint256 _index) external;
 
 	function length() external view returns (uint256);
 
@@ -49,7 +49,7 @@ interface IFormula {
 		external
 		view
 		returns (
-			string memory,
+			bytes32,
 			bytes32,
 			bytes32[] memory,
 			bytes32[] memory,
@@ -78,7 +78,7 @@ interface IFormula {
 		external
 		view
 		returns (
-			string memory,
+			bytes32,
 			uint16,
 			uint16,
 			bool

@@ -22,7 +22,7 @@ contract Itembase is
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
-		uint256 index,
+		bytes32 name,
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
@@ -52,7 +52,7 @@ contract Itembase is
 	enum Element { NaN, GOLD, WOOD, WATER, FIRE, SOIL }
 
 	struct Item {
-		uint256 index;
+		bytes32 name;
 		uint16 class;
 		uint16 grade;
 		uint16 prefer;
@@ -242,7 +242,7 @@ contract Itembase is
 		address _to
 	) internal returns (uint256) {
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, uint16 class, uint16 grade, bool canDisenchant) =
+		(bytes32 name, uint16 class, uint16 grade, bool canDisenchant) =
 			IFormula(formula).getMetaInfo(_index);
 		lastItemObjectId += 1;
 		require(
@@ -252,7 +252,7 @@ contract Itembase is
 
 		Item memory item =
 			Item({
-				index: _index,
+				name: name,
 				class: class,
 				grade: grade,
 				prefer: _prefer,
@@ -270,7 +270,7 @@ contract Itembase is
 		emit Enchanced(
 			_to,
 			tokenId,
-			item.index,
+			item.name,
 			item.class,
 			item.grade,
 			item.prefer,
@@ -310,7 +310,6 @@ contract Itembase is
 		returns (uint256)
 	{
 		(
-			,
 			uint16 class,
 			bool canDisenchant,
 			address[] memory mains,
@@ -342,7 +341,7 @@ contract Itembase is
 	}
 
 	function getBaseInfo(uint256 _tokenId)
-		external
+		public	
 		view
 		override
 		returns (uint16, uint16)
@@ -352,10 +351,9 @@ contract Itembase is
 	}
 
 	function getEnchantedInfo(uint256 _tokenId)
-		external
+		public	
 		view
 		returns (
-			uint256,
 			uint16,
 			bool,
 			address[] memory,
@@ -366,7 +364,6 @@ contract Itembase is
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		return (
-			item.index,
 			item.class,
 			item.canDisenchant,
 			item.mains,
