@@ -16,6 +16,3 @@
 [submodule "lib/ds-math"]
 	path = lib/ds-math
 	url = https://github.com/dapphub/ds-math
-[submodule "lib/land"]
-	path = lib/land
-	url = https://github.com/evolutionlandorg/land
