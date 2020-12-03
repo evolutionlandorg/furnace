@@ -71,9 +71,9 @@ Per Apostle BaseStrength <!-- $\approx$ --> <img style="transform: translateY(0.
 
 ```
 enhanceStrength = 3%
-Daily ROI: 0.03 GOLD / 1000 GOLD = 0.003%
-Weekly ROI: 0.003% * 7 = 0.021%
-Yearly ROI: 0.003% * 365 = 1.095%
+Daily ROI: 0.03 GOLD / (1000 GOLD * 2) = 0.0015%
+Weekly ROI: 0.003% * 7 = 0.0105%
+Yearly ROI: 0.003% * 365 = 0.5475%
 ```
 
 ## ROI base RING (unstable)
@@ -83,5 +83,5 @@ GOLD price = reserveRING / reserveGOLD
 0.01 = 1 / 100
 RING amount = 1000 * priceGOLD
 10 = 1000 * 0.01
-Daily ROI: 0.03 * 0.01 / 10 = 0.003%
+Daily ROI: 0.03 * 0.01 / (10 * 2) = 0.0015%
 ```

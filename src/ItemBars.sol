@@ -115,6 +115,9 @@ abstract contract ItemBars is DSAuth {
 		for (uint256 i = 0; i < _indexs.length; i++) {
 			Bar storage bar = land2Bars[_landTokenId][_indexs[i]];
 			bar.isPrivate = true;
+			if (bar.staker != msg.sender) {
+				forceUneqiup(_landTokenId, _indexs[i]);
+			}
 		}
 	}
 
