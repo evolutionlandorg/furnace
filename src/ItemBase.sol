@@ -195,6 +195,7 @@ contract Itembase is
 			(address pair, uint256 minorMin, uint256 minorMax) =
 				IFormula(formula).getMinorInfo(minor);
 			pairs[i] = pair;
+			// TODO: element is allowed
 			if (minor == CONTRACT_ELEMENT_ERC20_TOKEN) {
 				uint256 element = uint256(LPToken2element[pair]);
 				require(

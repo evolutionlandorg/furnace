@@ -26,13 +26,20 @@ uint _totalSupply = totalSupply; // gas savings, must be defined here since tota
 amount0 = liquidity.mul(balance0) / _totalSupply;
 amount1 = liquidity.mul(balance1) / _totalSupply;
 ```
-
+1. Pool Status before adding liquidity:  
 LP: 33.89  
+gold: 26.282  
 ring: 43.7387  
-gold: 26.282
+price: 1:1.6642
 
-add 1 gold + 1.6642 ring  
-LP: 1.29  
+2. Add 1 gold + 1.6642 ring to Pool.  
+Return LP: 1.29 
+
+3. Pool Status after adding liquidity:  
+LP: 35.18  
+gold: 27.282  
+ring: 45.4029  
+price: 1:1.6642 
 
 - supply = 0
 
@@ -65,23 +72,98 @@ startTime = 1544083267 | 2018/12/6 16:1:7
 remainDays = (now - startTime) / 86400  
 minableBalance = rate * (1 - remainDays/10000)  
 
-Per Apostle BaseStrength <!-- $\approx$ --> <img style="transform: translateY(0.25em);" src="svg/OCcjcm4u1l.svg"/> 1 Element
-
-## ROI base GOLD (stable)
+Per Apostle BaseStrength: 1.1778 fire, 1.2816 wood, 1.1649 gold, 1.2042 water, 1.2815 soil (1.2151 avg)  
 
 ```
-enhanceStrength = 3%
-Daily ROI: 0.03 GOLD / (1000 GOLD * 2) = 0.0015%
-Weekly ROI: 0.003% * 7 = 0.0105%
-Yearly ROI: 0.003% * 365 = 0.5475%
-```
+Add liquidity Formula:   
 
-## ROI base RING (unstable)
+LP_GOLD_RING 
+gold_liquidity_pool: r0 
+ring_liquidity_pool: r1 
+ring_price: p1 = r0 / r1
 
+k = r0 * r1 
+p1 = r0 / r1
+r1 = sqrt(k / p1)
+r0 = sqrt(k * p1)
+
+apostle_strength: x  
+drill_strength: y%  
 ```
-GOLD price = reserveRING / reserveGOLD
-0.01 = 1 / 100
-RING amount = 1000 * priceGOLD
-10 = 1000 * 0.01
-Daily ROI: 0.03 * 0.01 / (10 * 2) = 0.0015%
+## ROI of enhancing drill by GOLD (static)
+Note: neglecting fees and cost of drill
 ```
+Cost of GOLD: a0
+yield of GOLD: x * y%
+Daily ROI of GOLD: x * y% / a0  
+                =  1.1649 * (y% / a0)
+```
+# 
+if y = 3, a0 = 100  
+Daily ROI of GOLD: 0.0349%  
+Weekly ROI of GOLD: 0.0349% * 7 = 0.2446%  
+Yearly ROI of GOLD: 0.0349% * 365 = 12.755%
+# 
+if y = 12, a0 = 200  
+Daily ROI of GOLD: 0.069894%  
+Weekly ROI of GOLD: 0.069894% * 7 = 0.489258%  
+Yearly ROI of GOLD: 0.0396066% * 365 = 25.51131%
+# 
+## ROI of enhancing drill by LP_GOLD and LP_RING/LP_KTON (dynamic)
+
+Note: neglecting fees, cost of drill.
+```
+LP_GOLD_RING 
+liquiduty0: l0
+cost_gold: a0
+cost_ring: a1
+
+LP_RING_ETH
+liquiduty1: l1
+cost_ring: a2
+cost_eth: a3
+
+price_gold_ring: p0 = a1 / a0
+price_eth_ring: p1 = a2 / a3
+   
+Cost of RING: a0 * p0 + a1 + a2 + a3 * p1
+yield of RING: x * y% * p0
+Daily ROI in RING: x * y% * p0 / (a0 * p0 + a1 + a2 + a3 * p1) 
+                =  x * y% * p0 / (2 * (a1 + a2) 
+                =  0.58245 * y% * p0 / (a1 + a2)
+```
+# 
+if only LP_GOLD_RING init with 1 : 1     
+y = 6, l1 = 50, a0 = a1 = 50, a2 = a3 = 0 
+then p0 = 1, p1 = 1,   
+Daily ROI of RING:  0.07%   
+Weekly ROI of RING: 0.489%    
+Yearly ROI of RING: 25.51131%  
+# 
+if price change:     
+y = 6, l1 = 50, p0 = 1.2, p1 = 0.5  
+then a0 = 45.64, a1 = 54.77 
+Daily ROI of RING:  0.076%   
+Weekly ROI of RING: 0.535%    
+Yearly ROI of RING: 27.947%  
+#
+if LP_GOLD_RING and LP_RING_ETH all init with 1 : 1     
+y = 6, l1 = l2 = 50, a0 = a1 = 50, a2 = a3 = 50    
+then p0 = 1, p1 = 1,   
+Daily ROI of RING:  0.035%   
+Weekly ROI of RING: 0.244%    
+Yearly ROI of RING: 12.75%  
+# 
+if price change:  
+y = 6, l1 = l2 = 50, p0 = 1.2, p1 = 0.5  
+then a0 = 45.64, a1 = 54.77,  a2 = 35.355, a3 = 70.71    
+Daily ROI of RING: 0.0465%  
+Weekly ROI of RING: 0.326%  
+Yearly ROI of RING: 16.975%  
+# 
+if price change: y = 6, l1 = l2 = 50, p0 = 0.6, p1 = 4   
+then a0 = 64.55, a1 = 38.73,  a2 = 100, a3 = 25    
+Daily ROI of RING: 0.015%  
+Weekly ROI of RING: 0.105%  
+Yearly ROI of RING: 5.516%  
+# 
