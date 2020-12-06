@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# importing the csv module 
+import csv 
+  
+# my data rows as dictionary objects 
+mydict =[] 
+
+
+# Daily ROI of GOLD: x * y% / a0  
+x = 1.1649
+for y in range (3, 10):
+    for a0 in range (50, 550, 10):
+        gold = x * y / 100.0
+        roi = x * y / a0
+        row = {
+                'ApostleStrength': x,
+                'DrillStrength(%)': y,
+                'CostOfGold': a0,
+                'YielfOfGold': round(gold, 2), 
+                'DailyROI(%)': round(roi, 2),
+                'WeeklyROI(%)': round(roi*7, 2),
+                'YearlyROI(%)': round(roi*365, 2)
+                }
+        mydict.append(row)
+  
+# field names 
+fields = ['ApostleStrength', 'DrillStrength(%)', 'CostOfGold', 'YielfOfGold', 'DailyROI(%)', 'WeeklyROI(%)', 'YearlyROI(%)'] 
+  
+# name of csv file 
+filename = "bin/csv/roi-gold.csv"
+  
+# writing to csv file 
+with open(filename, 'w') as csvfile: 
+    # creating a csv dict writer object 
+    writer = csv.DictWriter(csvfile, fieldnames = fields) 
+      
+    # writing headers (field names) 
+    writer.writeheader() 
+      
+    # writing data rows 
+    writer.writerows(mydict) 

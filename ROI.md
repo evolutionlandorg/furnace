@@ -134,21 +134,21 @@ Daily ROI in RING: x * y% * p0 / (a0 * p0 + a1 + a2 + a3 * p1)
 ```
 # 
 if only LP_GOLD_RING init with 1 : 1     
-y = 6, l1 = 50, a0 = a1 = 50, a2 = a3 = 0 
+y = 6, l0 = 50, a0 = a1 = 50, a2 = a3 = 0   
 then p0 = 1, p1 = 1,   
 Daily ROI of RING:  0.07%   
 Weekly ROI of RING: 0.489%    
 Yearly ROI of RING: 25.51131%  
 # 
 if price change:     
-y = 6, l1 = 50, p0 = 1.2, p1 = 0.5  
-then a0 = 45.64, a1 = 54.77 
+y = 6, l0 = 50, p0 = 1.2  
+then a0 = 45.64, a1 = 54.77   
 Daily ROI of RING:  0.076%   
 Weekly ROI of RING: 0.535%    
 Yearly ROI of RING: 27.947%  
 #
 if LP_GOLD_RING and LP_RING_ETH all init with 1 : 1     
-y = 6, l1 = l2 = 50, a0 = a1 = 50, a2 = a3 = 50    
+y = 6, l0= l1 = 50, a0 = a1 = 50, a2 = a3 = 50    
 then p0 = 1, p1 = 1,   
 Daily ROI of RING:  0.035%   
 Weekly ROI of RING: 0.244%    
