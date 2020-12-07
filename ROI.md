@@ -91,7 +91,7 @@ apostle_strength: x
 drill_strength: y%  
 ```
 ## ROI of enhancing drill by GOLD (static)
-Note: neglecting fees and cost of drill
+Note: neglecting fees and cost of drill.
 ```
 Cost of GOLD: a0
 yield of GOLD: x * y%
@@ -110,8 +110,7 @@ Weekly ROI of GOLD: 0.069894% * 7 = 0.489258%
 Yearly ROI of GOLD: 0.0396066% * 365 = 25.51131%
 # 
 ## ROI of enhancing drill by LP_GOLD and LP_RING/LP_KTON (dynamic)
-
-Note: neglecting fees, cost of drill.
+Note: neglecting fees, cost of drill and impermanent lose.
 ```
 LP_GOLD_RING 
 liquiduty0: l0
