@@ -28,20 +28,20 @@ amount1 = liquidity.mul(balance1) / _totalSupply;
 ```
 1. Pool Status before adding liquidity:  
 LP: 33.89  
-gold: 26.282  
-ring: 43.7387  
-price: 1:1.6642
+GOLD: 26.282  
+RING: 43.7387  
+Price: 1:1.6642
 
-2. Add 1 gold + 1.6642 ring to Pool.  
+2. Add 1 GOLD + 1.6642 RING to Pool.  
 Return LP: 1.29 
 
 3. Pool Status after adding liquidity:  
 LP: 35.18  
-gold: 27.282  
-ring: 45.4029  
-price: 1:1.6642 
+GOLD: 27.282  
+RING: 45.4029  
+Price: 1:1.6642 
 
-- supply = 0
+- Supply = 0
 
   <!-- $$
   k = x*y  \\
@@ -50,7 +50,7 @@ price: 1:1.6642
 
 <div align="center"><img src="svg/gKu6tLqtB8.svg"/></div>
 
-- supply > 0
+- Supply > 0
   <!-- $$
   \frac {liquidity} {total} = \frac {amount} {reserve} 
   $$ --> 
