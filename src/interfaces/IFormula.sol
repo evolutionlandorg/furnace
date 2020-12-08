@@ -4,7 +4,7 @@ interface IFormula {
 	struct FormulaEntry {
 		// Item parameter
 		bytes32 name;
-		bytes32 meta;
+		bytes meta;
 		// if it is removed
 		// uint256 enchantTime;
 		// uint256 disenchantTime;
@@ -30,7 +30,7 @@ interface IFormula {
     */
 	function insert(
 		bytes32 _name,
-		bytes32 _meta,
+		bytes calldata _meta,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors
 	) external;
@@ -50,7 +50,7 @@ interface IFormula {
 		view
 		returns (
 			bytes32,
-			bytes32,
+			bytes memory,
 			bytes32[] memory,
 			bytes32[] memory,
 			bool
@@ -70,8 +70,8 @@ interface IFormula {
 		pure
 		returns (
 			address,
-			uint256,
-			uint256
+			uint112,
+			uint112
 		);
 
 	function getMetaInfo(uint256 _index)
@@ -81,6 +81,13 @@ interface IFormula {
 			bytes32,
 			uint16,
 			uint16,
+			uint112,
+			uint112,
 			bool
 		);
+
+	function getAddresses(uint256 _index)
+		external
+		view
+		returns (address[] memory, address[] memory);
 }

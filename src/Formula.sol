@@ -10,51 +10,26 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	event AddFormula(
 		uint256 indexed index,
 		bytes32 name,
-		bytes32 meta,
+		bytes meta,
 		bytes32[] majors,
 		bytes32[] minors
 	);
 	event RemoveFormula(uint256 indexed index);
-	event SetFurnaceStrength(
-		uint256 indexed objectClass,
-		uint16 class,
-		uint16 grade,
-		uint128 base,
-		uint128 enhance
-	);
-
-	struct Strength {
-		uint128 base;
-		uint128 enhance;
-	}
 
 	uint256 public constant DECIMALS = 10**10;
 
 	/*** STORAGE ***/
 
 	FormulaEntry[] public formulas;
-	mapping(bytes32 => Strength) public strengths;
 
 	function initialize() public initializer {
-		// FormulaEntry memory f0 =
-		// 	FormulaEntry({
-		// 		name: "",
-		// 		class: 0,
-		// 		grade: 0,
-		// 		canDisenchant: false,
-		// 		disable: true,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f0);
-		// // setFurnaceStrength(0, 0, 0);
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
 	}
 
 	function insert(
 		bytes32 _name,
-		bytes32 _meta,
+		bytes calldata _meta,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors
 	) external override auth {
@@ -94,7 +69,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		override
 		returns (
 			bytes32,
-			bytes32,
+			bytes memory,
 			bytes32[] memory,
 			bytes32[] memory,
 			bool
@@ -111,6 +86,26 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		);
 	}
 
+	function getAddresses(uint256 _index)
+		external
+		view
+		override
+		returns (address[] memory, address[] memory)
+	{
+		FormulaEntry memory formula = formulas[_index];
+		address[] memory majorAddresses = new address[](formula.majors.length);
+		for (uint256 i = 0; i < formula.majors.length; i++) {
+			(address majorAddress, , ) = getMajorInfo(formula.majors[i]);
+			majorAddresses[i] = majorAddress;
+		}
+		address[] memory minorAddresses = new address[](formula.minors.length);
+		for (uint256 i = 0; i < formula.minors.length; i++) {
+			(address minorAddress, , ) = getMinorInfo(formula.majors[i]);
+			minorAddresses[i] = minorAddress;
+		}
+		return (majorAddresses, minorAddresses);
+	}
+
 	function getMetaInfo(uint256 _index)
 		external
 		view
@@ -119,18 +114,25 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			bytes32,
 			uint16,
 			uint16,
+			uint112,
+			uint112,
 			bool
 		)
 	{
 		require(_index < formulas.length, "Formula: out of range");
 		FormulaEntry memory formula = formulas[_index];
-		(uint16 class, uint16 grade, bool canDisenchant) =
-			abi.decode(_toBytes(formula.meta), (uint16, uint16, bool));
-		return (formula.name, class, grade, canDisenchant);
+		(
+			uint16 class,
+			uint16 grade,
+			uint112 base,
+			uint112 enhance,
+			bool canDisenchant
+		) = abi.decode(formula.meta, (uint16, uint16, uint112, uint112, bool));
+		return (formula.name, class, grade, base, enhance, canDisenchant);
 	}
 
 	function getMajorInfo(bytes32 _major)
-		external
+		public
 		pure
 		override
 		returns (
@@ -145,57 +147,23 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	}
 
 	function getMinorInfo(bytes32 _minor)
-		external
+		public
 		pure
 		override
 		returns (
 			address,
-			uint256,
-			uint256
+			uint112,
+			uint112
 		)
 	{
+		// range: [10**10, 2**48 * 10**10]
 		(address minorAddress, uint48 minorMin, uint48 minorMax) =
 			abi.decode(_toBytes(_minor), (address, uint48, uint48));
 		// * never overflows
-		return (minorAddress, minorMin * DECIMALS, minorMax * DECIMALS);
-	}
-
-	// util to get key based on object class + formula index + appkey
-	function _getKey(
-		uint8 _objectClass,
-		uint16 _class,
-		uint16 _grade,
-		bytes32 _appKey
-	) internal pure returns (bytes32) {
-		return
-			keccak256(abi.encodePacked(_objectClass, _class, _grade, _appKey));
-	}
-
-	function getFurnaceStrength(uint16 _class, uint16 _grade)
-		public
-		view
-		returns (uint128, uint128)
-	{
-		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _class, _grade , FURNACE_APP);
-		Strength memory s = strengths[key];
-		return (s.base, s.enhance);
-	}
-
-	function setFurnaceStrength(
-		uint16 _class,
-		uint16 _grade,
-		uint128 _base,
-		uint128 _enhance
-	) public auth {
-		bytes32 key = _getKey(ITEM_OBJECT_CLASS, _class, _grade, FURNACE_APP);
-		Strength memory s = Strength({ base: _base, enhance: _enhance });
-		strengths[key] = s;
-		emit SetFurnaceStrength(
-			DRILL_OBJECT_CLASS,
-			_class,
-			_grade,
-			_base,
-			_enhance
+		return (
+			minorAddress,
+			uint112(minorMin * DECIMALS),
+			uint112(minorMax * DECIMALS)
 		);
 	}
 

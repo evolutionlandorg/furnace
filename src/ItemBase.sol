@@ -10,6 +10,7 @@ import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
 import "./interfaces/IObjectOwnership.sol";
+import "./common/UQ112x112.sol";
 import "./FurnaceSettingIds.sol";
 
 contract Itembase is
@@ -19,18 +20,14 @@ contract Itembase is
 	IELIP002,
 	FurnaceSettingIds
 {
+	using UQ112x112 for uint224;
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
-		bytes32 name,
-		uint16 class,
-		uint16 grade,
+		uint256 index,
 		uint16 prefer,
-		uint16 rate,
-		bool canDisenchant,
-		address[] mains,
+		uint112 rate,
 		uint256[] ids,
-		address[] pairs,
 		uint256[] amounts,
 		uint256 now
 	);
@@ -38,119 +35,56 @@ contract Itembase is
 	event Disenchanted(
 		address indexed user,
 		uint256 tokenId,
-		address[] mains,
+		address[] majors,
 		uint256[] ids,
-		address[] pairs,
+		address[] minors,
 		uint256[] amounts
 	);
 
-	// 金, Evolution Land Gold
-	// 木, Evolution Land Wood
-	// 水, Evolution Land Water
-	// 火, Evolution Land fire
-	// 土, Evolution Land Silicon
-	enum Element { NaN, GOLD, WOOD, WATER, FIRE, SOIL }
-
 	struct Item {
-		bytes32 name;
-		uint16 class;
-		uint16 grade;
+		uint256 index;
 		uint16 prefer;
-		uint16 rate;
-		bool canDisenchant;
-		address[] mains;
+		uint112 rate;
 		uint256[] ids;
-		address[] pairs;
 		uint256[] amounts;
 	}
+
+	// rate precision
+	uint112 public constant RATE_DECIMALS = 10**8;
 
 	/*** STORAGE ***/
 
 	uint128 public lastItemObjectId;
 	ISettingsRegistry public registry;
 	mapping(uint256 => Item) public tokenId2Item;
-	mapping(address => Element) public LPToken2element;
-	mapping(address => address) public LPToken2token;
 
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
 	function initialize(address _registry) public initializer {
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
-		LPToken2element[
-			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
-		] = Element.GOLD;
-		LPToken2element[
-			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
-		] = Element.WOOD;
-		LPToken2element[
-			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
-		] = Element.WATER;
-		LPToken2element[
-			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
-		] = Element.FIRE;
-		LPToken2element[
-			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
-		] = Element.SOIL;
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_RING_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_RING_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_KTON_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_KTON_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_WATER_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN);
-		LPToken2token[
-			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
-		] = registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN);
 	}
 
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
-		uint256[] calldata _liquidities
+		uint256[] calldata _values
 	) external override stoppable returns (uint256) {
-		address[] memory mains = _dealMajor(_index, _ids);
-		(
-			uint16 prefer,
-			uint16 rate,
-			address[] memory pairs,
-			uint256[] memory amounts
-		) = _dealMinor(_index, _liquidities);
-		return
-			_enchanceItem(
-				_index,
-				prefer,
-				rate,
-				mains,
-				_ids,
-				pairs,
-				amounts,
-				msg.sender
-			);
+		_dealMajor(_index, _ids);
+		(uint16 prefer, uint112 rate, uint256[] memory amounts) =
+			_dealMinor(_index, _values);
+		return _enchanceItem(_index, prefer, rate, _ids, amounts, msg.sender);
 	}
 
-	function _dealMajor(uint256 _index, uint256[] memory _ids)
-		internal
-		returns (address[] memory)
-	{
+	function _dealMajor(uint256 _index, uint256[] memory _ids) internal {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		(, , , bytes32[] memory majors, bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Formula disable.");
 		require(_ids.length == majors.length, "Invalid ids length.");
-		address[] memory mains = new address[](majors.length);
 		for (uint256 i = 0; i < majors.length; i++) {
 			bytes32 major = majors[i];
 			uint256 id = _ids[i];
@@ -161,17 +95,14 @@ contract Itembase is
 			require(class == majorClass, "Invalid Class.");
 			require(grade == majorGrade, "Invalid Grade.");
 			IERC721(majorAddress).transferFrom(msg.sender, address(this), id);
-			mains[i] = majorAddress;
 		}
-		return mains;
 	}
 
-	function _dealMinor(uint256 _index, uint256[] memory _liquidities)
+	function _dealMinor(uint256 _index, uint256[] memory _values)
 		internal
 		returns (
 			uint16,
-			uint16,
-			address[] memory,
+			uint112,
 			uint256[] memory
 		)
 	{
@@ -180,88 +111,70 @@ contract Itembase is
 		(, , , bytes32[] memory minors, bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Formula disable.");
-		require(
-			_liquidities.length == minors.length,
-			"Invalid liquidities length."
-		);
+		require(_values.length == minors.length, "Invalid liquidities length.");
 		uint16 prefer;
-		//TODO: calculate rate.
-		uint16 rate;
+		//TODO: check rate calculate.
+		uint112 rate = RATE_DECIMALS;
 		uint256[] memory amounts = new uint256[](minors.length);
-		address[] memory pairs = new address[](minors.length);
 		for (uint256 i = 0; i < minors.length; i++) {
 			bytes32 minor = minors[i];
-			uint256 liquidity = _liquidities[i];
-			(address pair, uint256 minorMin, uint256 minorMax) =
+			uint256 value = _values[i];
+			(address minorAddress, uint112 minorMin, uint112 minorMax) =
 				IFormula(formula).getMinorInfo(minor);
-			pairs[i] = pair;
-			// TODO: element is allowed
-			if (minor == CONTRACT_ELEMENT_ERC20_TOKEN) {
-				uint256 element = uint256(LPToken2element[pair]);
-				require(
-					element > 0 && element < 6,
-					"Invalid LP-token element."
-				);
-				prefer |= uint16(1 << element);
-			} else {
-				require(
-					pair == registry.addressOf(CONTRACT_LP_RING_ERC20_TOKEN) ||
-						pair ==
-						registry.addressOf(CONTRACT_LP_KTON_ERC20_TOKEN),
-					"Not support LP-token address."
-				);
-			}
-			address token = LPToken2token[pair];
-			uint256 value =
-				IMetaDataTeller(teller).getLiquidityValue(
-					pair,
-					token,
-					liquidity
-				);
+			require(minorMax >= minorMin, "Invalid limit.");
+			uint256 element =
+				IMetaDataTeller(teller).getPrefer(minor, minorAddress);
+			prefer |= uint16(1 << element);
 			require(value >= minorMin, "No enough value.");
+			require(value <= uint128(-1), "Overflow.");
+			uint112 numerator;
+			uint112 denominator;
 			if (value > minorMax) {
-				uint256 amount =
-					IMetaDataTeller(teller).getLiquidity(pair, token, minorMax);
-				IERC20(pair).transferFrom(msg.sender, address(this), amount);
-				amounts[i] = amount;
+				numerator = minorMax - minorMin;
+				IERC20(minorAddress).transferFrom(
+					msg.sender,
+					address(this),
+					minorMax
+				);
+				amounts[i] = minorMax;
 			} else {
-				IERC20(pair).transferFrom(msg.sender, address(this), liquidity);
-				amounts[i] = liquidity;
+				numerator = uint112(value - minorMin);
+				IERC20(minorAddress).transferFrom(
+					msg.sender,
+					address(this),
+					value
+				);
+				amounts[i] = value;
 			}
+			denominator = minorMin;
+			uint112 enhanceRate =
+				UQ112x112
+					.encode(numerator)
+					.uqdiv(denominator)
+					.mul(RATE_DECIMALS)
+					.decode();
+			rate = mul112(rate, enhanceRate) / RATE_DECIMALS;
 		}
-		return (prefer, rate, pairs, amounts);
+		return (prefer, rate, amounts);
 	}
 
 	function _enchanceItem(
 		uint256 _index,
 		uint16 _prefer,
-		uint16 _rate,
-		address[] memory _mains,
+		uint112 _rate,
 		uint256[] memory _ids,
-		address[] memory _pairs,
 		uint256[] memory _amounts,
 		address _to
 	) internal returns (uint256) {
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(bytes32 name, uint16 class, uint16 grade, bool canDisenchant) =
-			IFormula(formula).getMetaInfo(_index);
 		lastItemObjectId += 1;
-		require(
-			lastItemObjectId < 5192296858534827628530496329220095,
-			"Item: object id overflow."
-		);
+		require(lastItemObjectId <= uint128(-1), "Item: object id overflow.");
 
 		Item memory item =
 			Item({
-				name: name,
-				class: class,
-				grade: grade,
+				index: _index,
 				prefer: _prefer,
 				rate: _rate,
-				canDisenchant: canDisenchant,
-				mains: _mains,
 				ids: _ids,
-				pairs: _pairs,
 				amounts: _amounts
 			});
 		uint256 tokenId =
@@ -271,15 +184,10 @@ contract Itembase is
 		emit Enchanced(
 			_to,
 			tokenId,
-			item.name,
-			item.class,
-			item.grade,
+			item.index,
 			item.prefer,
 			item.rate,
-			item.canDisenchant,
-			item.mains,
 			item.ids,
-			item.pairs,
 			item.amounts,
 			now // solhint-disable-line
 		);
@@ -313,7 +221,7 @@ contract Itembase is
 		(
 			uint16 class,
 			bool canDisenchant,
-			address[] memory mains,
+			address[] memory majors,
 			uint256[] memory ids,
 			address[] memory pairs,
 			uint256[] memory amounts
@@ -321,11 +229,11 @@ contract Itembase is
 		require(_depth > 0, "Invalid Depth.");
 		require(canDisenchant == true, "Can not disenchant.");
 		require(class > 0, "Invalid class.");
-		require(ids.length == mains.length, "Invalid mains length.");
+		require(ids.length == majors.length, "Invalid majors length.");
 		require(amounts.length == pairs.length, "Invalid pairs length.");
 		_disenchantItem(address(this), _tokenId);
-		for (uint256 i = 0; i < mains.length; i++) {
-			address main = mains[i];
+		for (uint256 i = 0; i < majors.length; i++) {
+			address main = majors[i];
 			uint256 id = ids[i];
 			if (_depth == 1 || class == 0) {
 				IERC721(main).transferFrom(address(this), msg.sender, id);
@@ -338,21 +246,42 @@ contract Itembase is
 			uint256 amount = amounts[i];
 			IERC20(pair).transferFrom(address(this), msg.sender, amount);
 		}
-		emit Disenchanted(msg.sender, _tokenId, mains, ids, pairs, amounts);
+		emit Disenchanted(msg.sender, _tokenId, majors, ids, pairs, amounts);
+	}
+
+	function getRate(uint256 _tokenId, uint256 _index)
+		public
+		view
+		override
+		returns (uint256)
+	{
+		Item memory item = tokenId2Item[_tokenId];
+		address formula = registry.addressOf(CONTRACT_FORMULA);
+		(, , , uint112 baseRate, uint112 enhanceRate, ) =
+			IFormula(formula).getMetaInfo(item.index);
+		if (uint256(item.prefer) & (~(1 << _index)) > 0) {
+			uint112 realEnhanceRate =
+				baseRate + mul112(item.rate, enhanceRate) / RATE_DECIMALS;
+			return uint256(realEnhanceRate);
+		}
+		return uint256(baseRate);
 	}
 
 	function getBaseInfo(uint256 _tokenId)
-		public	
+		public
 		view
 		override
 		returns (uint16, uint16)
 	{
 		Item memory item = tokenId2Item[_tokenId];
-		return (item.class, item.grade);
+		address formula = registry.addressOf(CONTRACT_FORMULA);
+		(, uint16 class, uint16 grade, , , ) =
+			IFormula(formula).getMetaInfo(item.index);
+		return (class, grade);
 	}
 
 	function getEnchantedInfo(uint256 _tokenId)
-		public	
+		public
 		view
 		returns (
 			uint16,
@@ -364,13 +293,29 @@ contract Itembase is
 		)
 	{
 		Item memory item = tokenId2Item[_tokenId];
+		address formula = registry.addressOf(CONTRACT_FORMULA);
+		(, uint16 class, , , , bool canDisenchant) =
+			IFormula(formula).getMetaInfo(item.index);
+		(address[] memory majorAddresses, address[] memory minorAddresses) =
+			IFormula(formula).getAddresses(item.index);
 		return (
-			item.class,
-			item.canDisenchant,
-			item.mains,
+			class,
+			canDisenchant,
+			majorAddresses,
 			item.ids,
-			item.pairs,
+			minorAddresses,
 			item.amounts
 		);
+	}
+
+	function mul112(uint112 a, uint112 b) internal pure returns (uint112) {
+		if (a == 0) {
+			return 0;
+		}
+
+		uint112 c = a * b;
+		require(c / a == b, "Multiplication overflow");
+
+		return c;
 	}
 }

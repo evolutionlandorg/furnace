@@ -1,16 +1,39 @@
 pragma solidity ^0.6.7;
 
 import "ds-auth/auth.sol";
+import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC721/IERC721.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IInterstellarEncoder.sol";
 import "./interfaces/ERC721Receiver.sol";
 import "./interfaces/IMetaDataTeller.sol";
+import "./interfaces/ILandBase.sol";
 
-abstract contract ItemBars is DSAuth {
-	event Equip(uint256 indexed landTokenId, uint256  index, address staker, address token, uint256 id);
-	event Unequip(uint256 indexed landTokenId, uint256  index, address staker, address token, uint256 id);
-	event ForceUnequip(uint256 indexed landTokenId, uint256  index, address staker, address token, uint256 id);
+abstract contract ItemBar is DSAuth, DSMath {
+	event Equip(
+		uint256 indexed landTokenId,
+		uint256 index,
+		address staker,
+		address token,
+		uint256 id
+	);
+	event Unequip(
+		uint256 indexed landTokenId,
+		uint256 index,
+		address staker,
+		address token,
+		uint256 id
+	);
+	event ForceUnequip(
+		uint256 indexed landTokenId,
+		uint256 index,
+		address staker,
+		address token,
+		uint256 id
+	);
+
+    // 0x434f4e54524143545f4c414e445f424153450000000000000000000000000000
+    bytes32 public constant CONTRACT_LAND_BASE = "CONTRACT_LAND_BASE";
 
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
@@ -36,22 +59,21 @@ abstract contract ItemBars is DSAuth {
 	ISettingsRegistry registry;
 	uint256 public maxAmount;
 	mapping(address => bool) public allowList;
-	mapping(uint256 => mapping (uint256 => Bar)) public land2Bars;
-	mapping(uint256 => uint256) public land2EquippedNumber;
+	mapping(uint256 => mapping(uint256 => Bar)) public land2Bars;
 
-    modifier onlyLander(uint256 _landTokenId) {
+	modifier onlyLander(uint256 _landTokenId) {
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		require(IERC721(ownership).ownerOf(_landTokenId) == msg.sender, "Forbidden." );
-        _;
-    }
+		require(
+			IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
+			"Forbidden."
+		);
+		_;
+	}
 
-    constructor(
-            address _registry,
-            uint256 _maxAmount
-    ) internal {
-            registry = ISettingsRegistry(_registry);
-            maxAmount = _maxAmount;
-    }
+	constructor(address _registry, uint256 _maxAmount) internal {
+		registry = ISettingsRegistry(_registry);
+		maxAmount = _maxAmount;
+	}
 
 	function equip(
 		uint256 _landTokenId,
@@ -63,7 +85,11 @@ abstract contract ItemBars is DSAuth {
 		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = land2Bars[_landTokenId][_index];
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		require(bar.isPrivate == false || IERC721(ownership).ownerOf(_landTokenId) == msg.sender, "Forbidden." );
+		require(
+			bar.isPrivate == false ||
+				IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
+			"Forbidden."
+		);
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 			(uint16 class, ) =
@@ -78,16 +104,13 @@ abstract contract ItemBars is DSAuth {
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
 		IERC721(_token).transferFrom(msg.sender, address(this), _tokenId);
-		bar.staker = msg.sender; 
+		bar.staker = msg.sender;
 		bar.token = _token;
 		bar.id = _tokenId;
 		emit Equip(_landTokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
-	function unequip(
-		uint256 _landTokenId,
-		uint256 _index
-	) public {
+	function unequip(uint256 _landTokenId, uint256 _index) public {
 		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = land2Bars[_landTokenId][_index];
 		require(bar.token != address(0), "Empty.");
@@ -110,7 +133,10 @@ abstract contract ItemBars is DSAuth {
 		bar.id = 0;
 	}
 
-	function setPrivate(uint256 _landTokenId, uint256[] calldata _indexs) external onlyLander(_landTokenId) {
+	function setPrivate(uint256 _landTokenId, uint256[] calldata _indexs)
+		external
+		onlyLander(_landTokenId)
+	{
 		require(_indexs.length > 0, "Length is zero.");
 		for (uint256 i = 0; i < _indexs.length; i++) {
 			Bar storage bar = land2Bars[_landTokenId][_indexs[i]];
@@ -121,7 +147,10 @@ abstract contract ItemBars is DSAuth {
 		}
 	}
 
-	function setPublic(uint256 _landTokenId, uint256[] calldata _indexs) external onlyLander(_landTokenId) {
+	function setPublic(uint256 _landTokenId, uint256[] calldata _indexs)
+		external
+		onlyLander(_landTokenId)
+	{
 		require(_indexs.length > 0, "Length is zero.");
 		for (uint256 i = 0; i < _indexs.length; i++) {
 			Bar storage bar = land2Bars[_landTokenId][_indexs[i]];
@@ -152,5 +181,20 @@ abstract contract ItemBars is DSAuth {
 		} else {
 			return allowList[_token];
 		}
+	}
+
+	function enhanceStrengthRateOf(
+		address _resourceToken,
+		uint256 _landTokenId
+	) public view returns (uint256) {
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
+        uint256 index = ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_resourceToken);
+		uint256 rate;
+		for (uint256 i = 0; i < maxAmount; i++) {
+			Bar memory bar = land2Bars[_landTokenId][i];
+			uint256 itemRate = IMetaDataTeller(teller).getRate(bar.token, bar.id, index); 
+			rate = add(rate, itemRate); 
+		}
+		return rate;
 	}
 }

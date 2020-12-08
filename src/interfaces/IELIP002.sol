@@ -42,4 +42,6 @@ interface IELIP002 {
 	// }
 
 	function getBaseInfo(uint256 _tokenId) external view returns (uint16, uint16);
+
+	function getRate(uint256 _tokenId, uint256 _index) external view returns (uint256);
 }
