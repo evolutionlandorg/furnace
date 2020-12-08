@@ -7,6 +7,7 @@ import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IInterstellarEncoder.sol";
 import "./interfaces/ERC721Receiver.sol";
 import "./interfaces/IMetaDataTeller.sol";
+import "./interfaces/ILandResource.sol";
 import "./interfaces/ILandBase.sol";
 
 abstract contract ItemBar is DSAuth, DSMath {
@@ -32,8 +33,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 		uint256 id
 	);
 
-    // 0x434f4e54524143545f4c414e445f424153450000000000000000000000000000
-    bytes32 public constant CONTRACT_LAND_BASE = "CONTRACT_LAND_BASE";
+	// 0x434f4e54524143545f4c414e445f424153450000000000000000000000000000
+	bytes32 public constant CONTRACT_LAND_BASE = "CONTRACT_LAND_BASE";
+
+	// 0x434f4e54524143545f4c414e445f5245534f5552434500000000000000000000
+	bytes32 public constant CONTRACT_LAND_RESOURCE = "CONTRACT_LAND_RESOURCE";
 
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
@@ -70,9 +74,32 @@ abstract contract ItemBar is DSAuth, DSMath {
 		_;
 	}
 
+	modifier updateLandMinerStrength(uint256 _landTokenId) {
+		address landResource = registry.addressOf(CONTRACT_LAND_RESOURCE);
+		ILandResource(landResource).updateAllMinerStrengthWhenStop(
+			_landTokenId
+		);
+		_;
+		ILandResource(landResource).updateAllMinerStrengthWhenStart(
+			_landTokenId
+		);
+	}
+
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
+	}
+
+	function batchEquip(
+		uint256 _landTokenId,
+		uint256[] memory _indexes,
+		address[] memory _tokens,
+		uint256[] memory _tokenIds
+	) public updateLandMinerStrength(_landTokenId) {
+		require(_indexes.length <= maxAmount && _indexes.length > 0, "Invalid length.");
+		for (uint256 i = 0; i < _indexes.length; i++) {
+			_equip(_landTokenId, _indexes[i], _tokens[i], _tokenIds[i]);
+		}
 	}
 
 	function equip(
@@ -80,7 +107,16 @@ abstract contract ItemBar is DSAuth, DSMath {
 		uint256 _index,
 		address _token,
 		uint256 _tokenId
-	) public {
+	) public updateLandMinerStrength(_landTokenId) {
+		_equip(_landTokenId, _index, _token, _tokenId);
+	}
+
+	function _equip(
+		uint256 _landTokenId,
+		uint256 _index,
+		address _token,
+		uint256 _tokenId
+	) internal {
 		require(isAllowed(_token, _tokenId), "Not allow.");
 		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = land2Bars[_landTokenId][_index];
@@ -104,13 +140,31 @@ abstract contract ItemBar is DSAuth, DSMath {
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
 		IERC721(_token).transferFrom(msg.sender, address(this), _tokenId);
+
 		bar.staker = msg.sender;
 		bar.token = _token;
 		bar.id = _tokenId;
 		emit Equip(_landTokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
-	function unequip(uint256 _landTokenId, uint256 _index) public {
+	function batchUnquip(uint256 _landTokenId, uint256[] memory _indexes)
+		public
+		updateLandMinerStrength(_landTokenId)
+	{
+		require(_indexes.length <= maxAmount && _indexes.length > 0, "Invalid length.");
+		for (uint256 i = 0; i < _indexes.length; i++) {
+			_unequip(_landTokenId, _indexes[i]);
+		}
+	}
+
+	function unequip(uint256 _landTokenId, uint256 _index)
+		public
+		updateLandMinerStrength(_landTokenId)
+	{
+		_unequip(_landTokenId, _index);
+	}
+
+	function _unequip(uint256 _landTokenId, uint256 _index) internal {
 		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = land2Bars[_landTokenId][_index];
 		require(bar.token != address(0), "Empty.");
@@ -122,7 +176,10 @@ abstract contract ItemBar is DSAuth, DSMath {
 		bar.id = 0;
 	}
 
-	function forceUneqiup(uint256 _landTokenId, uint256 _index) internal {
+	function forceUneqiup(uint256 _landTokenId, uint256 _index)
+		internal
+		updateLandMinerStrength(_landTokenId)
+	{
 		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = land2Bars[_landTokenId][_index];
 		if (bar.token == address(0)) return;
@@ -183,17 +240,21 @@ abstract contract ItemBar is DSAuth, DSMath {
 		}
 	}
 
-	function enhanceStrengthRateOf(
-		address _resourceToken,
-		uint256 _landTokenId
-	) public view returns (uint256) {
+	function enhanceStrengthRateOf(address _resourceToken, uint256 _landTokenId)
+		public
+		view
+		returns (uint256)
+	{
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-        uint256 index = ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_resourceToken);
+		uint256 index =
+			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
+				.resourceToken2RateAttrId(_resourceToken);
 		uint256 rate;
 		for (uint256 i = 0; i < maxAmount; i++) {
 			Bar memory bar = land2Bars[_landTokenId][i];
-			uint256 itemRate = IMetaDataTeller(teller).getRate(bar.token, bar.id, index); 
-			rate = add(rate, itemRate); 
+			uint256 itemRate =
+				IMetaDataTeller(teller).getRate(bar.token, bar.id, index);
+			rate = add(rate, itemRate);
 		}
 		return rate;
 	}
