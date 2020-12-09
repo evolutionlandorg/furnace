@@ -7,26 +7,26 @@ import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IInterstellarEncoder.sol";
 import "./interfaces/ERC721Receiver.sol";
 import "./interfaces/IMetaDataTeller.sol";
-import "./interfaces/ILandResource.sol";
 import "./interfaces/ILandBase.sol";
+import "./interfaces/ILandResource.sol";
 
 abstract contract ItemBar is DSAuth, DSMath {
 	event Equip(
-		uint256 indexed landTokenId,
+		uint256 indexed tokenId,
 		uint256 index,
 		address staker,
 		address token,
 		uint256 id
 	);
 	event Unequip(
-		uint256 indexed landTokenId,
+		uint256 indexed tokenId,
 		uint256 index,
 		address staker,
 		address token,
 		uint256 id
 	);
 	event ForceUnequip(
-		uint256 indexed landTokenId,
+		uint256 indexed tokenId,
 		uint256 index,
 		address staker,
 		address token,
@@ -63,69 +63,59 @@ abstract contract ItemBar is DSAuth, DSMath {
 	ISettingsRegistry registry;
 	uint256 public maxAmount;
 	mapping(address => bool) public allowList;
-	mapping(uint256 => mapping(uint256 => Bar)) public land2Bars;
+	mapping(uint256 => mapping(uint256 => Bar)) public token2Bars;
 
-	modifier onlyLander(uint256 _landTokenId) {
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		require(
-			IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
-			"Forbidden."
-		);
-		_;
-	}
+	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
-	modifier updateLandMinerStrength(uint256 _landTokenId) {
-		address landResource = registry.addressOf(CONTRACT_LAND_RESOURCE);
-		ILandResource(landResource).updateAllMinerStrengthWhenStop(
-			_landTokenId
-		);
-		_;
-		ILandResource(landResource).updateAllMinerStrengthWhenStart(
-			_landTokenId
-		);
-	}
+	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
 
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
 	}
 
+	function getBarStaker(uint256 _tokenId, uint256 _index)
+		public
+		view
+		returns (address)
+	{
+		Bar memory bar = token2Bars[_tokenId][_index];
+		return bar.staker;
+	}
+
 	function batchEquip(
-		uint256 _landTokenId,
+		uint256 _tokenId,
 		uint256[] memory _indexes,
 		address[] memory _tokens,
-		uint256[] memory _tokenIds
-	) public updateLandMinerStrength(_landTokenId) {
-		require(_indexes.length <= maxAmount && _indexes.length > 0, "Invalid length.");
+		uint256[] memory _ids
+	) public updateMinerStrength(_tokenId) {
+		require(
+			_indexes.length <= maxAmount && _indexes.length > 0,
+			"Invalid length."
+		);
 		for (uint256 i = 0; i < _indexes.length; i++) {
-			_equip(_landTokenId, _indexes[i], _tokens[i], _tokenIds[i]);
+			_equip(_tokenId, _indexes[i], _tokens[i], _ids[i]);
 		}
 	}
 
 	function equip(
-		uint256 _landTokenId,
+		uint256 _tokenId,
 		uint256 _index,
 		address _token,
-		uint256 _tokenId
-	) public updateLandMinerStrength(_landTokenId) {
-		_equip(_landTokenId, _index, _token, _tokenId);
+		uint256 _id
+	) public updateMinerStrength(_tokenId) {
+		_equip(_tokenId, _index, _token, _id);
 	}
 
 	function _equip(
-		uint256 _landTokenId,
+		uint256 _tokenId,
 		uint256 _index,
 		address _token,
-		uint256 _tokenId
-	) internal {
+		uint256 _id
+	) internal onlyAuth(_tokenId, _index) {
 		require(isAllowed(_token, _tokenId), "Not allow.");
 		require(_index < maxAmount, "Index Forbidden.");
-		Bar storage bar = land2Bars[_landTokenId][_index];
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		require(
-			bar.isPrivate == false ||
-				IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
-			"Forbidden."
-		);
+		Bar storage bar = token2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 			(uint16 class, ) =
@@ -139,80 +129,48 @@ abstract contract ItemBar is DSAuth, DSMath {
 			);
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
-		IERC721(_token).transferFrom(msg.sender, address(this), _tokenId);
+		IERC721(_token).transferFrom(msg.sender, address(this), _id);
 
 		bar.staker = msg.sender;
 		bar.token = _token;
-		bar.id = _tokenId;
-		emit Equip(_landTokenId, _index, bar.staker, bar.token, bar.id);
+		bar.id = _id;
+		emit Equip(_tokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
-	function batchUnquip(uint256 _landTokenId, uint256[] memory _indexes)
+	function batchUnquip(uint256 _tokenId, uint256[] memory _indexes)
 		public
-		updateLandMinerStrength(_landTokenId)
+		updateMinerStrength(_tokenId)
 	{
-		require(_indexes.length <= maxAmount && _indexes.length > 0, "Invalid length.");
+		require(
+			_indexes.length <= maxAmount && _indexes.length > 0,
+			"Invalid length."
+		);
 		for (uint256 i = 0; i < _indexes.length; i++) {
-			_unequip(_landTokenId, _indexes[i]);
+			_unequip(_tokenId, _indexes[i]);
 		}
 	}
 
-	function unequip(uint256 _landTokenId, uint256 _index)
+	function unequip(uint256 _tokenId, uint256 _index)
 		public
-		updateLandMinerStrength(_landTokenId)
+		updateMinerStrength(_tokenId)
 	{
-		_unequip(_landTokenId, _index);
+		_unequip(_tokenId, _index);
 	}
 
-	function _unequip(uint256 _landTokenId, uint256 _index) internal {
+	function _unequip(uint256 _tokenId, uint256 _index) internal {
 		require(_index < maxAmount, "Index Forbidden.");
-		Bar storage bar = land2Bars[_landTokenId][_index];
+		Bar storage bar = token2Bars[_tokenId][_index];
 		require(bar.token != address(0), "Empty.");
 		require(bar.staker == msg.sender, "Forbidden.");
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
-		emit Unequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
+		emit Unequip(_tokenId, _index, bar.staker, bar.token, bar.id);
 		bar.staker = address(0);
 		bar.token = address(0);
 		bar.id = 0;
 	}
 
-	function forceUneqiup(uint256 _landTokenId, uint256 _index)
-		internal
-		updateLandMinerStrength(_landTokenId)
-	{
-		require(_index < maxAmount, "Index Forbidden.");
-		Bar storage bar = land2Bars[_landTokenId][_index];
-		if (bar.token == address(0)) return;
-		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
-		emit ForceUnequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
-		bar.staker = address(0);
-		bar.token = address(0);
-		bar.id = 0;
-	}
-
-	function setPrivate(uint256 _landTokenId, uint256[] calldata _indexs)
-		external
-		onlyLander(_landTokenId)
-	{
-		require(_indexs.length > 0, "Length is zero.");
-		for (uint256 i = 0; i < _indexs.length; i++) {
-			Bar storage bar = land2Bars[_landTokenId][_indexs[i]];
-			bar.isPrivate = true;
-			if (bar.staker != msg.sender) {
-				forceUneqiup(_landTokenId, _indexs[i]);
-			}
-		}
-	}
-
-	function setPublic(uint256 _landTokenId, uint256[] calldata _indexs)
-		external
-		onlyLander(_landTokenId)
-	{
-		require(_indexs.length > 0, "Length is zero.");
-		for (uint256 i = 0; i < _indexs.length; i++) {
-			Bar storage bar = land2Bars[_landTokenId][_indexs[i]];
-			bar.isPrivate = false;
-		}
+	function setMaxAmount(uint256 _maxAmount) public auth {
+		maxAmount = _maxAmount;
 	}
 
 	function addSupportedToken(address _token) public auth {
@@ -240,7 +198,20 @@ abstract contract ItemBar is DSAuth, DSMath {
 		}
 	}
 
-	function enhanceStrengthRateOf(address _resourceToken, uint256 _landTokenId)
+	function enhanceStrengthRateByindex(
+		address _resourceToken,
+		uint256 _tokenId,
+		uint256 _index
+	) public view returns (uint256) {
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
+		Bar memory bar = token2Bars[_tokenId][_index];
+		uint256 index =
+			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
+				.resourceToken2RateAttrId(_resourceToken);
+		return IMetaDataTeller(teller).getRate(bar.token, bar.id, index);
+	}
+
+	function enhanceStrengthRateOf(address _resourceToken, uint256 _tokenId)
 		public
 		view
 		returns (uint256)
@@ -251,7 +222,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 				.resourceToken2RateAttrId(_resourceToken);
 		uint256 rate;
 		for (uint256 i = 0; i < maxAmount; i++) {
-			Bar memory bar = land2Bars[_landTokenId][i];
+			Bar memory bar = token2Bars[_tokenId][i];
 			uint256 itemRate =
 				IMetaDataTeller(teller).getRate(bar.token, bar.id, index);
 			rate = add(rate, itemRate);
