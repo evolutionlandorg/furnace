@@ -9,5 +9,3 @@ address=$(dapp create src/DrillBase.sol:DrillBase)
 export DRILLBASE=$address
 seth send $FURNACEPROXYADMIN "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
 cat $path | jq '.DRILLBASE = $address' --arg address $DRILLBASE | sponge $path
-
-

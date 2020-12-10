@@ -30,4 +30,15 @@ library UQ112x112 {
     function mul(uint224 x, uint112 y) internal pure returns (uint224 z) {
         require(y == 0 || (z = x * uint224(y)) / uint224(y) == x, "UQ112x112: MULTIPLICATION_OVERFLOW");
     }
+
+	function mul112(uint112 a, uint112 b) internal pure returns (uint112) {
+		if (a == 0) {
+			return 0;
+		}
+
+		uint112 c = a * b;
+		require(c / a == b, "UQ112x112: MULTIPLICATION112_OVERFLOW");
+
+		return c;
+	}
 }

@@ -3,23 +3,14 @@ pragma solidity ^0.6.7;
 import "ds-math/math.sol";
 import "ds-stop/stop.sol";
 import "zeppelin-solidity/proxy/Initializable.sol";
-import "zeppelin-solidity/token/ERC721/IERC721.sol";
-import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/IELIP002.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
 import "./interfaces/IObjectOwnership.sol";
 import "./common/UQ112x112.sol";
-import "./FurnaceSettingIds.sol";
 
-contract Itembase is
-	Initializable,
-	DSStop,
-	DSMath,
-	IELIP002,
-	FurnaceSettingIds
-{
+contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	using UQ112x112 for uint224;
 	event Enchanced(
 		address indexed user,
@@ -49,8 +40,22 @@ contract Itembase is
 		uint256[] amounts;
 	}
 
+	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
+	bytes32 public constant CONTRACT_METADATA_TELLER =
+		"CONTRACT_METADATA_TELLER";
+
+	// 0x434f4e54524143545f464f524d554c4100000000000000000000000000000000
+	bytes32 public constant CONTRACT_FORMULA = "CONTRACT_FORMULA";
+
+	// 0x434f4e54524143545f4f424a4543545f4f574e45525348495000000000000000
+	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
+		"CONTRACT_OBJECT_OWNERSHIP";
+
 	// rate precision
 	uint112 public constant RATE_DECIMALS = 10**8;
+	// save about 200 gas when contract create
+	bytes4 private constant SELECTOR =
+		bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
 
 	/*** STORAGE ***/
 
@@ -67,6 +72,20 @@ contract Itembase is
 		registry = ISettingsRegistry(_registry);
 	}
 
+	function _safeTransfer(
+		address token,
+		address from,
+		address to,
+		uint256 value
+	) private {
+		(bool success, bytes memory data) =
+			token.call(abi.encodeWithSelector(SELECTOR, from, to, value));
+		require(
+			success && (data.length == 0 || abi.decode(data, (bool))),
+			"Furnace: TRANSFER_FAILED"
+		);
+	}
+
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
@@ -75,16 +94,16 @@ contract Itembase is
 		_dealMajor(_index, _ids);
 		(uint16 prefer, uint112 rate, uint256[] memory amounts) =
 			_dealMinor(_index, _values);
-		return _enchanceItem(_index, prefer, rate, _ids, amounts, msg.sender);
+		return _enchanceItem(_index, prefer, rate, _ids, amounts);
 	}
 
-	function _dealMajor(uint256 _index, uint256[] memory _ids) internal {
+	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , bytes32[] memory majors, bool disable) =
+		(, , bytes32[] memory majors, , bool disable) =
 			IFormula(formula).at(_index);
-		require(disable == false, "Formula disable.");
-		require(_ids.length == majors.length, "Invalid ids length.");
+		require(disable == false, "Furnace: FORMULA_DISABLE");
+		require(_ids.length == majors.length, "Furnace: INVALID_IDS_LENGTH");
 		for (uint256 i = 0; i < majors.length; i++) {
 			bytes32 major = majors[i];
 			uint256 id = _ids[i];
@@ -92,14 +111,14 @@ contract Itembase is
 				IFormula(formula).getMajorInfo(major);
 			(uint16 class, uint16 grade) =
 				IMetaDataTeller(teller).getMetaData(majorAddress, id);
-			require(class == majorClass, "Invalid Class.");
-			require(grade == majorGrade, "Invalid Grade.");
-			IERC721(majorAddress).transferFrom(msg.sender, address(this), id);
+			require(class == majorClass, "Furnace: INVALID_CLASS");
+			require(grade == majorGrade, "Furnace: INVALID_GRADE");
+			_safeTransfer(majorAddress, msg.sender, address(this), id);
 		}
 	}
 
 	function _dealMinor(uint256 _index, uint256[] memory _values)
-		internal
+		private
 		returns (
 			uint16,
 			uint112,
@@ -110,8 +129,11 @@ contract Itembase is
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		(, , , bytes32[] memory minors, bool disable) =
 			IFormula(formula).at(_index);
-		require(disable == false, "Formula disable.");
-		require(_values.length == minors.length, "Invalid liquidities length.");
+		require(disable == false, "Furnace: FORMULA_DISABLE");
+		require(
+			_values.length == minors.length,
+			"Furnace: INVALID_VALUES_LENGTH."
+		);
 		uint16 prefer;
 		//TODO: check rate calculate.
 		uint112 rate = RATE_DECIMALS;
@@ -121,17 +143,18 @@ contract Itembase is
 			uint256 value = _values[i];
 			(address minorAddress, uint112 minorMin, uint112 minorMax) =
 				IFormula(formula).getMinorInfo(minor);
-			require(minorMax >= minorMin, "Invalid limit.");
+			require(minorMax >= minorMin, "Furnace: INVALID_LIMIT");
 			uint256 element =
 				IMetaDataTeller(teller).getPrefer(minor, minorAddress);
 			prefer |= uint16(1 << element);
-			require(value >= minorMin, "No enough value.");
-			require(value <= uint128(-1), "Overflow.");
+			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
+			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
 			uint112 numerator;
 			uint112 denominator;
 			if (value > minorMax) {
 				numerator = minorMax - minorMin;
-				IERC20(minorAddress).transferFrom(
+				_safeTransfer(
+					minorAddress,
 					msg.sender,
 					address(this),
 					minorMax
@@ -139,11 +162,7 @@ contract Itembase is
 				amounts[i] = minorMax;
 			} else {
 				numerator = uint112(value - minorMin);
-				IERC20(minorAddress).transferFrom(
-					msg.sender,
-					address(this),
-					value
-				);
+				_safeTransfer(minorAddress, msg.sender, address(this), value);
 				amounts[i] = value;
 			}
 			denominator = minorMin;
@@ -153,7 +172,7 @@ contract Itembase is
 					.uqdiv(denominator)
 					.mul(RATE_DECIMALS)
 					.decode();
-			rate = mul112(rate, enhanceRate) / RATE_DECIMALS;
+			rate = UQ112x112.mul112(rate, enhanceRate) / RATE_DECIMALS;
 		}
 		return (prefer, rate, amounts);
 	}
@@ -163,11 +182,10 @@ contract Itembase is
 		uint16 _prefer,
 		uint112 _rate,
 		uint256[] memory _ids,
-		uint256[] memory _amounts,
-		address _to
-	) internal returns (uint256) {
+		uint256[] memory _amounts
+	) private returns (uint256) {
 		lastItemObjectId += 1;
-		require(lastItemObjectId <= uint128(-1), "Item: object id overflow.");
+		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
 
 		Item memory item =
 			Item({
@@ -179,10 +197,10 @@ contract Itembase is
 			});
 		uint256 tokenId =
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
-				.mintObject(_to, lastItemObjectId);
+				.mintObject(msg.sender, lastItemObjectId);
 		tokenId2Item[tokenId] = item;
 		emit Enchanced(
-			_to,
+			msg.sender,
 			tokenId,
 			item.index,
 			item.prefer,
@@ -194,7 +212,7 @@ contract Itembase is
 		return tokenId;
 	}
 
-	function _disenchantItem(address to, uint256 tokenId) internal {
+	function _disenchantItem(address to, uint256 tokenId) private {
 		IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).burn(
 			to,
 			tokenId
@@ -206,7 +224,8 @@ contract Itembase is
 		override
 		stoppable
 	{
-		IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).transferFrom(
+		_safeTransfer(
+			registry.addressOf(CONTRACT_OBJECT_OWNERSHIP),
 			msg.sender,
 			address(this),
 			_id
@@ -215,7 +234,7 @@ contract Itembase is
 	}
 
 	function _disenchant(uint256 _tokenId, uint256 _depth)
-		internal
+		private
 		returns (uint256)
 	{
 		(
@@ -223,30 +242,33 @@ contract Itembase is
 			bool canDisenchant,
 			address[] memory majors,
 			uint256[] memory ids,
-			address[] memory pairs,
+			address[] memory minors,
 			uint256[] memory amounts
-		) = this.getEnchantedInfo(_tokenId);
-		require(_depth > 0, "Invalid Depth.");
-		require(canDisenchant == true, "Can not disenchant.");
-		require(class > 0, "Invalid class.");
-		require(ids.length == majors.length, "Invalid majors length.");
-		require(amounts.length == pairs.length, "Invalid pairs length.");
+		) = getEnchantedInfo(_tokenId);
+		require(_depth > 0, "Furnace: INVALID_DEPTH");
+		require(canDisenchant == true, "Furnace: DISENCHANT_DISABLE");
+		require(class > 0, "Furnace: INVALID_CLASS");
+		require(ids.length == majors.length, "Furnace: INVALID_MAJORS_LENGTH.");
+		require(
+			amounts.length == minors.length,
+			"Furnace: INVALID_MINORS_LENGTH."
+		);
 		_disenchantItem(address(this), _tokenId);
 		for (uint256 i = 0; i < majors.length; i++) {
-			address main = majors[i];
+			address major = majors[i];
 			uint256 id = ids[i];
 			if (_depth == 1 || class == 0) {
-				IERC721(main).transferFrom(address(this), msg.sender, id);
+				_safeTransfer(major, address(this), msg.sender, id);
 			} else {
 				_disenchant(id, _depth - 1);
 			}
 		}
-		for (uint256 i = 0; i < pairs.length; i++) {
-			address pair = pairs[i];
+		for (uint256 i = 0; i < minors.length; i++) {
+			address minor = minors[i];
 			uint256 amount = amounts[i];
-			IERC20(pair).transferFrom(address(this), msg.sender, amount);
+			_safeTransfer(minor, address(this), msg.sender, amount);
 		}
-		emit Disenchanted(msg.sender, _tokenId, majors, ids, pairs, amounts);
+		emit Disenchanted(msg.sender, _tokenId, majors, ids, minors, amounts);
 	}
 
 	function getRate(uint256 _tokenId, uint256 _index)
@@ -261,7 +283,9 @@ contract Itembase is
 			IFormula(formula).getMetaInfo(item.index);
 		if (uint256(item.prefer) & (~(1 << _index)) > 0) {
 			uint112 realEnhanceRate =
-				baseRate + mul112(item.rate, enhanceRate) / RATE_DECIMALS;
+				baseRate +
+					UQ112x112.mul112(item.rate, enhanceRate) /
+					RATE_DECIMALS;
 			return uint256(realEnhanceRate);
 		}
 		return uint256(baseRate);
@@ -306,16 +330,5 @@ contract Itembase is
 			minorAddresses,
 			item.amounts
 		);
-	}
-
-	function mul112(uint112 a, uint112 b) internal pure returns (uint112) {
-		if (a == 0) {
-			return 0;
-		}
-
-		uint112 c = a * b;
-		require(c / a == b, "Multiplication overflow");
-
-		return c;
 	}
 }

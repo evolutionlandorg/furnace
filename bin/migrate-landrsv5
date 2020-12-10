@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+# back=0x84FA535d8d05BD800A8D3768a3FF62444751005a
+address=$(dapp create one/LandResourceV5.f.sol:LandResourceV5)
+export LANDRESOURCE=$address
+
+seth send -F $OWNER $LANDRESOURCE_PROXY "upgradeTo(address)" $LANDRESOURCE
+cat $path | jq '.LANDRESOURCE = $address' --arg address $LANDRESOURCE | sponge $path
+
+if test $(seth call $LANDRESOURCE_PROXY "implementation()(address)") != $LANDRESOURCE; then
+  (echo "check migration failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: migration finished." 

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+maxAmount=$(seth --to-hex 5)
+address=$(dapp create src/LandItemBar.sol:LandItemBar $ISETTINGSREGISTRY $maxAmount)
+export LANDITEMBAR=$address
+cat $path | jq '.LANDITEMBAR = $address' --arg address $LANDITEMBAR | sponge $path
+
+# setting registry
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_LAND_ITEM_BAR")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $LANDITEMBAR
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $LANDITEMBAR; then
+  (echo "check register ${registry} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."

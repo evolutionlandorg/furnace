@@ -25,13 +25,6 @@ abstract contract ItemBar is DSAuth, DSMath {
 		address token,
 		uint256 id
 	);
-	event ForceUnequip(
-		uint256 indexed tokenId,
-		uint256 index,
-		address staker,
-		address token,
-		uint256 id
-	);
 
 	// 0x434f4e54524143545f4c414e445f424153450000000000000000000000000000
 	bytes32 public constant CONTRACT_LAND_BASE = "CONTRACT_LAND_BASE";
@@ -51,23 +44,25 @@ abstract contract ItemBar is DSAuth, DSMath {
 	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
 		"CONTRACT_OBJECT_OWNERSHIP";
 
+	uint8 public constant DRILL_OBJECT_CLASS = 4; // Drill
 	uint8 public constant ITEM_OBJECT_CLASS = 5; // Item
+	uint8 public constant DARWINIA_OBJECT_CLASS = 254; // Darwinia
 
 	struct Bar {
 		address staker;
 		address token;
 		uint256 id;
-		bool isPrivate;
 	}
 
 	ISettingsRegistry registry;
 	uint256 public maxAmount;
-	mapping(address => bool) public allowList;
 	mapping(uint256 => mapping(uint256 => Bar)) public token2Bars;
 
 	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
 	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
+
+	function isAllowed(address _token, uint256 _id) public view virtual returns (bool);
 
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
@@ -79,19 +74,21 @@ abstract contract ItemBar is DSAuth, DSMath {
 		view
 		returns (address)
 	{
-		Bar memory bar = token2Bars[_tokenId][_index];
-		return bar.staker;
+		return token2Bars[_tokenId][_index].staker;
 	}
 
 	function batchEquip(
 		uint256 _tokenId,
-		uint256[] memory _indexes,
-		address[] memory _tokens,
-		uint256[] memory _ids
-	) public updateMinerStrength(_tokenId) {
+		uint256[] calldata _indexes,
+		address[] calldata _tokens,
+		uint256[] calldata _ids
+	) external updateMinerStrength(_tokenId) {
 		require(
-			_indexes.length <= maxAmount && _indexes.length > 0,
-			"Invalid length."
+			_indexes.length <= maxAmount &&
+				_indexes.length > 0 &&
+				_indexes.length == _tokens.length &&
+				_indexes.length == _ids.length,
+			"Furnace: INVALID_LENGTH."
 		);
 		for (uint256 i = 0; i < _indexes.length; i++) {
 			_equip(_tokenId, _indexes[i], _tokens[i], _ids[i]);
@@ -113,8 +110,8 @@ abstract contract ItemBar is DSAuth, DSMath {
 		address _token,
 		uint256 _id
 	) internal onlyAuth(_tokenId, _index) {
-		require(isAllowed(_token, _tokenId), "Not allow.");
-		require(_index < maxAmount, "Index Forbidden.");
+		require(isAllowed(_token, _tokenId), "Furnace: PERMISSION");
+		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
 		Bar storage bar = token2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
@@ -125,7 +122,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 				IMetaDataTeller(teller).getMetaData(bar.token, bar.id);
 			require(
 				class > originClass,
-				"Item class is less than origin class."
+				"Furnace: INVALID_CLASS"
 			);
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
@@ -137,13 +134,13 @@ abstract contract ItemBar is DSAuth, DSMath {
 		emit Equip(_tokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
-	function batchUnquip(uint256 _tokenId, uint256[] memory _indexes)
-		public
+	function batchUnquip(uint256 _tokenId, uint256[] calldata _indexes)
+		external	
 		updateMinerStrength(_tokenId)
 	{
 		require(
 			_indexes.length <= maxAmount && _indexes.length > 0,
-			"Invalid length."
+			"Furnace: INVALID_LENGTH"
 		);
 		for (uint256 i = 0; i < _indexes.length; i++) {
 			_unequip(_tokenId, _indexes[i]);
@@ -158,44 +155,16 @@ abstract contract ItemBar is DSAuth, DSMath {
 	}
 
 	function _unequip(uint256 _tokenId, uint256 _index) internal {
-		require(_index < maxAmount, "Index Forbidden.");
 		Bar storage bar = token2Bars[_tokenId][_index];
-		require(bar.token != address(0), "Empty.");
-		require(bar.staker == msg.sender, "Forbidden.");
+		require(bar.token != address(0), "Furnace: EMPTY");
+		require(bar.staker == msg.sender, "Furnace: Forbidden");
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit Unequip(_tokenId, _index, bar.staker, bar.token, bar.id);
-		bar.staker = address(0);
-		bar.token = address(0);
-		bar.id = 0;
+		delete token2Bars[_tokenId][_index];
 	}
 
 	function setMaxAmount(uint256 _maxAmount) public auth {
 		maxAmount = _maxAmount;
-	}
-
-	function addSupportedToken(address _token) public auth {
-		allowList[_token] = true;
-	}
-
-	function removeSupportedToken(address _token) public auth {
-		allowList[_token] = false;
-	}
-
-	function isAllowed(address _token, uint256 _id) public view returns (bool) {
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		if (_token == ownership) {
-			address interstellarEncoder =
-				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
-			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
-			if (objectClass == ITEM_OBJECT_CLASS) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return allowList[_token];
-		}
 	}
 
 	function enhanceStrengthRateByindex(

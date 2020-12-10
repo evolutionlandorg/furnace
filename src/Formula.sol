@@ -16,6 +16,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	);
 	event RemoveFormula(uint256 indexed index);
 
+	event SetStrength(
+		uint256 indexed inde,
+		uint112 baseRate,
+		uint112 enhanceRate
+	);
+
 	uint256 public constant DECIMALS = 10**10;
 
 	/*** STORAGE ***/
@@ -33,8 +39,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors
 	) external override auth {
-		// require(_majors.length == _classes.length && _majors.length == _grades.length, "majors length invalid");
-		// require(_minors.length == _mins.length && _minors.length == _maxs.length, "minors length invalid");
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
@@ -53,10 +57,29 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		);
 	}
 
-	function remove(uint256 index) external override auth {
-		require(index < formulas.length, "Formula: out of range");
-		formulas[index].disable = true;
-		emit RemoveFormula(index);
+	function remove(uint256 _index) external override auth {
+		require(_index < formulas.length, "Formula: out of range");
+		formulas[_index].disable = true;
+		emit RemoveFormula(_index);
+	}
+
+	function setStrengthRate(
+		uint256 _index,
+		uint112 _baseRate,
+		uint112 _enhanceRate
+	) external auth {
+		require(_index < formulas.length, "Formula: out of range");
+		FormulaEntry storage formula = formulas[_index];
+		(uint16 class, uint16 grade, , , bool canDisenchant) =
+			abi.decode(formula.meta, (uint16, uint16, uint112, uint112, bool));
+		formula.meta = abi.encodePacked(
+			class,
+			grade,
+			_baseRate,
+			_enhanceRate,
+			canDisenchant
+		);
+		emit SetStrength(_index, _baseRate, _enhanceRate);
 	}
 
 	function length() external view override returns (uint256) {

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+address=$(dapp create src/MetaDataTeller.sol:MetaDataTeller $ISETTINGSREGISTRY)
+export METADATATELLER=$address
+cat $path | jq '.METADATATELLER = $address' --arg address $METADATATELLER | sponge $path
+
+# setting registry
+teller=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_METADATA_TELLER")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $teller $METADATATELLER
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $teller) != $METADATATELLER; then
+  (echo "check register ${teller} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+
+

@@ -3,7 +3,15 @@ pragma solidity ^0.6.7;
 import "./ItemBar.sol";
 
 contract LandItemBar is ItemBar {
+	event ForceUnequip(
+		uint256 indexed tokenId,
+		uint256 index,
+		address staker,
+		address token,
+		uint256 id
+	);
 
+	mapping(address => bool) public allowList;
 	mapping(uint256 => bool) public land2IsPrivate;
 
 	constructor(address _registry, uint256 _maxAmount)
@@ -50,9 +58,7 @@ contract LandItemBar is ItemBar {
 		if (bar.token == address(0)) return;
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit ForceUnequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
-		bar.staker = address(0);
-		bar.token = address(0);
-		bar.id = 0;
+		delete token2Bars[_landTokenId][_index];
 	}
 
 	function setPrivate(uint256 _landTokenId)
@@ -69,11 +75,43 @@ contract LandItemBar is ItemBar {
 		}
 	}
 
-	function setPublic(uint256 _landTokenId)
-		external
-		onlyLander(_landTokenId)
-	{
+	function setPublic(uint256 _landTokenId) external onlyLander(_landTokenId) {
 		require(land2IsPrivate[_landTokenId] == true, "Already is public.");
 		land2IsPrivate[_landTokenId] = false;
+	}
+
+	function isAllowed(address _token, uint256 _id)
+		public
+		view
+		override
+		returns (bool)
+	{
+		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		if (_token == ownership) {
+			address interstellarEncoder =
+				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
+			uint8 objectClass =
+				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+			if (
+				//TODO:: internal token
+				objectClass == ITEM_OBJECT_CLASS ||
+				objectClass == DRILL_OBJECT_CLASS ||
+				objectClass == DARWINIA_OBJECT_CLASS
+			) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return allowList[_token];
+		}
+	}
+
+	function addSupportedToken(address _token) public auth {
+		allowList[_token] = true;
+	}
+
+	function removeSupportedToken(address _token) public auth {
+		allowList[_token] = false;
 	}
 }
