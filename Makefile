@@ -3,6 +3,12 @@ clean   :; dapp clean
 test    :; dapp test
 deploy  :; dapp create Furnance
 lint    :; solhint --max-warnings 0 'src/**/*.sol' 
+link    :;
+	rm -rf 'one'
+	mkdir 'one'
+	ln lib/apostle/contracts-flattener/ApostleBaseV3.sol one/ApostleBaseV3.f.sol
+	ln lib/land/contracts-flattener/LandResourceV5.sol one/LandResourceV5.f.sol
+	  
 flatten :; 
 	rm -rf 'bin/flatten'
 	mkdir -p 'bin/flatten'

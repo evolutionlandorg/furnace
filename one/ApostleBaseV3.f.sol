@@ -519,7 +519,7 @@ contract PausableDSAuth is DSAuth {
 
 // Dependency file: @evolutionland/common/contracts/interfaces/ERC223.sol
 
-// pragma solidity ^0.4.24;
+// pragma solidity ^0.4.23;
 
 contract ERC223 {
     function transfer(address to, uint amount, bytes data) public returns (bool ok);

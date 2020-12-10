@@ -1,6 +1,6 @@
 // Dependency file: contracts/interfaces/IItemBar.sol
 
-// pragma solidity ^0.4.25;
+// pragma solidity ^0.4.24;
 
 interface IItemBar {
 	function enhanceStrengthRateOf(
@@ -1092,7 +1092,7 @@ contract LandResourceV4 is SupportsInterfaceWithLookup, DSAuth, IActivity, LandS
 
 // Root file: contracts/LandResourceV5.sol
 
-pragma solidity ^0.4.25;
+pragma solidity ^0.4.24;
 
 // import "contracts/interfaces/IItemBar.sol";
 // import "contracts/LandResourceV4.sol";
