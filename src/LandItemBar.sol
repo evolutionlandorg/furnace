@@ -1,8 +1,9 @@
 pragma solidity ^0.6.7;
 
+import "zeppelin-solidity/proxy/Initializable.sol";
 import "./ItemBar.sol";
 
-contract LandItemBar is ItemBar {
+contract LandItemBar is Initializable, ItemBar(address(0),0) {
 	event ForceUnequip(
 		uint256 indexed tokenId,
 		uint256 index,
@@ -14,10 +15,15 @@ contract LandItemBar is ItemBar {
 	mapping(address => bool) public allowList;
 	mapping(uint256 => bool) public land2IsPrivate;
 
-	constructor(address _registry, uint256 _maxAmount)
+	function initialize(address _registry, uint256 _maxAmount)
 		public
-		ItemBar(_registry, _maxAmount)
-	{}
+		initializer
+	{
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
+		registry = ISettingsRegistry(_registry);
+		maxAmount = _maxAmount;
+	}
 
 	modifier onlyLander(uint256 _landTokenId) {
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);

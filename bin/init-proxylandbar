@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+address=$(dapp create src/LandItemBar.sol:LandItemBar)
+export LANDITEMBAR=$address
+cat $path | jq '.LANDITEMBAR = $address' --arg address $LANDITEMBAR | sponge $path
+
+echo >&2 "${0##*/}: info: LandItemBar created."
+
+# 1
+maxAmount=$(seth --to-uint256 5)
+calldata=$(seth calldata "initialize(address,uint256)" $ISETTINGSREGISTRY $maxAmount)
+lanbarProxy=$(dapp create src/LandItemBarProxy.sol:LandItemBarProxy $LANDITEMBAR $FURNACEPROXYADMIN $calldata)
+export LANDITEMBAR_PROXY=$lanbarProxy
+cat $path | jq '.LANDITEMBAR_PROXY = $address' --arg address $LANDITEMBAR_PROXY | sponge $path
+echo >&2 "${0##*/}: info: LandItemBarProxy inited."
+
+# setting registry
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_LAND_ITEM_BAR")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $LANDITEMBAR_PROXY
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $LANDITEMBAR_PROXY; then
+  (echo "check register ${registry} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+

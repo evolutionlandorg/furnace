@@ -2,6 +2,7 @@ pragma solidity ^0.6.7;
 
 import "ds-math/math.sol";
 import "ds-auth/auth.sol";
+import "zeppelin-solidity/proxy/Initializable.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 import "./interfaces/IELIP002.sol";
@@ -11,11 +12,11 @@ import "./interfaces/ILandBase.sol";
 import "./interfaces/IELIP002.sol";
 import "./FurnaceSettingIds.sol";
 
-contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
+contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	event AddTokenMeta(
 		address indexed token,
 		uint16 grade,
-		uint112 trengthRate
+		uint128 trengthRate
 	);
 	event RemoveTokenMeta(address indexed token);
 	// 金, Evolution Land Gold
@@ -27,7 +28,7 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 
 	struct Meta {
 		uint16 grade;
-		uint112 strengthRate;
+		uint128 strengthRate;
 		bool isSupport;
 	}
 
@@ -40,7 +41,9 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	mapping(address => uint8) public resourceLPToken2RateAttrId;
 	mapping(address => Meta) public token2Meta;
 
-	constructor(address _registry) public {
+	function initialize(address _registry) public initializer {
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 
 		resourceLPToken2RateAttrId[
@@ -63,7 +66,7 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	function addTokenMeta(
 		address _token,
 		uint16 _grade,
-		uint112 _strengthRate
+		uint128 _strengthRate
 	) public auth {
 		Meta memory meta =
 			Meta({
@@ -139,8 +142,36 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 		uint256 _id,
 		uint256 _index
 	) external view returns (uint256) {
+		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		if (_token == ownership) {
+			address interstellarEncoder =
+				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
+			uint8 objectClass =
+				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+			address nftAddress =
+				IInterstellarEncoder(interstellarEncoder).getContractAddress(
+					_id
+				);
+			if (objectClass == ITEM_OBJECT_CLASS) {
+				return IELIP002(_token).getRate(_id, _index);
+			} else if (
+				//TODO:: internal token
+				objectClass == DRILL_OBJECT_CLASS ||
+				// TODO::grade decode change?
+				objectClass == DARWINIA_OBJECT_CLASS
+			) {
+				// TODO:: hard code
+				uint16 grade = IDrillBase(nftAddress).getGrade(_id);
+				if (grade == 1) {
+					return 15 * 10**5;
+				} else if (grade == 2) {
+					return 2 * 10**6;
+				} else if (grade == 3) {
+					return 3 * 10**6;
+				}
+			}
+		}
 		if (_token == registry.addressOf(CONTRACT_ITEM_BASE)) {
-			return IELIP002(_token).getRate(_id, _index);
 		} else {
 			return getExternalStrengthRate(_token);
 		}

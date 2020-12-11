@@ -20,12 +20,6 @@ export ITEMBASE_PROXY=$itemBaseProxy
 cat $path | jq '.ITEMBASE_PROXY = $address' --arg address $ITEMBASE_PROXY | sponge $path
 echo >&2 "${0##*/}: info: ItemBaseProxy inited."
 
-# 2
-# seth send $FURNACEPROXYADMIN "upgradeAndCall(address,address,bytes)" $ITEMBASE_PROXY $ITEMBASE $calldata 
-# 3
-# seth send $FURNACEPROXYADMIN "upgrade(address,address)" $ITEMBASE_PROXY $ITEMBASE
-# seth send $ITEMBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
-
 OWNERSHIPV4WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
 ownerShipAuth=$(dapp create src/ObjectOwnershipAuthorityV4.sol:ObjectOwnershipAuthorityV4 $OWNERSHIPV4WHITELIST)
 export OBJECTOWNERSHIPAUTHORITY=$ownerShipAuth

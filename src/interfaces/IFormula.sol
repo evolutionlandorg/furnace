@@ -21,17 +21,28 @@ interface IFormula {
 		bool disable;
 	}
 
+	event AddFormula(
+		uint256 indexed index,
+		bytes32 name,
+		bytes meta,
+		bytes32[] majors,
+		address[] minors,
+		uint256[] limits
+	);
+	event DisableFormula(uint256 indexed index);
+	event EnableFormula(uint256 indexed index);
+
 	/**
         @notice Only governance can add `formula`.
         @dev Add a formula rule.
         MUST revert if length of `_majors` is not the same as length of `_class`.
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name    New enchanted NFT name.
-        @param _meta    Metadata of new enchanted NFT.
-        @param _majors    NFT token addresses of major meterail for enchanting.
-        @param _minors     FT Token addresses of minor meterail for enchanting.
-        @param _limits     FT Token limits of minor meterail for enchanting.
+        @param _name     New enchanted NFT name.
+        @param _meta     Metadata of new enchanted NFT.
+        @param _majors   FT token addresses of major meterail for enchanting.
+        @param _minors   FT Token addresses of minor meterail for enchanting.
+        @param _limits   FT Token limits of minor meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
@@ -42,12 +53,14 @@ interface IFormula {
 	) external;
 
 	/**
-        @notice Only governance can remove `formula`.
-        @dev Remove a formula rule.
+        @notice Only governance can disble `formula`.
+        @dev Disble a formula rule.
         MUST revert on any other error.        
         @param _index    Disble the formule of index.
     */
-	function remove(uint256 _index) external;
+	function disable(uint256 _index) external;
+
+	function enable(uint256 _index) external;
 
 	function length() external view returns (uint256);
 

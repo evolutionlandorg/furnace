@@ -1,1 +1,1 @@
-[{"inputs":[{"internalType":"address","name":"_resourceToken","type":"address"}],"name":"resourceToken2RateAttrId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}]
+[{"constant":true,"inputs":[{"name":"_resourceToken","type":"address"}],"name":"resourceToken2RateAttrId","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]

@@ -1,6 +1,12 @@
 pragma solidity ^0.6.7;
 
 interface IMetaDataTeller {
+	function addTokenMeta(
+		address _token,
+		uint16 _grade,
+		uint112 _strengthRate
+	) external;
+
 	function getMetaData(address _token, uint256 _id)
 		external
 		view

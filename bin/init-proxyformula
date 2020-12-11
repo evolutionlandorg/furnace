@@ -16,15 +16,8 @@ echo >&2 "${0##*/}: info: Formula created."
 calldata=$(seth calldata "initialize()")
 formulaProxy=$(dapp create src/FormulaProxy.sol:FormulaProxy $FORMULA $FURNACEPROXYADMIN $calldata)
 export FORMULA_PROXY=$formulaProxy
-
 cat $path | jq '.FORMULA_PROXY = $address' --arg address $FORMULA_PROXY | sponge $path
 echo >&2 "${0##*/}: info: FormulaProxy inited."
-
-# 2
-# seth send $FURNACEPROXYADMIN "upgradeAndCall(address,address,bytes)" $FORMULA_PROXY $FORMULA $calldata 
-# 3
-# seth send $FURNACEPROXYADMIN "upgrade(address,address)" $FORMULA_PROXY $FORMULA
-# seth send $FORMULA_PROXY "initialize(address)" 
 
 # setting registry
 fml=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_FORMULA")))

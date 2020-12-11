@@ -18,4 +18,7 @@ if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $teller) !=
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."
 
-
+grade=$(seth --to-uint16 1)
+rate=$(seth --to-uint128 1000000)
+seth send $METADATATELLER "addTokenMeta(address,uint16,uint128)" $TOKEN_GEGO $grade $rate
+echo >&2 "${0##*/}: info: add gego metadata finished."

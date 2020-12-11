@@ -7,15 +7,6 @@ import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-	event AddFormula(
-		uint256 indexed index,
-		bytes32 name,
-		bytes meta,
-		bytes32[] majors,
-		address[] minors,
-		uint256[] limits
-	);
-	event RemoveFormula(uint256 indexed index);
 
 	event SetStrength(
 		uint256 indexed inde,
@@ -48,7 +39,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 				majors: _majors,
 				minors: _minors,
 				limits: _limits,
-				disable: false
+				disable: false 
 			});
 		formulas.push(formula);
 		emit AddFormula(
@@ -61,10 +52,16 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		);
 	}
 
-	function remove(uint256 _index) external override auth {
+	function disable(uint256 _index) external override auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		formulas[_index].disable = true;
-		emit RemoveFormula(_index);
+		emit DisableFormula(_index);
+	}
+
+	function enable(uint256 _index) external override auth {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		formulas[_index].disable = false;
+		emit EnableFormula(_index);
 	}
 
 	function setStrengthRate(

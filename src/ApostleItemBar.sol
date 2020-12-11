@@ -1,14 +1,20 @@
 pragma solidity ^0.6.7;
 
+import "zeppelin-solidity/proxy/Initializable.sol";
 import "./ItemBar.sol";
 
-contract ApostleItemBar is ItemBar {
+contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 	mapping(address => bool) public allowList;
 
-	constructor(address _registry, uint256 _maxAmount)
+	function initialize(address _registry, uint256 _maxAmount)
 		public
-		ItemBar(_registry, _maxAmount)
-	{}
+		initializer
+	{
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
+		registry = ISettingsRegistry(_registry);
+		maxAmount = _maxAmount;
+	}
 
 	modifier onlyAuth(uint256 _apostleTokenId, uint256 _index) override {
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
