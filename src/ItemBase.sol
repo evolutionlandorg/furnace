@@ -8,16 +8,16 @@ import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
 import "./interfaces/IObjectOwnership.sol";
-import "./common/UQ112x112.sol";
+import "./common/UQ128x128.sol";
 
 contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
-	using UQ112x112 for uint224;
+	using UQ128x128 for uint256;
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
 		uint256 index,
 		uint16 prefer,
-		uint112 rate,
+		uint128 rate,
 		uint256[] ids,
 		uint256[] amounts,
 		uint256 now
@@ -35,7 +35,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	struct Item {
 		uint256 index;
 		uint16 prefer;
-		uint112 rate;
+		uint128 rate;
 		uint256[] ids;
 		uint256[] amounts;
 	}
@@ -52,7 +52,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		"CONTRACT_OBJECT_OWNERSHIP";
 
 	// rate precision
-	uint112 public constant RATE_DECIMALS = 10**8;
+	uint128 public constant RATE_PRECISION = 10**8;
 	// save about 200 gas when contract create
 	bytes4 private constant SELECTOR =
 		bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
@@ -92,7 +92,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		uint256[] calldata _values
 	) external override stoppable returns (uint256) {
 		_dealMajor(_index, _ids);
-		(uint16 prefer, uint112 rate, uint256[] memory amounts) =
+		(uint16 prefer, uint128 rate, uint256[] memory amounts) =
 			_dealMinor(_index, _values);
 		return _enchanceItem(_index, prefer, rate, _ids, amounts);
 	}
@@ -100,7 +100,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , bytes32[] memory majors, , bool disable) =
+		(, , bytes32[] memory majors, , , bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Furnace: FORMULA_DISABLE");
 		require(_ids.length == majors.length, "Furnace: INVALID_IDS_LENGTH");
@@ -121,13 +121,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		private
 		returns (
 			uint16,
-			uint112,
+			uint128,
 			uint256[] memory
 		)
 	{
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(, , , bytes32[] memory minors, bool disable) =
+		(, , , address[] memory minors, uint256[] memory limits, bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Furnace: FORMULA_DISABLE");
 		require(
@@ -136,21 +136,21 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		);
 		uint16 prefer;
 		//TODO: check rate calculate.
-		uint112 rate = RATE_DECIMALS;
+		uint128 rate = RATE_PRECISION;
 		uint256[] memory amounts = new uint256[](minors.length);
 		for (uint256 i = 0; i < minors.length; i++) {
-			bytes32 minor = minors[i];
+			address minorAddress = minors[i];
+			uint256 limit = limits[i];
 			uint256 value = _values[i];
-			(address minorAddress, uint112 minorMin, uint112 minorMax) =
-				IFormula(formula).getMinorInfo(minor);
+			(uint128 minorMin, uint128 minorMax) =
+				IFormula(formula).getLimit(limit);
 			require(minorMax >= minorMin, "Furnace: INVALID_LIMIT");
-			uint256 element =
-				IMetaDataTeller(teller).getPrefer(minor, minorAddress);
+			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
 			prefer |= uint16(1 << element);
 			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
 			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-			uint112 numerator;
-			uint112 denominator;
+			uint128 numerator;
+			uint128 denominator;
 			if (value > minorMax) {
 				numerator = minorMax - minorMin;
 				_safeTransfer(
@@ -161,18 +161,18 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				);
 				amounts[i] = minorMax;
 			} else {
-				numerator = uint112(value - minorMin);
+				numerator = uint128(value) - minorMin;
 				_safeTransfer(minorAddress, msg.sender, address(this), value);
 				amounts[i] = value;
 			}
 			denominator = minorMin;
-			uint112 enhanceRate =
-				UQ112x112
+			uint128 enhanceRate =
+				UQ128x128
 					.encode(numerator)
 					.uqdiv(denominator)
-					.mul(RATE_DECIMALS)
+					.uqmul(RATE_PRECISION)
 					.decode();
-			rate = UQ112x112.mul112(rate, enhanceRate) / RATE_DECIMALS;
+			rate = UQ128x128.mul128(rate, enhanceRate) / RATE_PRECISION;
 		}
 		return (prefer, rate, amounts);
 	}
@@ -180,7 +180,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function _enchanceItem(
 		uint256 _index,
 		uint16 _prefer,
-		uint112 _rate,
+		uint128 _rate,
 		uint256[] memory _ids,
 		uint256[] memory _amounts
 	) private returns (uint256) {
@@ -279,13 +279,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , uint112 baseRate, uint112 enhanceRate, ) =
+		(, , , , uint128 baseRate, uint128 enhanceRate) =
 			IFormula(formula).getMetaInfo(item.index);
 		if (uint256(item.prefer) & (~(1 << _index)) > 0) {
-			uint112 realEnhanceRate =
+			uint128 realEnhanceRate =
 				baseRate +
-					UQ112x112.mul112(item.rate, enhanceRate) /
-					RATE_DECIMALS;
+					UQ128x128.mul128(item.rate, enhanceRate) /
+					RATE_PRECISION;
 			return uint256(realEnhanceRate);
 		}
 		return uint256(baseRate);
@@ -318,16 +318,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, uint16 class, , , , bool canDisenchant) =
+		(, uint16 class, , bool canDisenchant, , ) =
 			IFormula(formula).getMetaInfo(item.index);
-		(address[] memory majorAddresses, address[] memory minorAddresses) =
-			IFormula(formula).getAddresses(item.index);
 		return (
 			class,
 			canDisenchant,
-			majorAddresses,
+			IFormula(formula).getMajorAddresses(item.index),
 			item.ids,
-			minorAddresses,
+			IFormula(formula).getMinorAddresses(item.index),
 			item.amounts
 		);
 	}

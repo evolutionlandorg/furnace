@@ -87,7 +87,7 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	}
 
 	function getExternalStrengthRate(address _token)
-		public	
+		public
 		view
 		returns (uint256)
 	{
@@ -113,7 +113,7 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 			if (objectClass == ITEM_OBJECT_CLASS) {
 				return IELIP002(nftAddress).getBaseInfo(_id);
 			} else if (
-				//TODO:: internal token      
+				//TODO:: internal token
 				objectClass == DRILL_OBJECT_CLASS ||
 				// TODO::grade decode change?
 				objectClass == DARWINIA_OBJECT_CLASS
@@ -125,31 +125,13 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 		return (0, getExternalGrade(_token));
 	}
 
-	function getPrefer(bytes32 _name, address _token)
-		external
-		view
-		returns (uint256)
-	{
-		if (
-			_name == CONTRACT_ELEMENT_ERC20_TOKEN ||
-			_name == CONTRACT_LP_ELEMENT_ERC20_TOKEN
-		) {
-			uint256 index =
-				ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-					.resourceToken2RateAttrId(_token) > 0
-					? ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-						.resourceToken2RateAttrId(_token)
-					: resourceLPToken2RateAttrId[_token];
-			require(index > 0 && index < 6, "Not support minor token address.");
-			return index;
-		} else {
-			require(
-				_token == registry.addressOf(CONTRACT_LP_RING_ERC20_TOKEN) ||
-					_token == registry.addressOf(CONTRACT_LP_KTON_ERC20_TOKEN),
-				"Not support LP-token address."
-			);
-		}
-		return 0;
+	function getPrefer(address _token) external view returns (uint256) {
+		return
+			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
+				.resourceToken2RateAttrId(_token) > 0
+				? ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
+					.resourceToken2RateAttrId(_token)
+				: resourceLPToken2RateAttrId[_token];
 	}
 
 	function getRate(

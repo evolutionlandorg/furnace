@@ -4,6 +4,7 @@ interface IFormula {
 	struct FormulaEntry {
 		// Item parameter
 		bytes32 name;
+		// [uint16 class, uint16 grade, bool canDisenchant, uint128 base, uint128 enhance] 
 		bytes meta;
 		// if it is removed
 		// uint256 enchantTime;
@@ -11,9 +12,12 @@ interface IFormula {
 		// uint256 loseRate;
 
 		// major meterail info
+		// [address token, uint16 class, uint16 grade]
 		bytes32[] majors;
 		// minor meterail info
-		bytes32[] minors;
+		address[] minors;
+		// [uint128 min, uint128 max]
+		uint256[] limits;
 		bool disable;
 	}
 
@@ -27,12 +31,14 @@ interface IFormula {
         @param _meta    Metadata of new enchanted NFT.
         @param _majors    NFT token addresses of major meterail for enchanting.
         @param _minors     FT Token addresses of minor meterail for enchanting.
+        @param _limits     FT Token limits of minor meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
 		bytes calldata _meta,
 		bytes32[] calldata _majors,
-		bytes32[] calldata _minors
+		address[] calldata _minors,
+		uint256[] calldata _limits
 	) external;
 
 	/**
@@ -52,7 +58,8 @@ interface IFormula {
 			bytes32,
 			bytes memory,
 			bytes32[] memory,
-			bytes32[] memory,
+			address[] memory,
+			uint256[] memory,
 			bool
 		);
 
@@ -65,13 +72,12 @@ interface IFormula {
 			uint16
 		);
 
-	function getMinorInfo(bytes32 _minor)
+	function getLimit(uint256 _limit)
 		external
 		pure
 		returns (
-			address,
-			uint112,
-			uint112
+			uint128,
+			uint128
 		);
 
 	function getMetaInfo(uint256 _index)
@@ -81,13 +87,18 @@ interface IFormula {
 			bytes32,
 			uint16,
 			uint16,
-			uint112,
-			uint112,
-			bool
+			bool,
+			uint128,
+			uint128
 		);
 
-	function getAddresses(uint256 _index)
+	function getMajorAddresses(uint256 _index)
 		external
 		view
-		returns (address[] memory, address[] memory);
+		returns (address[] memory);
+
+	function getMinorAddresses(uint256 _index)
+		external
+		view
+		returns (address[] memory);
 }

@@ -1,0 +1,21 @@
+[{
+  "index": 1,
+  "name": "0xe59088e98791e995900000000000000000000000000000000000000000000000",
+  "class": 1,
+  "grade": 1,
+  "base" : 400000000,
+  "enhance": 400000000,
+  "canDisenchant": true,
+  "majors": [
+    {
+      "token": "0xd12FCCAA363d446428a4A7bb77273069CA144B57",
+      "class": 0,
+      "grade": 0
+    }
+  ],
+  "minors": [
+    {
+      "token": ""
+    }
+  ]
+}]

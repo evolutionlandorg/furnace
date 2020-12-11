@@ -12,7 +12,8 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		bytes32 name,
 		bytes meta,
 		bytes32[] majors,
-		bytes32[] minors
+		address[] minors,
+		uint256[] limits
 	);
 	event RemoveFormula(uint256 indexed index);
 
@@ -22,7 +23,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint112 enhanceRate
 	);
 
-	uint256 public constant DECIMALS = 10**10;
+	event SetLimits(uint256 indexed index, uint256[] limits);
 
 	/*** STORAGE ***/
 
@@ -37,7 +38,8 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		bytes32 _name,
 		bytes calldata _meta,
 		bytes32[] calldata _majors,
-		bytes32[] calldata _minors
+		address[] calldata _minors,
+		uint256[] calldata _limits
 	) external override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
@@ -45,6 +47,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 				meta: _meta,
 				majors: _majors,
 				minors: _minors,
+				limits: _limits,
 				disable: false
 			});
 		formulas.push(formula);
@@ -53,12 +56,13 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			formula.name,
 			formula.meta,
 			formula.majors,
-			formula.minors
+			formula.minors,
+			formula.limits
 		);
 	}
 
 	function remove(uint256 _index) external override auth {
-		require(_index < formulas.length, "Formula: out of range");
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		formulas[_index].disable = true;
 		emit RemoveFormula(_index);
 	}
@@ -68,7 +72,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint112 _baseRate,
 		uint112 _enhanceRate
 	) external auth {
-		require(_index < formulas.length, "Formula: out of range");
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
 		(uint16 class, uint16 grade, , , bool canDisenchant) =
 			abi.decode(formula.meta, (uint16, uint16, uint112, uint112, bool));
@@ -80,6 +84,16 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			canDisenchant
 		);
 		emit SetStrength(_index, _baseRate, _enhanceRate);
+	}
+
+	function setLimit(uint256 _index, uint256[] calldata _limits)
+		external
+		auth
+	{
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		formula.limits = _limits;
+		emit SetLimits(_index, formula.limits);
 	}
 
 	function length() external view override returns (uint256) {
@@ -94,26 +108,28 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			bytes32,
 			bytes memory,
 			bytes32[] memory,
-			bytes32[] memory,
+			address[] memory,
+			uint256[] memory,
 			bool
 		)
 	{
-		require(_index < formulas.length, "Formula: out of range");
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry memory formula = formulas[_index];
 		return (
 			formula.name,
 			formula.meta,
 			formula.majors,
 			formula.minors,
+			formula.limits,
 			formula.disable
 		);
 	}
 
-	function getAddresses(uint256 _index)
+	function getMajorAddresses(uint256 _index)
 		external
 		view
 		override
-		returns (address[] memory, address[] memory)
+		returns (address[] memory)
 	{
 		FormulaEntry memory formula = formulas[_index];
 		address[] memory majorAddresses = new address[](formula.majors.length);
@@ -121,12 +137,16 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			(address majorAddress, , ) = getMajorInfo(formula.majors[i]);
 			majorAddresses[i] = majorAddress;
 		}
-		address[] memory minorAddresses = new address[](formula.minors.length);
-		for (uint256 i = 0; i < formula.minors.length; i++) {
-			(address minorAddress, , ) = getMinorInfo(formula.majors[i]);
-			minorAddresses[i] = minorAddress;
-		}
-		return (majorAddresses, minorAddresses);
+		return majorAddresses;
+	}
+
+	function getMinorAddresses(uint256 _index)
+		external
+		view
+		override
+		returns (address[] memory)
+	{
+		return formulas[_index].minors;
 	}
 
 	function getMetaInfo(uint256 _index)
@@ -137,21 +157,21 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			bytes32,
 			uint16,
 			uint16,
-			uint112,
-			uint112,
-			bool
+			bool,
+			uint128,
+			uint128
 		)
 	{
-		require(_index < formulas.length, "Formula: out of range");
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry memory formula = formulas[_index];
 		(
 			uint16 class,
 			uint16 grade,
-			uint112 base,
-			uint112 enhance,
-			bool canDisenchant
-		) = abi.decode(formula.meta, (uint16, uint16, uint112, uint112, bool));
-		return (formula.name, class, grade, base, enhance, canDisenchant);
+			bool canDisenchant,
+			uint128 base,
+			uint128 enhance
+		) = abi.decode(formula.meta, (uint16, uint16, bool, uint128, uint128));
+		return (formula.name, class, grade, canDisenchant, base, enhance);
 	}
 
 	function getMajorInfo(bytes32 _major)
@@ -169,25 +189,16 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return (majorAddress, majorClass, majorGrade);
 	}
 
-	function getMinorInfo(bytes32 _minor)
+	function getLimit(uint256 _limit)
 		public
 		pure
 		override
 		returns (
-			address,
-			uint112,
-			uint112
+			uint128,
+			uint128
 		)
 	{
-		// range: [10**10, 2**48 * 10**10]
-		(address minorAddress, uint48 minorMin, uint48 minorMax) =
-			abi.decode(_toBytes(_minor), (address, uint48, uint48));
-		// * never overflows
-		return (
-			minorAddress,
-			uint112(minorMin * DECIMALS),
-			uint112(minorMax * DECIMALS)
-		);
+		return (uint128(_limit >> 128), uint128((_limit << 128) >> 128));
 	}
 
 	function _toBytes(bytes32 self) internal pure returns (bytes memory bts) {
