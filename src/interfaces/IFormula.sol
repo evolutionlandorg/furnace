@@ -4,7 +4,7 @@ interface IFormula {
 	struct FormulaEntry {
 		// Item parameter
 		bytes32 name;
-		// [uint16 class, uint16 grade, bool canDisenchant, uint128 base, uint128 enhance] 
+		// [uint16 objectClassExt, uint16 class, uint16 grade, bool canDisenchant, uint128 base, uint128 enhance] 
 		bytes meta;
 		// if it is removed
 		// uint256 enchantTime;
@@ -12,7 +12,7 @@ interface IFormula {
 		// uint256 loseRate;
 
 		// major meterail info
-		// [address token, uint16 class, uint16 grade]
+		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
 		bytes32[] majors;
 		// minor meterail info
 		address[] minors;
@@ -82,6 +82,7 @@ interface IFormula {
 		returns (
 			address,
 			uint16,
+			uint16,
 			uint16
 		);
 
@@ -98,6 +99,7 @@ interface IFormula {
 		view
 		returns (
 			bytes32,
+			uint16,
 			uint16,
 			uint16,
 			bool,

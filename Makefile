@@ -1,4 +1,5 @@
 all     :; dapp build
+buildone:; dapp --use solc:0.4.24 buildone
 clean   :; dapp clean
 test    :; dapp test
 deploy  :; dapp create Furnance

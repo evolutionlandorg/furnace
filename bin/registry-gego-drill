@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+# setting registry
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ERC721_GEGO")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_GEGO
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $TOKEN_GEGO; then
+  (echo "check register ${registry} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+
+objclasext=$(seth --to-uint16 256)
+grade=$(seth --to-uint16 1)
+rate=$(seth --to-uint256 1000000)
+seth send $METADATATELLER_PROXY "addExternalTokenMeta(address,uint16,uint16,uint256)" $TOKEN_GEGO $objclasext $grade $rate
+
+drill=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_DRILL_BASE")))
+drillgrade1=$(seth --to-uint16 1)
+rate1=$(seth --to-uint256 1500000)
+seth send $METADATATELLER_PROXY "addInternalTokenMeta(bytes32,uint16,uint256)" $drill $drillgrade1 $rate1
+
+
+drillgrade2=$(seth --to-uint16 2)
+rate2=$(seth --to-uint256 2000000)
+seth send $METADATATELLER_PROXY "addInternalTokenMeta(bytes32,uint16,uint256)" $drill $drillgrade2 $rate2
+
+drillgrade3=$(seth --to-uint16 3)
+rate3=$(seth --to-uint256 3000000)
+seth send $METADATATELLER_PROXY "addInternalTokenMeta(bytes32,uint16,uint256)" $drill $drillgrade3 $rate3

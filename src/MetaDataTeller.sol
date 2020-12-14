@@ -7,30 +7,32 @@ import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 import "./interfaces/IELIP002.sol";
 import "./interfaces/IInterstellarEncoder.sol";
-import "./interfaces/IDrillBase.sol";
 import "./interfaces/ILandBase.sol";
 import "./interfaces/IELIP002.sol";
 import "./FurnaceSettingIds.sol";
 
 contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
-	event AddTokenMeta(
-		address indexed token,
+	event AddInternalTokenMeta(
+		bytes32 indexed token,
 		uint16 grade,
-		uint128 trengthRate
+		uint256 trengthRate
 	);
-	event RemoveTokenMeta(address indexed token);
-	// 金, Evolution Land Gold
-	// 木, Evolution Land Wood
-	// 水, Evolution Land Water
-	// 火, Evolution Land fire
-	// 土, Evolution Land Silicon
-	enum Element { NaN, GOLD, WOOD, WATER, FIRE, SOIL }
+	event AddExternalTokenMeta(
+		address indexed token,
+		uint16 objectClassExt,
+		uint16 grade,
+		uint256 trengthRate
+	);
+	event RemoveExternalTokenMeta(address indexed token);
+	event RemoveInternalTokenMeta(bytes32 indexed token, uint16 grade);
 
 	struct Meta {
-		uint16 grade;
-		uint128 strengthRate;
-		bool isSupport;
+		uint16 objectClassExt;
+		mapping(uint16 => uint256) grade2StrengthRate;
 	}
+
+	uint16 internal constant _EXTERNAL_DEFAULT_CLASS = 0;
+	uint16 internal constant _EXTERNAL_DEFAULT_GRADE = 1;
 
 	ISettingsRegistry public registry;
 	/**
@@ -39,7 +41,8 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	 * goldrate is 1, woodrate is 2, waterrate is 3, firerate is 4, soilrate is 5
 	 */
 	mapping(address => uint8) public resourceLPToken2RateAttrId;
-	mapping(address => Meta) public token2Meta;
+	mapping(address => Meta) public externalToken2Meta;
+	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
 
 	function initialize(address _registry) public initializer {
 		owner = msg.sender;
@@ -63,45 +66,72 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		] = 5;
 	}
 
-	function addTokenMeta(
-		address _token,
+	function addInternalTokenMeta(
+		bytes32 _token,
 		uint16 _grade,
-		uint128 _strengthRate
+		uint256 _strengthRate
 	) public auth {
-		Meta memory meta =
-			Meta({
-				grade: _grade,
-				strengthRate: _strengthRate,
-				isSupport: true
-			});
-		token2Meta[_token] = meta;
-		emit AddTokenMeta(_token, meta.grade, meta.strengthRate);
+		internalToken2Meta[_token][_grade] = _strengthRate;
+		emit AddInternalTokenMeta(_token, _grade, _strengthRate);
 	}
 
-	function removeTokenMeta(address _token) public auth {
-		require(token2Meta[_token].isSupport == true, "Furnace: EMPTY");
-		delete token2Meta[_token];
-		emit RemoveTokenMeta(_token);
+	function addExternalTokenMeta(
+		address _token,
+		uint16 _objectClassExt,
+		uint16 _grade,
+		uint256 _strengthRate
+	) public auth {
+		require(_objectClassExt > 0, "Furnace: INVALIDOBJCLASSEXT");
+		externalToken2Meta[_token].objectClassExt = _objectClassExt;
+		externalToken2Meta[_token].grade2StrengthRate[_grade] = _strengthRate;
+		emit AddExternalTokenMeta(_token, _objectClassExt, _grade, _strengthRate);
 	}
 
-	function getExternalGrade(address _token) public view returns (uint16) {
-		require(token2Meta[_token].isSupport == true, "Furnace: NOT_SUPPORT");
-		return token2Meta[_token].grade;
+	function removeExternalTokenMeta(address _token) public auth {
+		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: EMPTY");
+		delete externalToken2Meta[_token];
+		emit RemoveExternalTokenMeta(_token);
 	}
 
-	function getExternalStrengthRate(address _token)
+	function removeInternalTokenMeta(bytes32 _token, uint16 _grade) public auth {
+		delete internalToken2Meta[_token][_grade];
+		emit RemoveInternalTokenMeta(_token, _grade);
+	}
+
+	function getExternalObjectClassExt(address _token)
+		public
+		view
+		returns (uint16)
+	{
+		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: NOT_SUPPORT");
+		return externalToken2Meta[_token].objectClassExt;
+	}
+
+	function getExternalStrengthRate(address _token, uint16 _grade)
 		public
 		view
 		returns (uint256)
 	{
-		require(token2Meta[_token].isSupport == true, "Furnace: NOT_SUPPORT");
-		return uint256(token2Meta[_token].strengthRate);
+		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: NOT_SUPPORT");
+		return uint256(externalToken2Meta[_token].grade2StrengthRate[_grade]);
+	}
+
+	function getInternalStrengthRate(bytes32 _token, uint16 _grade)
+		public
+		view
+		returns (uint256)
+	{
+		return uint256(internalToken2Meta[_token][_grade]);
 	}
 
 	function getMetaData(address _token, uint256 _id)
 		external
 		view
-		returns (uint16, uint16)
+		returns (
+			uint16,
+			uint16,
+			uint16
+		)
 	{
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		if (_token == ownership) {
@@ -115,17 +145,39 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 				);
 			if (objectClass == ITEM_OBJECT_CLASS) {
 				return IELIP002(nftAddress).getBaseInfo(_id);
-			} else if (
-				//TODO:: internal token
-				objectClass == DRILL_OBJECT_CLASS ||
-				// TODO::grade decode change?
-				objectClass == DARWINIA_OBJECT_CLASS
-			) {
-				return (0, IDrillBase(nftAddress).getGrade(_id));
+			} else if (objectClass == DRILL_OBJECT_CLASS) {
+				return (
+					objectClass,
+					_EXTERNAL_DEFAULT_CLASS,
+					getDrillGrade(_id)
+				);
+			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
+				//TODO:: check ONLY_AMBASSADOR
+				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
+				return (
+					objectClass,
+					_EXTERNAL_DEFAULT_CLASS,
+					getDarwiniaGrade(_id)
+				);
 			}
 		}
 		// external token
-		return (0, getExternalGrade(_token));
+		return (getExternalObjectClassExt(_token), _EXTERNAL_DEFAULT_CLASS, _EXTERNAL_DEFAULT_GRADE);
+	}
+
+	function getDrillGrade(uint256 _tokenId) public pure returns (uint16) {
+		uint128 objectId = uint128(_tokenId);
+		return uint16(objectId >> 112);
+	}
+
+	function isAmbassador(uint256 _tokenId) public pure returns (bool) {
+		uint128 objectId = uint128(_tokenId);
+		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
+	}
+
+	function getDarwiniaGrade(uint256 _tokenId) public pure returns (uint16) {
+		uint128 objectId = uint128(_tokenId);
+		return uint16(uint16(objectId >> 112) & 0x3FF);
 	}
 
 	function getPrefer(address _token) external view returns (uint256) {
@@ -148,32 +200,20 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
 			uint8 objectClass =
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
-			address nftAddress =
-				IInterstellarEncoder(interstellarEncoder).getContractAddress(
-					_id
-				);
 			if (objectClass == ITEM_OBJECT_CLASS) {
 				return IELIP002(_token).getRate(_id, _index);
-			} else if (
-				//TODO:: internal token
-				objectClass == DRILL_OBJECT_CLASS ||
-				// TODO::grade decode change?
-				objectClass == DARWINIA_OBJECT_CLASS
-			) {
-				// TODO:: hard code
-				uint16 grade = IDrillBase(nftAddress).getGrade(_id);
-				if (grade == 1) {
-					return 15 * 10**5;
-				} else if (grade == 2) {
-					return 2 * 10**6;
-				} else if (grade == 3) {
-					return 3 * 10**6;
-				}
+			} else if (objectClass == DRILL_OBJECT_CLASS) {
+				uint16 grade = getDrillGrade(_id);
+				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);
+			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
+				//TODO:: check ONLY_AMBASSADOR
+				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
+				uint16 grade = getDarwiniaGrade(_id);
+				return getInternalStrengthRate(CONTRACT_DARWINIA_ITO_BASE, grade);
 			}
 		}
-		if (_token == registry.addressOf(CONTRACT_ITEM_BASE)) {
-		} else {
-			return getExternalStrengthRate(_token);
+		if (_token == registry.addressOf(CONTRACT_ERC721_GEGO)) {} else {
+			return getExternalStrengthRate(_token, _EXTERNAL_DEFAULT_GRADE);
 		}
 	}
 }

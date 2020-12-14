@@ -62,7 +62,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 
 	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
 
-	function isAllowed(address _token, uint256 _id) public view virtual returns (bool);
+	function isAllowed(address _token, uint256 _id)
+		public
+		view
+		virtual
+		returns (bool);
 
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
@@ -115,15 +119,12 @@ abstract contract ItemBar is DSAuth, DSMath {
 		Bar storage bar = token2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-			(uint16 class, ) =
+			(, uint16 class, ) =
 				IMetaDataTeller(teller).getMetaData(_token, _tokenId);
 
-			(uint16 originClass, ) =
+			(, uint16 originClass, ) =
 				IMetaDataTeller(teller).getMetaData(bar.token, bar.id);
-			require(
-				class > originClass,
-				"Furnace: INVALID_CLASS"
-			);
+			require(class > originClass, "Furnace: INVALID_CLASS");
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
 		IERC721(_token).transferFrom(msg.sender, address(this), _id);
@@ -135,7 +136,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 	}
 
 	function batchUnquip(uint256 _tokenId, uint256[] calldata _indexes)
-		external	
+		external
 		updateMinerStrength(_tokenId)
 	{
 		require(

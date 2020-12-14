@@ -103,15 +103,23 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		(, , bytes32[] memory majors, , , bool disable) =
 			IFormula(formula).at(_index);
 		require(disable == false, "Furnace: FORMULA_DISABLE");
-		require(_ids.length == majors.length, "Furnace: INVALID_IDS_LENGTH");
+		require(_ids.length == majors.length, "Furnace: INVALID_LENGTH");
 		for (uint256 i = 0; i < majors.length; i++) {
 			bytes32 major = majors[i];
 			uint256 id = _ids[i];
-			(address majorAddress, uint16 majorClass, uint16 majorGrade) =
-				IFormula(formula).getMajorInfo(major);
-			(uint16 class, uint16 grade) =
+			(
+				address majorAddress,
+				uint16 majorObjClassExt,
+				uint16 majorClass,
+				uint16 majorGrade
+			) = IFormula(formula).getMajorInfo(major);
+			(uint16 objectClassExt, uint16 class, uint16 grade) =
 				IMetaDataTeller(teller).getMetaData(majorAddress, id);
 			//TODO:: check object class
+			require(
+				objectClassExt == majorObjClassExt,
+				"Furnace: INVALID_OBJECTCLASSEXT"
+			);
 			require(class == majorClass, "Furnace: INVALID_CLASS");
 			require(grade == majorGrade, "Furnace: INVALID_GRADE");
 			_safeTransfer(majorAddress, msg.sender, address(this), id);
@@ -301,7 +309,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , , uint128 baseRate, uint128 enhanceRate) =
+		(, , , , , uint128 baseRate, uint128 enhanceRate) =
 			IFormula(formula).getMetaInfo(item.index);
 		if (uint256(item.prefer) & (~(1 << _index)) > 0) {
 			uint128 realEnhanceRate =
@@ -310,20 +318,24 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 					RATE_PRECISION;
 			return uint256(realEnhanceRate);
 		}
-		return uint256(baseRate);
+		return uint256(baseRate / 2); 
 	}
 
 	function getBaseInfo(uint256 _tokenId)
 		public
 		view
 		override
-		returns (uint16, uint16)
+		returns (
+			uint16,
+			uint16,
+			uint16
+		)
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, uint16 class, uint16 grade, , , ) =
+		(, uint16 objectClassExt, uint16 class, uint16 grade, , , ) =
 			IFormula(formula).getMetaInfo(item.index);
-		return (class, grade);
+		return (objectClassExt, class, grade);
 	}
 
 	function getEnchantedInfo(uint256 _tokenId)
@@ -340,7 +352,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, uint16 class, , bool canDisenchant, , ) =
+		(, , uint16 class, , bool canDisenchant, , ) =
 			IFormula(formula).getMetaInfo(item.index);
 		return (
 			class,

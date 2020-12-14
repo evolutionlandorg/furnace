@@ -8,7 +8,7 @@ import "./common/Input.sol";
 import "./FurnaceSettingIds.sol";
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-    using Input for Input.Data;
+	using Input for Input.Data;
 	event SetStrength(
 		uint256 indexed inde,
 		uint112 baseRate,
@@ -134,7 +134,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		FormulaEntry memory formula = formulas[_index];
 		address[] memory majorAddresses = new address[](formula.majors.length);
 		for (uint256 i = 0; i < formula.majors.length; i++) {
-			(address majorAddress, , ) = getMajorInfo(formula.majors[i]);
+			(address majorAddress, , , ) = getMajorInfo(formula.majors[i]);
 			majorAddresses[i] = majorAddress;
 		}
 		return majorAddresses;
@@ -157,6 +157,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			bytes32,
 			uint16,
 			uint16,
+			uint16,
 			bool,
 			uint128,
 			uint128
@@ -165,12 +166,21 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry memory formula = formulas[_index];
 		Input.Data memory data = Input.from(formula.meta);
+		uint16 objectClassExt = data.decodeU16();
 		uint16 class = data.decodeU16();
 		uint16 grade = data.decodeU16();
 		bool canDisenchant = data.decodeBool();
 		uint128 base = data.decodeU128();
 		uint128 enhance = data.decodeU128();
-		return (formula.name, class, grade, canDisenchant, base, enhance);
+		return (
+			formula.name,
+			objectClassExt,
+			class,
+			grade,
+			canDisenchant,
+			base,
+			enhance
+		);
 	}
 
 	function getMajorInfo(bytes32 _major)
@@ -180,14 +190,16 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		returns (
 			address,
 			uint16,
+			uint16,
 			uint16
 		)
 	{
 		Input.Data memory data = Input.from(abi.encodePacked(_major));
 		address majorAddress = address(data.decodeBytes20());
+		uint16 objectClassExt = data.decodeU16();
 		uint16 majorClass = data.decodeU16();
 		uint16 majorGrade = data.decodeU16();
-		return (majorAddress, majorClass, majorGrade);
+		return (majorAddress, objectClassExt, majorClass, majorGrade);
 	}
 
 	function getLimit(uint256 _limit)
@@ -198,5 +210,4 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	{
 		return (uint128(_limit >> 128), uint128((_limit << 128) >> 128));
 	}
-
 }

@@ -49,11 +49,13 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 			uint8 objectClass =
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
 			if (
-				//TODO:: internal token
 				objectClass == ITEM_OBJECT_CLASS ||
-				objectClass == DRILL_OBJECT_CLASS ||
-				objectClass == DARWINIA_OBJECT_CLASS
+				objectClass == DRILL_OBJECT_CLASS
 			) {
+				return true;
+			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
+				//TODO:: check ONLY_AMBASSADOR
+				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
 				return true;
 			} else {
 				return false;
@@ -61,6 +63,11 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 		} else {
 			return allowList[_token];
 		}
+	}
+
+	function isAmbassador(uint256 _tokenId) public pure returns (bool) {
+		uint128 objectId = uint128(_tokenId);
+		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
 	}
 
 	function addSupportedToken(address _token) public auth {
