@@ -4,10 +4,11 @@ import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
+import "./common/Input.sol";
 import "./FurnaceSettingIds.sol";
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-
+    using Input for Input.Data;
 	event SetStrength(
 		uint256 indexed inde,
 		uint112 baseRate,
@@ -39,7 +40,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 				majors: _majors,
 				minors: _minors,
 				limits: _limits,
-				disable: false 
+				disable: false
 			});
 		formulas.push(formula);
 		emit AddFormula(
@@ -71,8 +72,10 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	) external auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		(uint16 class, uint16 grade, , , bool canDisenchant) =
-			abi.decode(formula.meta, (uint16, uint16, uint112, uint112, bool));
+		Input.Data memory data = Input.from(formula.meta);
+		uint16 class = data.decodeU16();
+		uint16 grade = data.decodeU16();
+		bool canDisenchant = data.decodeBool();
 		formula.meta = abi.encodePacked(
 			class,
 			grade,
@@ -161,13 +164,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry memory formula = formulas[_index];
-		(
-			uint16 class,
-			uint16 grade,
-			bool canDisenchant,
-			uint128 base,
-			uint128 enhance
-		) = abi.decode(formula.meta, (uint16, uint16, bool, uint128, uint128));
+		Input.Data memory data = Input.from(formula.meta);
+		uint16 class = data.decodeU16();
+		uint16 grade = data.decodeU16();
+		bool canDisenchant = data.decodeBool();
+		uint128 base = data.decodeU128();
+		uint128 enhance = data.decodeU128();
 		return (formula.name, class, grade, canDisenchant, base, enhance);
 	}
 
@@ -181,8 +183,10 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			uint16
 		)
 	{
-		(address majorAddress, uint16 majorClass, uint16 majorGrade) =
-			abi.decode(_toBytes(_major), (address, uint16, uint16));
+		Input.Data memory data = Input.from(abi.encodePacked(_major));
+		address majorAddress = address(data.decodeBytes20());
+		uint16 majorClass = data.decodeU16();
+		uint16 majorGrade = data.decodeU16();
 		return (majorAddress, majorClass, majorGrade);
 	}
 
@@ -190,25 +194,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		public
 		pure
 		override
-		returns (
-			uint128,
-			uint128
-		)
+		returns (uint128, uint128)
 	{
 		return (uint128(_limit >> 128), uint128((_limit << 128) >> 128));
 	}
 
-	function _toBytes(bytes32 self) internal pure returns (bytes memory bts) {
-		bts = new bytes(32);
-		assembly {
-			mstore(
-				add(
-					bts,
-					/*BYTES_HEADER_SIZE*/
-					32
-				),
-				self
-			)
-		}
-	}
 }

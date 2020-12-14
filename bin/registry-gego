@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+# setting registry
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ERC721_GEGO")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_GEGO
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $TOKEN_GEGO; then
+  (echo "check register ${registry} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+
+token=$TOKEN_GEGO
+grade=$(seth --to-uint16 1)
+rate=$(seth --to-uint128 1000000)
+seth send $METADATATELLER_PROXY "addTokenMeta(address,uint16,uint128)" $token $grade $rate
+

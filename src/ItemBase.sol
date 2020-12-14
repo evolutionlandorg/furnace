@@ -111,6 +111,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				IFormula(formula).getMajorInfo(major);
 			(uint16 class, uint16 grade) =
 				IMetaDataTeller(teller).getMetaData(majorAddress, id);
+			//TODO:: check object class
 			require(class == majorClass, "Furnace: INVALID_CLASS");
 			require(grade == majorGrade, "Furnace: INVALID_GRADE");
 			_safeTransfer(majorAddress, msg.sender, address(this), id);
@@ -144,7 +145,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			uint256 value = _values[i];
 			(uint128 minorMin, uint128 minorMax) =
 				IFormula(formula).getLimit(limit);
-			require(minorMax >= minorMin, "Furnace: INVALID_LIMIT");
+			require(minorMax > minorMin, "Furnace: INVALID_LIMIT");
 			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
 			prefer |= uint16(1 << element);
 			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
@@ -165,7 +166,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				_safeTransfer(minorAddress, msg.sender, address(this), value);
 				amounts[i] = value;
 			}
-			denominator = minorMin;
+			denominator = minorMax - minorMin;
 			uint128 enhanceRate =
 				UQ128x128
 					.encode(numerator)
@@ -270,6 +271,27 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		}
 		emit Disenchanted(msg.sender, _tokenId, majors, ids, minors, amounts);
 	}
+
+	function getItem(uint256 _tokenId)
+		public
+		view
+		returns (
+			uint256,
+			uint16,
+			uint128,
+			uint256[] memory,
+			uint256[] memory
+		)
+	{
+		Item memory item = tokenId2Item[_tokenId];
+		return (item.index, item.prefer, item.rate, item.ids, item.amounts);
+	}
+
+	uint256 index;
+	uint16 prefer;
+	uint128 rate;
+	uint256[] ids;
+	uint256[] amounts;
 
 	function getRate(uint256 _tokenId, uint256 _index)
 		public

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$1" ]
+  then
+    echo "No argument supplied"
+    exit 1
+fi
+
+. $(PWD)/bin/init
+
+index=$(seth --to-uint256 $1)
+seth call $FORMULA_PROXY  "at(uint256)(bytes32,bytes,bytes32[],address[],uint256[],bool)" $index 
