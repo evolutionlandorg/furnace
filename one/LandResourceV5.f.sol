@@ -10,7 +10,7 @@ interface IItemBar {
 
 	function maxAmount() external view returns (uint256);
 
-	function enhanceStrengthRateByindex(
+	function enhanceStrengthRateByIndex(
 		address _resourceToken,
 		uint256 _landTokenId,
 		uint256 _index
@@ -1102,7 +1102,7 @@ contract LandResourceV5 is LandResourceV4 {
 	bytes32 public constant CONTRACT_LAND_ITEM_BAR = "CONTRACT_LAND_ITEM_BAR";
 
 	// rate precision
-	uint112 public constant RATE_DECIMALS = 10**8;
+	uint128 public constant RATE_PRECISION = 10**8;
 
 	mapping(uint256 => mapping(address => mapping(address => uint256))) land2ItemBarMinedStrength;
 
@@ -1141,7 +1141,8 @@ contract LandResourceV5 is LandResourceV4 {
 
 		require(
 			land2ResourceMineState[_landTokenId].totalMiners <=
-				land2ResourceMineState[_landTokenId].maxMiners
+				land2ResourceMineState[_landTokenId].maxMiners,
+			"Land: EXCEED_MINER_LIMIT"
 		);
 
 		address miner =
@@ -1156,7 +1157,7 @@ contract LandResourceV5 is LandResourceV4 {
 		address itemBar = registry.addressOf(CONTRACT_LAND_ITEM_BAR);
 		uint256 enhanceRate =
 			IItemBar(itemBar).enhanceStrengthRateOf(_resource, _landTokenId);
-		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_DECIMALS);
+		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_PRECISION);
 		uint256 totalStrength = strength.add(enhanceStrength);
 
 		land2ResourceMineState[_landTokenId].miners[_resource].push(_tokenId);
@@ -1218,7 +1219,7 @@ contract LandResourceV5 is LandResourceV4 {
 		address itemBar = registry.addressOf(CONTRACT_LAND_ITEM_BAR);
 		uint256 enhanceRate =
 			IItemBar(itemBar).enhanceStrengthRateOf(resource, landTokenId);
-		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_DECIMALS);
+		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_PRECISION);
 		uint256 totalStrength = strength.add(enhanceStrength);
 
 		// for backward compatibility
@@ -1254,6 +1255,36 @@ contract LandResourceV5 is LandResourceV4 {
 		delete miner2Index[_tokenId];
 
 		emit StopMining(_tokenId, landTokenId, resource, totalStrength);
+	}
+
+	function updateMinerStrengthWhenStop(uint256 _apostleTokenId) public auth {
+		if (miner2Index[_apostleTokenId].landTokenId == 0) {
+			return;
+		}
+		(uint256 landTokenId, uint256 strength) =
+			_updateMinerStrength(_apostleTokenId, true);
+		// _isStop == true - minus strength
+		// _isStop == false - add strength
+		emit UpdateMiningStrengthWhenStop(
+			_apostleTokenId,
+			landTokenId,
+			strength
+		);
+	}
+
+	function updateMinerStrengthWhenStart(uint256 _apostleTokenId) public auth {
+		if (miner2Index[_apostleTokenId].landTokenId == 0) {
+			return;
+		}
+		(uint256 landTokenId, uint256 strength) =
+			_updateMinerStrength(_apostleTokenId, false);
+		// _isStop == true - minus strength
+		// _isStop == false - add strength
+		emit UpdateMiningStrengthWhenStart(
+			_apostleTokenId,
+			landTokenId,
+			strength
+		);
 	}
 
 	// can only be called by ItemBar
@@ -1363,7 +1394,7 @@ contract LandResourceV5 is LandResourceV4 {
 		address itemBar = registry.addressOf(CONTRACT_LAND_ITEM_BAR);
 		uint256 enhanceRate =
 			IItemBar(itemBar).enhanceStrengthRateOf(resource, landTokenId);
-		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_DECIMALS);
+		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_PRECISION);
 		uint256 totalStrength = strength.add(enhanceStrength);
 
 		if (_isStop) {
@@ -1391,8 +1422,7 @@ contract LandResourceV5 is LandResourceV4 {
 
 	function isBarStaker(uint256 _landTokenId) internal view returns (bool) {
 		address itemBar = registry.addressOf(CONTRACT_LAND_ITEM_BAR);
-		uint256 maxAmount = IItemBar(itemBar).maxAmount();
-		for (uint256 i = 0; i < maxAmount; i++) {
+		for (uint256 i = 0; i < IItemBar(itemBar).maxAmount(); i++) {
 			address barStaker = IItemBar(itemBar).getBarStaker(_landTokenId, i);
 			if (msg.sender == barStaker) {
 				return true;
@@ -1416,27 +1446,35 @@ contract LandResourceV5 is LandResourceV4 {
 				_landTokenId
 			);
 		uint256 landBalance =
-			minedBalance.mul(RATE_DECIMALS).div(enhanceRate.add(RATE_DECIMALS));
-		uint256 itemBalance = minedBalance.sub(landBalance);
-		uint256 maxAmount = IItemBar(itemBar).maxAmount();
-		for (uint256 i = 0; i < maxAmount; i++) {
-			uint256 barRate =
-				IItemBar(itemBar).enhanceStrengthRateByindex(
-					_resourceToken,
-					_landTokenId,
-					i
-				);
-			uint256 barBalance = itemBalance.mul(barRate).div(enhanceRate);
-			address barStaker = IItemBar(itemBar).getBarStaker(_landTokenId, i);
-			//TODO:: give fee to lander
-			land2ItemBarMinedStrength[_landTokenId][barStaker][
-				_resourceToken
-			] = barBalance;
+			minedBalance.mul(RATE_PRECISION).div(
+				enhanceRate.add(RATE_PRECISION)
+			);
+		if (enhanceRate > 0) {
+			uint256 itemBalance = minedBalance.sub(landBalance);
+			for (uint256 i = 0; i < IItemBar(itemBar).maxAmount(); i++) {
+				uint256 barRate =
+					IItemBar(itemBar).enhanceStrengthRateByIndex(
+						_resourceToken,
+						_landTokenId,
+						i
+					);
+				uint256 barBalance = itemBalance.mul(barRate).div(enhanceRate);
+				address barStaker =
+					IItemBar(itemBar).getBarStaker(_landTokenId, i);
+				//TODO:: give fee to lander
+				land2ItemBarMinedStrength[_landTokenId][barStaker][
+					_resourceToken
+				] = land2ItemBarMinedStrength[_landTokenId][barStaker][
+					_resourceToken
+				]
+					.add(barBalance);
+			}
 		}
 
 		land2ResourceMineState[_landTokenId].mintedBalance[
 			_resourceToken
-		] += landBalance;
+		] = land2ResourceMineState[_landTokenId].mintedBalance[_resourceToken]
+			.add(landBalance);
 	}
 
 	function claimBarResource(uint256 _landTokenId) public {
@@ -1600,26 +1638,31 @@ contract LandResourceV5 is LandResourceV4 {
 				_resourceToken,
 				_landTokenId
 			);
-		uint256 itemBalance =
-			_minedBalance.sub(
-				_minedBalance.mul(RATE_DECIMALS).div(
-					enhanceRate.add(RATE_DECIMALS)
-				)
+		// V5 yeild distribution
+		uint256 landBalance =
+			_minedBalance.mul(RATE_PRECISION).div(
+				enhanceRate.add(RATE_PRECISION)
 			);
+
 		uint256 callerResource;
-		{
+		if (isLander(_landTokenId)) {
+			callerResource = callerResource.add(landBalance);
+		}
+		if (enhanceRate > 0) {
+			uint256 itemBalance = _minedBalance.sub(landBalance);
 			for (uint256 i = 0; i < IItemBar(itemBar).maxAmount(); i++) {
 				uint256 barRate =
-					IItemBar(itemBar).enhanceStrengthRateByindex(
+					IItemBar(itemBar).enhanceStrengthRateByIndex(
 						_resourceToken,
 						_landTokenId,
 						i
 					);
 				uint256 barBalance = itemBalance.mul(barRate).div(enhanceRate);
-				address barStaker =
-					IItemBar(itemBar).getBarStaker(_landTokenId, i);
 				//TODO:: give fee to lander
-				if (msg.sender == barStaker) {
+				if (
+					msg.sender ==
+					IItemBar(itemBar).getBarStaker(_landTokenId, i)
+				) {
 					callerResource = callerResource.add(barBalance);
 				}
 			}
@@ -1645,8 +1688,14 @@ contract LandResourceV5 is LandResourceV4 {
 		for (uint256 i = 0; i < 5; i++) {
 			uint256 mined =
 				_calculateMinedBalance(_landTokenId, _resourceTokens[i], now);
+
 			uint256 available =
 				_calculateBarResources(_landTokenId, _resourceTokens[i], mined);
+			available = available.add(
+				land2ItemBarMinedStrength[_landTokenId][msg.sender][
+					_resourceTokens[i]
+				]
+			);
 			if (isLander(_landTokenId)) {
 				available = available.add(
 					land2ResourceMineState[_landTokenId].mintedBalance[

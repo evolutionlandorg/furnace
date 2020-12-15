@@ -6,19 +6,9 @@ set -e
 
 path=$FNC_CONFIG
 
-address=$(dapp create src/MetaDataTeller.sol:MetaDataTeller $ISETTINGSREGISTRY)
+address=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
 export METADATATELLER=$address
+
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $METADATATELLER_PROXY $METADATATELLER
 cat $path | jq '.METADATATELLER = $address' --arg address $METADATATELLER | sponge $path
 
-# setting registry
-teller=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_METADATA_TELLER")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $teller $METADATATELLER
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $teller) != $METADATATELLER; then
-  (echo "check register ${teller} failed."; exit 1;)
-fi
-echo >&2 "${0##*/}: info: installerEncoder register finished."
-
-grade=$(seth --to-uint16 1)
-rate=$(seth --to-uint128 1000000)
-seth send $METADATATELLER "addTokenMeta(address,uint16,uint128)" $TOKEN_GEGO $grade $rate
-echo >&2 "${0##*/}: info: add gego metadata finished."

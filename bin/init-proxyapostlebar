@@ -21,7 +21,7 @@ cat $path | jq '.APOSTLEITEMBAR_PROXY = $address' --arg address $APOSTLEITEMBAR_
 echo >&2 "${0##*/}: info: ApostleItemBarProxy inited."
 
 # setting registry
-registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_APOSTEL_ITEM_BAR")))
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_APOSTLE_ITEM_BAR")))
 seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $APOSTLEITEMBAR_PROXY
 if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $APOSTLEITEMBAR_PROXY; then
   (echo "check register ${registry} failed."; exit 1;)

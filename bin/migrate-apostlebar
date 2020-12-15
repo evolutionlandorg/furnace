@@ -6,15 +6,8 @@ set -e
 
 path=$FNC_CONFIG
 
-maxAmount=$(seth --to-hex 3)
-address=$(dapp create src/ApostleItemBar.sol:ApostleItemBar $ISETTINGSREGISTRY $maxAmount)
+address=$(dapp create src/ApostleItemBar.sol:ApostleItemBar)
 export APOSTLEITEMBAR=$address
-cat $path | jq '.APOSTLEITEMBAR = $address' --arg address $APOSTLEITEMBAR | sponge $path
 
-# setting registry
-registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_APOSTLE_ITEM_BAR")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $APOSTLEITEMBAR
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $APOSTLEITEMBAR; then
-  (echo "check register ${registry} failed."; exit 1;)
-fi
-echo >&2 "${0##*/}: info: installerEncoder register finished."
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $APOSTLEITEMBAR_PROXY $APOSTLEITEMBAR
+cat $path | jq '.APOSTLEITEMBAR = $address' --arg address $APOSTLEITEMBAR | sponge $path

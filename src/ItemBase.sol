@@ -301,7 +301,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	uint256[] ids;
 	uint256[] amounts;
 
-	function getRate(uint256 _tokenId, uint256 _index)
+	function getRate(uint256 _tokenId, uint256 _element)
 		public
 		view
 		override
@@ -311,14 +311,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		(, , , , , uint128 baseRate, uint128 enhanceRate) =
 			IFormula(formula).getMetaInfo(item.index);
-		if (uint256(item.prefer) & (~(1 << _index)) > 0) {
+		if (uint256(item.prefer) & (~(1 << _element)) > 0) {
 			uint128 realEnhanceRate =
 				baseRate +
 					UQ128x128.mul128(item.rate, enhanceRate) /
 					RATE_PRECISION;
 			return uint256(realEnhanceRate);
 		}
-		return uint256(baseRate / 2); 
+		return uint256(baseRate / 2);
 	}
 
 	function getBaseInfo(uint256 _tokenId)

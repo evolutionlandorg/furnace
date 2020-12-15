@@ -6,7 +6,7 @@ set -e
 
 path=$FNC_CONFIG
 
-# back=0x3Fc42eadF609EfBa7552bEE29951561462f69A1C
+# export APOSTLEBASE=0x3Fc42eadF609EfBa7552bEE29951561462f69A1C #back
 address=$(dapp create one/ApostleBaseV3.f.sol:ApostleBaseV3)
 export APOSTLEBASE=$address
 

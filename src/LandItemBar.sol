@@ -12,7 +12,6 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		uint256 id
 	);
 
-	mapping(address => bool) public allowList;
 	mapping(uint256 => bool) public land2IsPrivate;
 
 	function initialize(address _registry, uint256 _maxAmount)
@@ -92,39 +91,11 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		override
 		returns (bool)
 	{
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		if (_token == ownership) {
-			address interstellarEncoder =
-				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
-			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
-			if (
-				objectClass == ITEM_OBJECT_CLASS ||
-				objectClass == DRILL_OBJECT_CLASS
-			) {
-				return true;
-			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
-				//TODO:: check ONLY_AMBASSADOR
-				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return allowList[_token];
-		}
+		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
 	}
 
 	function isAmbassador(uint256 _tokenId) public pure returns (bool) {
 		uint128 objectId = uint128(_tokenId);
 		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
-	}
-
-	function addSupportedToken(address _token) public auth {
-		allowList[_token] = true;
-	}
-
-	function removeSupportedToken(address _token) public auth {
-		allowList[_token] = false;
 	}
 }

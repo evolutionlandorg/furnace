@@ -78,6 +78,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 		view
 		returns (address)
 	{
+		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
 		return token2Bars[_tokenId][_index].staker;
 	}
 
@@ -168,17 +169,20 @@ abstract contract ItemBar is DSAuth, DSMath {
 		maxAmount = _maxAmount;
 	}
 
-	function enhanceStrengthRateByindex(
+	function enhanceStrengthRateByIndex(
 		address _resourceToken,
 		uint256 _tokenId,
 		uint256 _index
 	) public view returns (uint256) {
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		Bar memory bar = token2Bars[_tokenId][_index];
-		uint256 index =
+		if (bar.token == address(0)) {
+			return 0;
+		}
+		uint256 element =
 			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
 				.resourceToken2RateAttrId(_resourceToken);
-		return IMetaDataTeller(teller).getRate(bar.token, bar.id, index);
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
+		return IMetaDataTeller(teller).getRate(bar.token, bar.id, element);
 	}
 
 	function enhanceStrengthRateOf(address _resourceToken, uint256 _tokenId)
@@ -187,14 +191,17 @@ abstract contract ItemBar is DSAuth, DSMath {
 		returns (uint256)
 	{
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		uint256 index =
+		uint256 element =
 			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
 				.resourceToken2RateAttrId(_resourceToken);
 		uint256 rate;
 		for (uint256 i = 0; i < maxAmount; i++) {
 			Bar memory bar = token2Bars[_tokenId][i];
+			if (bar.token == address(0)) {
+				continue;
+			}
 			uint256 itemRate =
-				IMetaDataTeller(teller).getRate(bar.token, bar.id, index);
+				IMetaDataTeller(teller).getRate(bar.token, bar.id, element);
 			rate = add(rate, itemRate);
 		}
 		return rate;

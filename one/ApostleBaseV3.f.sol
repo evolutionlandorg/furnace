@@ -1335,7 +1335,7 @@ contract ApostleBaseV3 is ApostleBaseV2 {
 	bytes32 public constant CONTRACT_APOSTLE_ITEM_BAR = "CONTRACT_APOSTLE_ITEM_BAR";
 
 	// rate precision
-	uint112 public constant RATE_DECIMALS = 10**8;
+	uint128 public constant RATE_PRECISION = 10**8;
 
     function strengthOf(uint256 _tokenId, address _resourceToken, uint256 _landTokenId) public view returns (uint256) {
         uint talents = tokenId2Apostle[_tokenId].talents;
@@ -1345,7 +1345,7 @@ contract ApostleBaseV3 is ApostleBaseV2 {
 		address itemBar = registry.addressOf(CONTRACT_APOSTLE_ITEM_BAR);
 		uint256 enhanceRate =
 			IItemBar(itemBar).enhanceStrengthRateOf(_resourceToken, _tokenId);
-		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_DECIMALS);
+		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_PRECISION);
 		uint256 totalStrength = strength.add(enhanceStrength);
 		return totalStrength;
     }

@@ -81,19 +81,30 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		uint16 _grade,
 		uint256 _strengthRate
 	) public auth {
-		require(_objectClassExt > 0, "Furnace: INVALIDOBJCLASSEXT");
+		require(_objectClassExt > 0, "Furnace: INVALID_OBJCLASSEXT");
 		externalToken2Meta[_token].objectClassExt = _objectClassExt;
 		externalToken2Meta[_token].grade2StrengthRate[_grade] = _strengthRate;
-		emit AddExternalTokenMeta(_token, _objectClassExt, _grade, _strengthRate);
+		emit AddExternalTokenMeta(
+			_token,
+			_objectClassExt,
+			_grade,
+			_strengthRate
+		);
 	}
 
 	function removeExternalTokenMeta(address _token) public auth {
-		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: EMPTY");
+		require(
+			externalToken2Meta[_token].objectClassExt > 0,
+			"Furnace: EMPTY"
+		);
 		delete externalToken2Meta[_token];
 		emit RemoveExternalTokenMeta(_token);
 	}
 
-	function removeInternalTokenMeta(bytes32 _token, uint16 _grade) public auth {
+	function removeInternalTokenMeta(bytes32 _token, uint16 _grade)
+		public
+		auth
+	{
 		delete internalToken2Meta[_token][_grade];
 		emit RemoveInternalTokenMeta(_token, _grade);
 	}
@@ -103,7 +114,10 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		view
 		returns (uint16)
 	{
-		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: NOT_SUPPORT");
+		require(
+			externalToken2Meta[_token].objectClassExt > 0,
+			"Furnace: NOT_SUPPORT"
+		);
 		return externalToken2Meta[_token].objectClassExt;
 	}
 
@@ -112,7 +126,10 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		view
 		returns (uint256)
 	{
-		require(externalToken2Meta[_token].objectClassExt > 0, "Furnace: NOT_SUPPORT");
+		require(
+			externalToken2Meta[_token].objectClassExt > 0,
+			"Furnace: NOT_SUPPORT"
+		);
 		return uint256(externalToken2Meta[_token].grade2StrengthRate[_grade]);
 	}
 
@@ -124,8 +141,13 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint256(internalToken2Meta[_token][_grade]);
 	}
 
+	function isAllowed(address _token, uint256 _id) public view returns (bool) {
+		(uint16 objClassExt, , ) = getMetaData(_token, _id);
+		return objClassExt > 0;
+	}
+
 	function getMetaData(address _token, uint256 _id)
-		external
+		public
 		view
 		returns (
 			uint16,
@@ -162,7 +184,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			}
 		}
 		// external token
-		return (getExternalObjectClassExt(_token), _EXTERNAL_DEFAULT_CLASS, _EXTERNAL_DEFAULT_GRADE);
+		return (
+			getExternalObjectClassExt(_token),
+			_EXTERNAL_DEFAULT_CLASS,
+			_EXTERNAL_DEFAULT_GRADE
+		);
 	}
 
 	function getDrillGrade(uint256 _tokenId) public pure returns (uint16) {
@@ -192,8 +218,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	function getRate(
 		address _token,
 		uint256 _id,
-		uint256 _index
+		uint256 _element
 	) external view returns (uint256) {
+		if (_token == address(0)) {
+			return 0;
+		}
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		if (_token == ownership) {
 			address interstellarEncoder =
@@ -201,7 +230,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			uint8 objectClass =
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(_token).getRate(_id, _index);
+				return IELIP002(_token).getRate(_id, _element);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);
@@ -209,11 +238,10 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 				//TODO:: check ONLY_AMBASSADOR
 				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
 				uint16 grade = getDarwiniaGrade(_id);
-				return getInternalStrengthRate(CONTRACT_DARWINIA_ITO_BASE, grade);
+				return
+					getInternalStrengthRate(CONTRACT_DARWINIA_ITO_BASE, grade);
 			}
 		}
-		if (_token == registry.addressOf(CONTRACT_ERC721_GEGO)) {} else {
-			return getExternalStrengthRate(_token, _EXTERNAL_DEFAULT_GRADE);
-		}
+		return getExternalStrengthRate(_token, _EXTERNAL_DEFAULT_GRADE);
 	}
 }
