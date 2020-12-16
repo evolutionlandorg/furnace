@@ -54,7 +54,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		);
 	}
 
-	function forceUneqiup(uint256 _landTokenId, uint256 _index)
+	function _forceUneqiup(uint256 _landTokenId, uint256 _index)
 		internal
 		updateMinerStrength(_landTokenId)
 	{
@@ -75,7 +75,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		for (uint256 i = 0; i < maxAmount; i++) {
 			Bar storage bar = token2Bars[_landTokenId][i];
 			if (bar.staker != msg.sender) {
-				forceUneqiup(_landTokenId, i);
+				_forceUneqiup(_landTokenId, i);
 			}
 		}
 	}

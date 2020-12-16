@@ -54,7 +54,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	// rate precision
 	uint128 public constant RATE_PRECISION = 10**8;
 	// save about 200 gas when contract create
-	bytes4 private constant SELECTOR =
+	bytes4 private constant _SELECTOR =
 		bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
 
 	/*** STORAGE ***/
@@ -79,7 +79,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		uint256 value
 	) private {
 		(bool success, bytes memory data) =
-			token.call(abi.encodeWithSelector(SELECTOR, from, to, value));
+			token.call(abi.encodeWithSelector(_SELECTOR, from, to, value)); // solhint-disable-line
 		require(
 			success && (data.length == 0 || abi.decode(data, (bool))),
 			"Furnace: TRANSFER_FAILED"
@@ -294,12 +294,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		Item memory item = tokenId2Item[_tokenId];
 		return (item.index, item.prefer, item.rate, item.ids, item.amounts);
 	}
-
-	uint256 index;
-	uint16 prefer;
-	uint128 rate;
-	uint256[] ids;
-	uint256[] amounts;
 
 	function getRate(uint256 _tokenId, uint256 _element)
 		public

@@ -20,33 +20,33 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function initFormula() public {
 		require(isInit == false, "Furnace: ALREADY_INITED");
-		initFormula0(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
-		initFormula0(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
-		initFormula0(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
-		initFormula0(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
-		initFormula0(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
+		_initFormula0(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
+		_initFormula0(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
+		_initFormula0(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
+		_initFormula0(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
+		_initFormula0(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
 
-		initFormula5(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
-		initFormula5(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
-		initFormula5(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
-		initFormula5(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
-		initFormula5(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
+		_initFormula5(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
+		_initFormula5(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
+		_initFormula5(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
+		_initFormula5(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
+		_initFormula5(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
 
-		initFormula10(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
-		initFormula10(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
-		initFormula10(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
-		initFormula10(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
-		initFormula10(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
+		_initFormula10(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
+		_initFormula10(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
+		_initFormula10(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
+		_initFormula10(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
+		_initFormula10(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
 
-		initFormula15(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
-		initFormula15(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
-		initFormula15(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
-		initFormula15(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
-		initFormula15(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
+		_initFormula15(registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN));
+		_initFormula15(registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN));
+		_initFormula15(registry.addressOf(CONTRACT_WATER_ERC20_TOKEN));
+		_initFormula15(registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN));
+		_initFormula15(registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN));
 		isInit = true;
 	}
 
-	function initFormula0(address token) private {
+	function _initFormula0(address token) private {
 		bytes32 name = "合金镐";	
 		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
@@ -60,7 +60,7 @@ contract FormulaInit is FurnaceSettingIds {
 		IFormula(formula).insert(name, meta, majors, minors, limits);
 	}
 
-	function initFormula5(address token) private {
+	function _initFormula5(address token) private {
 		bytes32 name = "人力铸铁钻机";	
 		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
@@ -74,7 +74,7 @@ contract FormulaInit is FurnaceSettingIds {
 		IFormula(formula).insert(name, meta, majors, minors, limits);
 	}
 
-	function initFormula10(address token) private {
+	function _initFormula10(address token) private {
 		bytes32 name = "人力钨钢钻机";	
 		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(2), true, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
@@ -88,7 +88,7 @@ contract FormulaInit is FurnaceSettingIds {
 		IFormula(formula).insert(name, meta, majors, minors, limits);
 	}
 
-	function initFormula15(address token) private {
+	function _initFormula15(address token) private {
 		bytes32 name = "人力金刚钻机";	
 		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(3), true, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);

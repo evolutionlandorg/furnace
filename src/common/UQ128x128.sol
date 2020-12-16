@@ -6,8 +6,8 @@ pragma solidity ^0.6.7;
 // resolution: 1 / 2**128
 
 library UQ128x128 {
-    uint8 constant RESOLUTION = 128;
-    uint256 constant Q128 = 2**128;
+    uint8 public constant RESOLUTION = 128;
+    uint256 public constant Q128 = 2**128;
 
     // encode a uint128 as a UQ128x128
     function encode(uint128 y) internal pure returns (uint256 z) {
@@ -21,7 +21,7 @@ library UQ128x128 {
 
     // divide a UQ128x128 by a uint128, returning a UQ128x128
     function uqdiv(uint256 x, uint128 y) internal pure returns (uint256 z) {
-        require(y != 0, 'UQ128x128: DIV_BY_ZERO');
+        require(y != 0, "UQ128x128: DIV_BY_ZERO");
         z = x / uint256(y);
     }
 

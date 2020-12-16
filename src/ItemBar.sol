@@ -54,7 +54,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 		uint256 id;
 	}
 
-	ISettingsRegistry registry;
+	ISettingsRegistry public registry;
 	uint256 public maxAmount;
 	mapping(uint256 => mapping(uint256 => Bar)) public token2Bars;
 
