@@ -1698,22 +1698,22 @@ contract LandResourceV5 is LandResourceV4 {
 		);
 	}
 
-	// function availableResources(
-	// 	uint256 _landTokenId,
-	// 	address[5] _resourceTokens
-	// )
-	// 	public
-	// 	view
-	// 	returns (
-	// 		uint256,
-	// 		uint256,
-	// 		uint256,
-	// 		uint256,
-	// 		uint256
-	// 	)
-	// {
-	// 	revert();
-	// }
+	function availableResources(
+		uint256 _landTokenId,
+		address[5] _resourceTokens
+	)
+		public
+		view
+		returns (
+			uint256,
+			uint256,
+			uint256,
+			uint256,
+			uint256
+		)
+	{
+		revert();
+	}
 
 	function getLandMinedBalance(uint256 _landTokenId, address _resourceToken)
 		public
