@@ -48,7 +48,7 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function initFormula0(address token) private {
 		bytes32 name = "合金镐";	
-		bytes memory meta = abi.encodePacked(uint16(256), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
+		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -62,7 +62,7 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function initFormula5(address token) private {
 		bytes32 name = "人力铸铁钻机";	
-		bytes memory meta = abi.encodePacked(uint16(4), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
+		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -76,7 +76,7 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function initFormula10(address token) private {
 		bytes32 name = "人力钨钢钻机";	
-		bytes memory meta = abi.encodePacked(uint16(4), uint16(1), uint16(2), true, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS));
+		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(2), true, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -90,7 +90,7 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function initFormula15(address token) private {
 		bytes32 name = "人力金刚钻机";	
-		bytes memory meta = abi.encodePacked(uint16(4), uint16(1), uint16(3), true, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS));
+		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(3), true, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);

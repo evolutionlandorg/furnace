@@ -162,7 +162,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			uint8 objectClass =
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
 			address nftAddress =
-				IInterstellarEncoder(interstellarEncoder).getContractAddress(
+				IInterstellarEncoder(interstellarEncoder).getObjectAddress(
 					_id
 				);
 			if (objectClass == ITEM_OBJECT_CLASS) {
@@ -229,8 +229,12 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 				registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
 			uint8 objectClass =
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+			address nftAddress =
+				IInterstellarEncoder(interstellarEncoder).getObjectAddress(
+					_id
+				);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(_token).getRate(_id, _element);
+				return IELIP002(nftAddress).getRate(_id, _element);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);

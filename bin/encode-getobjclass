@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+seth call $INTERSTELLARENCODER "getObjectClass(uint256)(uint8)" $1

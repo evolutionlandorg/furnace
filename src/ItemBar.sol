@@ -115,13 +115,13 @@ abstract contract ItemBar is DSAuth, DSMath {
 		address _token,
 		uint256 _id
 	) internal onlyAuth(_tokenId, _index) {
-		require(isAllowed(_token, _tokenId), "Furnace: PERMISSION");
+		require(isAllowed(_token, _id), "Furnace: PERMISSION");
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
 		Bar storage bar = token2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 			(, uint16 class, ) =
-				IMetaDataTeller(teller).getMetaData(_token, _tokenId);
+				IMetaDataTeller(teller).getMetaData(_token, _id);
 
 			(, uint16 originClass, ) =
 				IMetaDataTeller(teller).getMetaData(bar.token, bar.id);

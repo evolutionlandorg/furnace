@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$1" ]
+  then
+    echo "No argument supplied"
+    exit 1
+fi
+
+. $(PWD)/bin/init
+
+seth call $ITEMBASE_PROXY  "getBaseInfo(uint256)(uint16,uint16,uint16)" $1 
