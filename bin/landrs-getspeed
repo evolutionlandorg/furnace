@@ -34,10 +34,10 @@ seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)
 seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_SOIL $currentTime
 
 # seth call $LANDRESOURCE_PROXY "availableResources(uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $tokenId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
-echo ------------------------
-
-seth call $LANDRESOURCE_PROXY "getTotalMiningStrength(uint256,address)(uint256)" $tokenId $TOKEN_GOLD
-seth call $LANDRESOURCE_PROXY "getTotalMiningStrength(uint256,address)(uint256)" $tokenId $TOKEN_WOOD
-seth call $LANDRESOURCE_PROXY "getTotalMiningStrength(uint256,address)(uint256)" $tokenId $TOKEN_WATER
-seth call $LANDRESOURCE_PROXY "getTotalMiningStrength(uint256,address)(uint256)" $tokenId $TOKEN_FIRE
-seth call $LANDRESOURCE_PROXY "getTotalMiningStrength(uint256,address)(uint256)" $tokenId $TOKEN_SOIL
+echo "-----------------------------"
+tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+for token in "${tokens[@]}"; do
+	landstrength=$(seth call $LANDRESOURCE_PROXY "getLandMiningStrength(uint256,address)(uint256)" $tokenId $token)
+	barstrength=$(seth call $LANDRESOURCE_PROXY "getBarMiningStrength(uint256,address)(uint256)" $tokenId $token)
+	echo "landstrength:"   "$landstrength"       barstrength:  "$barstrength"
+done

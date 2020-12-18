@@ -1768,13 +1768,6 @@ contract LandResourceV5 is LandResourceV4 {
 		return land2ResourceMineState[_landTokenId].miners[_resourceToken];
 	}
 
-    function getReleaseSpeed(uint256 _tokenId, address _resourceToken, uint256 _time) public view returns (uint256 currentSpeed) {
-        return ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-        .getResourceRate(_tokenId, _resourceToken).mul(_getReleaseSpeedInSeconds(_tokenId, _time))
-		.mul(1 ether)
-        .div(TOTAL_SECONDS);
-    }
-
 	// function availableResources(
 	// 	uint256 _landTokenId,
 	// 	address[5] _resourceTokens

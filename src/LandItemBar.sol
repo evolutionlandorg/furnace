@@ -28,7 +28,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		require(
 			IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
-			"Forbidden."
+			"Furnace: Forbidden"
 		);
 		_;
 	}
@@ -38,7 +38,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		require(
 			land2IsPrivate[_landTokenId] == false ||
 				IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
-			"Forbidden."
+			"Furnace: Forbidden"
 		);
 		_;
 	}
@@ -59,11 +59,11 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		updateMinerStrength(_landTokenId)
 	{
 		require(_index < maxAmount, "Index Forbidden.");
-		Bar storage bar = token2Bars[_landTokenId][_index];
+		Bar storage bar = tokenId2Bars[_landTokenId][_index];
 		if (bar.token == address(0)) return;
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit ForceUnequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
-		delete token2Bars[_landTokenId][_index];
+		delete tokenId2Bars[_landTokenId][_index];
 	}
 
 	function setPrivate(uint256 _landTokenId)
@@ -73,7 +73,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		require(land2IsPrivate[_landTokenId] == false, "Already is private.");
 		land2IsPrivate[_landTokenId] = true;
 		for (uint256 i = 0; i < maxAmount; i++) {
-			Bar storage bar = token2Bars[_landTokenId][i];
+			Bar storage bar = tokenId2Bars[_landTokenId][i];
 			if (bar.staker != msg.sender) {
 				_forceUneqiup(_landTokenId, i);
 			}

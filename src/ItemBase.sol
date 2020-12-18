@@ -305,7 +305,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		(, , , , , uint128 baseRate, uint128 enhanceRate) =
 			IFormula(formula).getMetaInfo(item.index);
-		if (uint256(item.prefer) & (~(1 << _element)) > 0) {
+		if (uint256(item.prefer) & (1 << _element) > 0) {
 			uint128 realEnhanceRate =
 				baseRate +
 					UQ128x128.mul128(item.rate, enhanceRate) /

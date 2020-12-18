@@ -56,7 +56,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 
 	ISettingsRegistry public registry;
 	uint256 public maxAmount;
-	mapping(uint256 => mapping(uint256 => Bar)) public token2Bars;
+	mapping(uint256 => mapping(uint256 => Bar)) public tokenId2Bars;
 
 	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
@@ -79,7 +79,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 		returns (address)
 	{
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		return token2Bars[_tokenId][_index].staker;
+		return tokenId2Bars[_tokenId][_index].staker;
 	}
 
 	function batchEquip(
@@ -117,7 +117,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 	) internal onlyAuth(_tokenId, _index) {
 		require(isAllowed(_token, _id), "Furnace: PERMISSION");
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		Bar storage bar = token2Bars[_tokenId][_index];
+		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 			(, uint16 class, ) =
@@ -157,15 +157,16 @@ abstract contract ItemBar is DSAuth, DSMath {
 	}
 
 	function _unequip(uint256 _tokenId, uint256 _index) internal {
-		Bar storage bar = token2Bars[_tokenId][_index];
+		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		require(bar.token != address(0), "Furnace: EMPTY");
 		require(bar.staker == msg.sender, "Furnace: Forbidden");
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit Unequip(_tokenId, _index, bar.staker, bar.token, bar.id);
-		delete token2Bars[_tokenId][_index];
+		delete tokenId2Bars[_tokenId][_index];
 	}
 
 	function setMaxAmount(uint256 _maxAmount) public auth {
+		require(_maxAmount > maxAmount, "Furnace: INVALID_MAXAMOUNT")
 		maxAmount = _maxAmount;
 	}
 
@@ -174,7 +175,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 		uint256 _tokenId,
 		uint256 _index
 	) public view returns (uint256) {
-		Bar memory bar = token2Bars[_tokenId][_index];
+		Bar memory bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token == address(0)) {
 			return 0;
 		}
@@ -196,7 +197,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 				.resourceToken2RateAttrId(_resourceToken);
 		uint256 rate;
 		for (uint256 i = 0; i < maxAmount; i++) {
-			Bar memory bar = token2Bars[_tokenId][i];
+			Bar memory bar = tokenId2Bars[_tokenId][i];
 			if (bar.token == address(0)) {
 				continue;
 			}
