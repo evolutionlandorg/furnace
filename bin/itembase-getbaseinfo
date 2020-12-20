@@ -11,3 +11,5 @@ fi
 . $(PWD)/bin/init
 
 seth call $ITEMBASE_PROXY  "getBaseInfo(uint256)(uint16,uint16,uint16)" $1 
+echo "-----------------------"
+seth estimate $ITEMBASE_PROXY  "getBaseInfo(uint256)(uint16,uint16,uint16)" $1 

@@ -9,6 +9,7 @@ landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
 tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
 for token in "${tokens[@]}"; do
 	seth call $LANDITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $landId
+	seth estimate $LANDITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $landId
 done
 
 # seth call $LANDITEMBAR_PROXY "getBarStaker(uint256,uint256)(uint256)" $landId $(seth --to-uint256 0) 
