@@ -15,8 +15,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
+		uint128 base,
+		uint128 enhance,
 		uint256 index,
+		uint16 objClassExt,
+		uint16 class,
+		uint16 grade,
 		uint16 prefer,
+		bool canDisenchant,
 		uint128 rate,
 		uint256[] ids,
 		uint256[] amounts,
@@ -33,8 +39,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	);
 
 	struct Item {
+		uint128 base;
+		uint128 enhance;
 		uint256 index;
+		uint16 objClassExt;
+		uint16 class;
+		uint16 grade;
 		uint16 prefer;
+		bool canDisenchant;
 		uint128 rate;
 		uint256[] ids;
 		uint256[] amounts;
@@ -70,6 +82,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		owner = msg.sender;
 		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
+
+		// trick test
+		lastItemObjectId = 1000;
 	}
 
 	function _safeTransfer(
@@ -196,10 +211,26 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		lastItemObjectId += 1;
 		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
 
+		(
+			,
+			uint16 objClassExt,
+			uint16 class,
+			uint16 grade,
+			bool canDisenchant,
+			uint128 base,
+			uint128 enhance
+		) = IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
+
 		Item memory item =
 			Item({
+				base: base,
+				enhance: enhance,
 				index: _index,
+				objClassExt: objClassExt,
+				class: class,
+				grade: grade,
 				prefer: _prefer,
+				canDisenchant: canDisenchant,
 				rate: _rate,
 				ids: _ids,
 				amounts: _amounts
@@ -211,8 +242,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		emit Enchanced(
 			msg.sender,
 			tokenId,
+			item.base,
+			item.enhance,
 			item.index,
+			item.objClassExt,
+			item.class,
+			item.grade,
 			item.prefer,
+			item.canDisenchant,
 			item.rate,
 			item.ids,
 			item.amounts,
@@ -302,17 +339,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		returns (uint256)
 	{
 		Item memory item = tokenId2Item[_tokenId];
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , , , , uint128 baseRate, uint128 enhanceRate) =
-			IFormula(formula).getMetaInfo(item.index);
 		if (uint256(item.prefer) & (1 << _element) > 0) {
 			uint128 realEnhanceRate =
-				baseRate +
-					UQ128x128.mul128(item.rate, enhanceRate) /
+				item.base +
+					UQ128x128.mul128(item.rate, item.enhance) /
 					RATE_PRECISION;
 			return uint256(realEnhanceRate);
 		}
-		return uint256(baseRate / 2);
+		return uint256(item.base / 2);
 	}
 
 	function getBaseInfo(uint256 _tokenId)
@@ -326,10 +360,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		)
 	{
 		Item memory item = tokenId2Item[_tokenId];
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, uint16 objectClassExt, uint16 class, uint16 grade, , , ) =
-			IFormula(formula).getMetaInfo(item.index);
-		return (objectClassExt, class, grade);
+		return (item.objClassExt, item.class, item.grade);
 	}
 
 	function getEnchantedInfo(uint256 _tokenId)
@@ -346,11 +377,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item memory item = tokenId2Item[_tokenId];
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , uint16 class, , bool canDisenchant, , ) =
-			IFormula(formula).getMetaInfo(item.index);
 		return (
-			class,
-			canDisenchant,
+			item.class,
+			item.canDisenchant,
 			IFormula(formula).getMajorAddresses(item.index),
 			item.ids,
 			IFormula(formula).getMinorAddresses(item.index),

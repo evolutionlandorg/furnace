@@ -85,12 +85,13 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		land2IsPrivate[_landTokenId] = false;
 	}
 
-	function isAllowed(address _token, uint256 _id)
+	function isAllowed(uint256 _landTokenId, address _token, uint256 _id)
 		public
 		view
 		override
 		returns (bool)
 	{
+        require(IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_landTokenId) == 1, "Funace: ONLY_LAND");
 		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
 	}
 

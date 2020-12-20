@@ -35,12 +35,13 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 		);
 	}
 
-	function isAllowed(address _token, uint256 _id)
+	function isAllowed(uint256 _apostleTokenId, address _token, uint256 _id)
 		public
 		view
 		override
 		returns (bool)
 	{
+        require(IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_apostleTokenId) == 1, "Funace: ONLY_APOSTEL");
 		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
 	}
 

@@ -7,7 +7,8 @@ set -e
 landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
 
 for i in {0..4}; do
+	echo "-----------------------------"
 	index=$(seth --to-uint256 $i)
-	seth call $LANDRESOURCE_PROXY "getMinerOnLand(uint256,uint256)(uint256)" $landId $index  
+	seth call $LANDITEMBAR_PROXY "tokenId2Bars(uint256,uint256)(address,address,uint256)" $landId $index
 done
 

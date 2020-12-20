@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+index=$(seth --to-uint256 $2)
+token=$IOBJECTOWNERSHIP_PROXY
+id=0x2a010001010001040000000000000001000100000000000000000000000000eb
+# seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $APOSTLEITEMBAR_PROXY $(seth --to-uint256 1)
+seth send $APOSTLEITEMBAR_PROXY "equip(uint256,uint256,address,uint256)" $1 $index $token $id

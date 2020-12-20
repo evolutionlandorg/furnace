@@ -62,7 +62,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 
 	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
 
-	function isAllowed(address _token, uint256 _id)
+	function isAllowed(uint256 _tokenId, address _token, uint256 _id)
 		public
 		view
 		virtual
@@ -115,11 +115,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 		address _token,
 		uint256 _id
 	) internal onlyAuth(_tokenId, _index) {
-		require(isAllowed(_token, _id), "Furnace: PERMISSION");
+		require(isAllowed(_tokenId, _token, _id), "Furnace: PERMISSION");
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
+		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
-			address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 			(, uint16 class, ) =
 				IMetaDataTeller(teller).getMetaData(_token, _id);
 
@@ -159,14 +159,15 @@ abstract contract ItemBar is DSAuth, DSMath {
 	function _unequip(uint256 _tokenId, uint256 _index) internal {
 		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		require(bar.token != address(0), "Furnace: EMPTY");
-		require(bar.staker == msg.sender, "Furnace: Forbidden");
+		require(bar.staker == msg.sender, "Furnace: FORBIDDEN");
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit Unequip(_tokenId, _index, bar.staker, bar.token, bar.id);
+		//TODO: check
 		delete tokenId2Bars[_tokenId][_index];
 	}
 
 	function setMaxAmount(uint256 _maxAmount) public auth {
-		require(_maxAmount > maxAmount, "Furnace: INVALID_MAXAMOUNT")
+		require(_maxAmount > maxAmount, "Furnace: INVALID_MAXAMOUNT");
 		maxAmount = _maxAmount;
 	}
 
