@@ -221,8 +221,8 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 
 	function getPrefer(address _token) external view returns (uint256) {
 		return
-			landbase.resourceToken2RateAttrId(_token) > 0
-				? landbase.resourceToken2RateAttrId(_token)
+			ILandBase(landbase).resourceToken2RateAttrId(_token) > 0
+				? ILandBase(landbase).resourceToken2RateAttrId(_token)
 				: resourceLPToken2RateAttrId[_token];
 	}
 

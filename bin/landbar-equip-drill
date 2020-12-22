@@ -4,9 +4,9 @@ set -e
 
 . $(PWD)/bin/init
 
-index=$(seth --to-uint256 $2)
+index=$(seth --to-uint256 $3)
 token=$IOBJECTOWNERSHIP_PROXY
-id=$(seth --to-uint256 $1)
-landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
+id=$(seth --to-uint256 $2)
+landId=$1
 # seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $LANDITEMBAR_PROXY $(seth --to-uint256 1)
 seth send $LANDITEMBAR_PROXY "equip(uint256,uint256,address,uint256)" $landId $index $token $id

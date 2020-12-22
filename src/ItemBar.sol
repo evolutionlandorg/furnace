@@ -120,13 +120,13 @@ abstract contract ItemBar is DSAuth, DSMath {
 		return tokenId2Bars[_tokenId][_index].staker;
 	}
 
-	function getBarItemId(uint256 _tokenId, uint256 _index)
+	function getBarItem(uint256 _tokenId, uint256 _index)
 		public
 		view
-		returns (uint256)
+		returns (address, uint256)
 	{
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		return tokenId2Bars[_tokenId][_index].id;
+		return (tokenId2Bars[_tokenId][_index].token, tokenId2Bars[_tokenId][_index].id);
 	}
 
 	function batchEquip(
