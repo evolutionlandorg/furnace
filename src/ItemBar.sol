@@ -44,6 +44,26 @@ abstract contract ItemBar is DSAuth, DSMath {
 	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
 		"CONTRACT_OBJECT_OWNERSHIP";
 
+	// 0x434f4e54524143545f474f4c445f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_GOLD_ERC20_TOKEN =
+		"CONTRACT_GOLD_ERC20_TOKEN";
+
+	// 0x434f4e54524143545f574f4f445f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_WOOD_ERC20_TOKEN =
+		"CONTRACT_WOOD_ERC20_TOKEN";
+
+	// 0x434f4e54524143545f57415445525f45524332305f544f4b454e000000000000
+	bytes32 public constant CONTRACT_WATER_ERC20_TOKEN =
+		"CONTRACT_WATER_ERC20_TOKEN";
+
+	// 0x434f4e54524143545f464952455f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_FIRE_ERC20_TOKEN =
+		"CONTRACT_FIRE_ERC20_TOKEN";
+
+	// 0x434f4e54524143545f534f494c5f45524332305f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_SOIL_ERC20_TOKEN =
+		"CONTRACT_SOIL_ERC20_TOKEN";
+
 	uint8 public constant DRILL_OBJECT_CLASS = 4; // Drill
 	uint8 public constant ITEM_OBJECT_CLASS = 5; // Item
 	uint8 public constant DARWINIA_OBJECT_CLASS = 254; // Darwinia
@@ -52,25 +72,43 @@ abstract contract ItemBar is DSAuth, DSMath {
 		address staker;
 		address token;
 		uint256 id;
+		mapping(address => uint256) rates;
 	}
 
 	ISettingsRegistry public registry;
 	uint256 public maxAmount;
 	mapping(uint256 => mapping(uint256 => Bar)) public tokenId2Bars;
+	IMetaDataTeller public teller;
+	address public gold;
+	address public wood;
+	address public water;
+	address public fire;
+	address public soil;
 
 	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
 	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
 
-	function isAllowed(uint256 _tokenId, address _token, uint256 _id)
-		public
-		view
-		virtual
-		returns (bool);
+	function isAllowed(
+		uint256 _tokenId,
+		address _token,
+		uint256 _id
+	) public view virtual returns (bool);
 
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
+
+	}
+
+	function refresh() public virtual auth {
+		teller = IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER));
+
+		gold = registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN);
+		wood = registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN);
+		water = registry.addressOf(CONTRACT_WATER_ERC20_TOKEN);
+		fire = registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN);
+		soil = registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN);
 	}
 
 	function getBarStaker(uint256 _tokenId, uint256 _index)
@@ -80,6 +118,15 @@ abstract contract ItemBar is DSAuth, DSMath {
 	{
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
 		return tokenId2Bars[_tokenId][_index].staker;
+	}
+
+	function getBarItemId(uint256 _tokenId, uint256 _index)
+		public
+		view
+		returns (uint256)
+	{
+		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
+		return tokenId2Bars[_tokenId][_index].id;
 	}
 
 	function batchEquip(
@@ -117,14 +164,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 	) internal onlyAuth(_tokenId, _index) {
 		require(isAllowed(_tokenId, _token, _id), "Furnace: PERMISSION");
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
-			(, uint16 class, ) =
-				IMetaDataTeller(teller).getMetaData(_token, _id);
+			(, uint16 class, ) = teller.getMetaData(_token, _id);
 
-			(, uint16 originClass, ) =
-				IMetaDataTeller(teller).getMetaData(bar.token, bar.id);
+			(, uint16 originClass, ) = teller.getMetaData(bar.token, bar.id);
 			require(class > originClass, "Furnace: INVALID_CLASS");
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
@@ -133,6 +177,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 		bar.staker = msg.sender;
 		bar.token = _token;
 		bar.id = _id;
+		bar.rates[gold] = teller.getRate(bar.token, bar.id, 1);
+		bar.rates[wood] = teller.getRate(bar.token, bar.id, 2);
+		bar.rates[water] = teller.getRate(bar.token, bar.id, 3);
+		bar.rates[fire] = teller.getRate(bar.token, bar.id, 4);
+		bar.rates[soil] = teller.getRate(bar.token, bar.id, 5);
 		emit Equip(_tokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
@@ -172,39 +221,29 @@ abstract contract ItemBar is DSAuth, DSMath {
 	}
 
 	function enhanceStrengthRateByIndex(
-		address _resourceToken,
+		address _resource,
 		uint256 _tokenId,
 		uint256 _index
-	) public view returns (uint256) {
-		Bar memory bar = tokenId2Bars[_tokenId][_index];
+	) external view returns (uint256) {
+		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token == address(0)) {
 			return 0;
 		}
-		uint256 element =
-			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-				.resourceToken2RateAttrId(_resourceToken);
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		return IMetaDataTeller(teller).getRate(bar.token, bar.id, element);
+		return bar.rates[_resource];
 	}
 
-	function enhanceStrengthRateOf(address _resourceToken, uint256 _tokenId)
-		public
+	function enhanceStrengthRateOf(address _resource, uint256 _tokenId)
+		external
 		view
 		returns (uint256)
 	{
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		uint256 element =
-			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-				.resourceToken2RateAttrId(_resourceToken);
 		uint256 rate;
 		for (uint256 i = 0; i < maxAmount; i++) {
-			Bar memory bar = tokenId2Bars[_tokenId][i];
+			Bar storage bar = tokenId2Bars[_tokenId][i];
 			if (bar.token == address(0)) {
 				continue;
 			}
-			uint256 itemRate =
-				IMetaDataTeller(teller).getRate(bar.token, bar.id, element);
-			rate = add(rate, itemRate);
+			rate = add(rate, bar.rates[_resource]);
 		}
 		return rate;
 	}

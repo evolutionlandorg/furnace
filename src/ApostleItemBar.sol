@@ -5,6 +5,10 @@ import "./ItemBar.sol";
 
 contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 
+	IERC721 public ownership;
+	ILandResource public landResource;
+	IInterstellarEncoder public interstellarEncoder; 
+
 	function initialize(address _registry, uint256 _maxAmount)
 		public
 		initializer
@@ -13,24 +17,33 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
+
+		refresh();
+	}
+
+	function refresh() public auth override {
+		super.refresh();
+
+		teller = IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER));
+		ownership = IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP));
+		landResource = ILandResource(registry.addressOf(CONTRACT_LAND_RESOURCE));
+		interstellarEncoder = IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER));
 	}
 
 	modifier onlyAuth(uint256 _apostleTokenId, uint256 _index) override {
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		require(
-			IERC721(ownership).ownerOf(_apostleTokenId) == msg.sender,
+			ownership.ownerOf(_apostleTokenId) == msg.sender,
 			"Forbidden."
 		);
 		_;
 	}
 
 	modifier updateMinerStrength(uint256 _apostleTokenId) override {
-		address landResource = registry.addressOf(CONTRACT_LAND_RESOURCE);
-		ILandResource(landResource).updateMinerStrengthWhenStop(
+		landResource.updateMinerStrengthWhenStop(
 			_apostleTokenId
 		);
 		_;
-		ILandResource(landResource).updateMinerStrengthWhenStart(
+		landResource.updateMinerStrengthWhenStart(
 			_apostleTokenId
 		);
 	}
@@ -41,8 +54,8 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 		override
 		returns (bool)
 	{
-        require(IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_apostleTokenId) == 1, "Funace: ONLY_APOSTEL");
-		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
+        require(interstellarEncoder.getObjectClass(_apostleTokenId) == 1, "Funace: ONLY_APOSTEL");
+		return teller.isAllowed(_token, _id);
 	}
 
 	function isAmbassador(uint256 _tokenId) public pure returns (bool) {

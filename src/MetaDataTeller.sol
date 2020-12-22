@@ -75,7 +75,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	function refresh() public auth {
 		ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		interstellarEncoder = registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
-		landbase = registry.addressOf(CONTRACT_LAND_BASE); 
+		landbase = registry.addressOf(CONTRACT_LAND_BASE);
 		itembase = registry.addressOf(CONTRACT_ITEM_BASE);
 	}
 
@@ -158,10 +158,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		uint16 objClassExt;
 		if (_token == ownership) {
 			objClassExt = uint16(
-				IInterstellarEncoder(
-					interstellarEncoder
-				)
-					.getObjectClass(_id)
+				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id)
 			);
 		} else {
 			objClassExt = getExternalObjectClassExt(_token);
@@ -224,10 +221,8 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 
 	function getPrefer(address _token) external view returns (uint256) {
 		return
-			ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-				.resourceToken2RateAttrId(_token) > 0
-				? ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
-					.resourceToken2RateAttrId(_token)
+			landbase.resourceToken2RateAttrId(_token) > 0
+				? landbase.resourceToken2RateAttrId(_token)
 				: resourceLPToken2RateAttrId[_token];
 	}
 

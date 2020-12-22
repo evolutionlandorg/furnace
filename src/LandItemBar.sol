@@ -12,7 +12,10 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		uint256 id
 	);
 
-	mapping(uint256 => bool) public land2IsPrivate;
+	mapping(uint256 => mapping(uint256 => bool)) public land2IsPrivate;
+	IERC721 public ownership;
+	ILandResource public landResource;
+	IInterstellarEncoder public interstellarEncoder; 
 
 	function initialize(address _registry, uint256 _maxAmount)
 		public
@@ -22,34 +25,41 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
+
+		refresh();
+	}
+
+	function refresh() public auth override {
+		super.refresh();
+
+		ownership = IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP));
+		landResource = ILandResource(registry.addressOf(CONTRACT_LAND_RESOURCE));
+		interstellarEncoder = IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER));
 	}
 
 	modifier onlyLander(uint256 _landTokenId) {
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		require(
-			IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
+			ownership.ownerOf(_landTokenId) == msg.sender,
 			"Furnace: Forbidden"
 		);
 		_;
 	}
 
 	modifier onlyAuth(uint256 _landTokenId, uint256 _index) override {
-		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
 		require(
-			land2IsPrivate[_landTokenId] == false ||
-				IERC721(ownership).ownerOf(_landTokenId) == msg.sender,
+			land2IsPrivate[_landTokenId][_index] == false ||
+				ownership.ownerOf(_landTokenId) == msg.sender,
 			"Furnace: Forbidden"
 		);
 		_;
 	}
 
 	modifier updateMinerStrength(uint256 _landTokenId) override {
-		address landResource = registry.addressOf(CONTRACT_LAND_RESOURCE);
-		ILandResource(landResource).updateAllMinerStrengthWhenStop(
+		landResource.updateAllMinerStrengthWhenStop(
 			_landTokenId
 		);
 		_;
-		ILandResource(landResource).updateAllMinerStrengthWhenStart(
+		landResource.updateAllMinerStrengthWhenStart(
 			_landTokenId
 		);
 	}
@@ -66,23 +76,21 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		delete tokenId2Bars[_landTokenId][_index];
 	}
 
-	function setPrivate(uint256 _landTokenId)
+	function setPrivate(uint256 _landTokenId, uint256 _index)
 		external
 		onlyLander(_landTokenId)
 	{
-		require(land2IsPrivate[_landTokenId] == false, "Already is private.");
-		land2IsPrivate[_landTokenId] = true;
-		for (uint256 i = 0; i < maxAmount; i++) {
-			Bar storage bar = tokenId2Bars[_landTokenId][i];
-			if (bar.staker != msg.sender) {
-				_forceUneqiup(_landTokenId, i);
-			}
+		require(land2IsPrivate[_landTokenId][_index] == false, "Already is private.");
+		land2IsPrivate[_landTokenId][_index] = true;
+		Bar storage bar = tokenId2Bars[_landTokenId][_index];
+		if (bar.staker != msg.sender) {
+			_forceUneqiup(_landTokenId, _index);
 		}
 	}
 
-	function setPublic(uint256 _landTokenId) external onlyLander(_landTokenId) {
-		require(land2IsPrivate[_landTokenId] == true, "Already is public.");
-		land2IsPrivate[_landTokenId] = false;
+	function setPublic(uint256 _landTokenId, uint256 _index) external onlyLander(_landTokenId) {
+		require(land2IsPrivate[_landTokenId][_index] == true, "Already is public.");
+		land2IsPrivate[_landTokenId][_index] = false;
 	}
 
 	function isAllowed(uint256 _landTokenId, address _token, uint256 _id)
@@ -91,8 +99,8 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		override
 		returns (bool)
 	{
-        require(IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_landTokenId) == 1, "Funace: ONLY_LAND");
-		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
+        require(interstellarEncoder.getObjectClass(_landTokenId) == 1, "Funace: ONLY_LAND");
+		return teller.isAllowed(_token, _id);
 	}
 
 	function isAmbassador(uint256 _tokenId) public pure returns (bool) {

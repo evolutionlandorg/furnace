@@ -8,5 +8,6 @@ landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
 tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
 for token in "${tokens[@]}"; do
 	strength=$(seth call $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $1 $token $landId)
+	seth estimate $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $1 $token $landId
 	seth --to-fix 18 $strength 
 done

@@ -251,11 +251,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function _calculteRate(uint256 _tokenId, uint16 _prefer, uint128 _rate, uint128 _base, uint128 _enhance)
 		internal
 	{
-		tokenId2Rate[_tokenId][0] = _getRate(0, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][1] = _getRate(0, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][2] = _getRate(0, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][3] = _getRate(0, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][4] = _getRate(0, _prefer, _rate, _base, _enhance);	
+		tokenId2Rate[_tokenId][1] = _getRate(1, _prefer, _rate, _base, _enhance);	
+		tokenId2Rate[_tokenId][2] = _getRate(2, _prefer, _rate, _base, _enhance);	
+		tokenId2Rate[_tokenId][3] = _getRate(3, _prefer, _rate, _base, _enhance);	
+		tokenId2Rate[_tokenId][4] = _getRate(4, _prefer, _rate, _base, _enhance);	
+		tokenId2Rate[_tokenId][5] = _getRate(5, _prefer, _rate, _base, _enhance);	
 	}
 
 	function _getRate(uint256 _element, uint16 _prefer, uint128 _rate, uint128 _base, uint128 _enhance)

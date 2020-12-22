@@ -5,17 +5,18 @@ set -e
 . $(PWD)/bin/init
 
 landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
+itemId=0x0000000000000000000000000000000000000000000000000000000000000046
 
-seth call $LANDRESOURCE_PROXY "availableResources(address,uint256,address[5])(uint256[2],uint256[2],uint256[2],uint256[2],uint256[2])" $AUTH $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
+seth call $LANDRESOURCE_PROXY "availableLandResources(uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
 
-# echo "-----------------------------"
-# seth call $LANDRESOURCE_PROXY "availableResources(uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
+echo "-----------------------------"
+seth call $LANDRESOURCE_PROXY "availableItemResources(uint256,uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $itemId $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
 
 echo "-----------------------------"
 tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
 for token in "${tokens[@]}"; do
 	landrs=$(seth call $LANDRESOURCE_PROXY "getLandMinedBalance(uint256,address)(uint256)" $landId $token)
-	barrs=$(seth call $LANDRESOURCE_PROXY "getBarMinedBalance(uint256,address,address)(uint256)" $landId $AUTH $token)
+	barrs=$(seth call $LANDRESOURCE_PROXY "getItemMinedBalance(uint256,address)(uint256)" $itemId $token)
 	echo "land:"   "$landrs"       bar:  "$barrs"
 	# seth call $LANDRESOURCE_PROXY "land2RSState(uint256,address)(uint256,uint256,uint256)" $landId $token
 done
