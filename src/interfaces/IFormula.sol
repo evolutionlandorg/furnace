@@ -19,7 +19,7 @@ interface IFormula {
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
 		bytes32[] majors;
 		// minor meterail info
-		address[] minors;
+		bytes32[] minors;
 		// [uint128 min, uint128 max]
 		uint256[] limits;
 		bool disable;
@@ -35,7 +35,7 @@ interface IFormula {
 		uint16 grade,
 		bool canDisenchant,
 		bytes32[] majors,
-		address[] minors,
+		bytes32[] minors,
 		uint256[] limits
 	);
 	event DisableFormula(uint256 indexed index);
@@ -61,7 +61,7 @@ interface IFormula {
 		uint16 _grade,
 		bool _canDisenchant,
 		bytes32[] calldata _majors,
-		address[] calldata _minors,
+		bytes32[] calldata _minors,
 		uint256[] calldata _limits
 	) external;
 
@@ -91,7 +91,7 @@ interface IFormula {
 	function getMinors(uint256 _index)
 		external
 		view
-		returns (address[] memory, uint256[] memory);
+		returns (bytes32[] memory, uint256[] memory);
 
 	//0x6ef2fd27
 	function getMajorInfo(bytes32 _major)
@@ -118,11 +118,9 @@ interface IFormula {
 		external
 		view
 		returns (
-			bytes32,
 			uint16,
 			uint16,
 			uint16,
-			bool,
 			uint128,
 			uint128
 		);
@@ -133,9 +131,8 @@ interface IFormula {
 		view
 		returns (address[] memory);
 
-	//0x98de0201
-	function getMinorAddresses(uint256 _index)
+	function getDisenchant(uint256 _index)
 		external
 		view
-		returns (address[] memory);
+		returns (bool);
 }

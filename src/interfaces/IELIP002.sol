@@ -15,6 +15,7 @@ interface IELIP002 {
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
+		address[] calldata _tokens,
 		uint256[] calldata _values
 	) external returns (uint256);
 

@@ -35,7 +35,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint16 _grade,
 		bool _canDisenchant,
 		bytes32[] calldata _majors,
-		address[] calldata _minors,
+		bytes32[] calldata _minors,
 		uint256[] calldata _limits
 	) external override auth {
 		FormulaEntry memory formula =
@@ -125,7 +125,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		external
 		view
 		override
-		returns (address[] memory, uint256[] memory)
+		returns (bytes32[] memory, uint256[] memory)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		return (formulas[_index].minors, formulas[_index].limits);
@@ -146,13 +146,14 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return majorAddresses;
 	}
 
-	function getMinorAddresses(uint256 _index)
+	function getDisenchant(uint256 _index)
 		external
 		view
 		override
-		returns (address[] memory)
+		returns (bool)
 	{
-		return formulas[_index].minors;
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return formulas[_index].canDisenchant;
 	}
 
 	function getMetaInfo(uint256 _index)
@@ -160,11 +161,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		view
 		override
 		returns (
-			bytes32,
 			uint16,
 			uint16,
 			uint16,
-			bool,
 			uint128,
 			uint128
 		)
@@ -172,11 +171,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
 		return (
-			formula.name,
 			formula.objClassExt,
 			formula.class,
 			formula.grade,
-			formula.canDisenchant,
 			formula.base,
 			formula.enhance
 		);

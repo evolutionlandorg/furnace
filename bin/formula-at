@@ -11,4 +11,4 @@ fi
 . $(PWD)/bin/init
 
 index=$(seth --to-uint256 $1)
-seth call $FORMULA_PROXY  "at(uint256)(bytes32,bytes,bytes32[],address[],uint256[],bool)" $index 
+seth call $FORMULA_PROXY  "formulas(uint256)(bytes32,uint128,uint128,uint16,uint16,uint16,bool)" $index 

@@ -12,3 +12,5 @@ seth call $authAddress "whiteList(address)" $address
 seth send $FORMULA_PROXY "setAuthority(address)" $authAddress
 
 seth send $address "initFormula()"
+
+. $(PWD)/bin/teller-refresh

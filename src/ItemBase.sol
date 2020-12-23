@@ -23,8 +23,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
-		bool canDisenchant,
 		uint256[] ids,
+		address[] tokens,
 		uint256[] amounts,
 		uint256 now
 	);
@@ -47,8 +47,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		uint16 class;
 		uint16 grade;
 		uint16 prefer;
-		bool canDisenchant;
 		uint256[] ids;
+		address[] tokens;
 		uint256[] amounts;
 	}
 
@@ -62,6 +62,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	// 0x434f4e54524143545f4f424a4543545f4f574e45525348495000000000000000
 	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
 		"CONTRACT_OBJECT_OWNERSHIP";
+
+	//0x434f4e54524143545f4c505f454c454d454e545f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_LP_ELEMENT_TOKEN =
+		"CONTRACT_LP_ELEMENT_TOKEN";
+
+	//0x434f4e54524143545f454c454d454e545f544f4b454e00000000000000000000
+	bytes32 public constant CONTRACT_ELEMENT_TOKEN = "CONTRACT_ELEMENT_TOKEN";
 
 	// rate precision
 	uint128 public constant RATE_PRECISION = 10**8;
@@ -106,12 +113,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
+		address[] calldata _tokens,
 		uint256[] calldata _values
 	) external override stoppable returns (uint256) {
 		_dealMajor(_index, _ids);
 		(uint16 prefer, uint128 rate, uint256[] memory amounts) =
-			_dealMinor(_index, _values);
-		return _enchanceItem(_index, prefer, rate, _ids, amounts);
+			_dealMinor(_index, _tokens, _values);
+		return _enchanceItem(_index, prefer, rate, _ids, _tokens, amounts);
 	}
 
 	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
@@ -144,7 +152,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		}
 	}
 
-	function _dealMinor(uint256 _index, uint256[] memory _values)
+	function _dealMinor(
+		uint256 _index,
+		address[] memory _tokens,
+		uint256[] memory _values
+	)
 		private
 		returns (
 			uint16,
@@ -154,10 +166,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(address[] memory minors, uint256[] memory limits) =
+		(bytes32[] memory minors, uint256[] memory limits) =
 			IFormula(formula).getMinors(_index);
 		require(
-			_values.length == minors.length,
+			_tokens.length == minors.length && _values.length == minors.length,
 			"Furnace: INVALID_VALUES_LENGTH."
 		);
 		uint16 prefer;
@@ -165,13 +177,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		uint128 rate = RATE_PRECISION;
 		uint256[] memory amounts = new uint256[](minors.length);
 		for (uint256 i = 0; i < minors.length; i++) {
-			address minorAddress = minors[i];
-			uint256 limit = limits[i];
+			address minorAddress = _tokens[i];
 			uint256 value = _values[i];
 			(uint128 minorMin, uint128 minorMax) =
-				IFormula(formula).getLimit(limit);
+				IFormula(formula).getLimit(limits[i]);
 			require(minorMax > minorMin, "Furnace: INVALID_LIMIT");
 			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
+			_checkMinorAddress(element, minors[i], minorAddress);
 			prefer |= uint16(1 << element);
 			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
 			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
@@ -203,22 +215,40 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		return (prefer, rate, amounts);
 	}
 
+	function _checkMinorAddress(
+		uint256 element,
+		bytes32 minor,
+		address minorAddress
+	) internal view {
+		if (element > 0) {
+			require(
+				minor == CONTRACT_ELEMENT_TOKEN ||
+					minor == CONTRACT_LP_ELEMENT_TOKEN,
+				"Funace: INVALID_TOKEN"
+			);
+		} else {
+			require(
+				minorAddress == registry.addressOf(minor),
+				"Furnace: INVALID_TOKEN"
+			);
+		}
+	}
+
 	function _enchanceItem(
 		uint256 _index,
 		uint16 _prefer,
 		uint128 _rate,
 		uint256[] memory _ids,
+		address[] memory _tokens,
 		uint256[] memory _amounts
 	) private returns (uint256) {
 		lastItemObjectId += 1;
 		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
 
 		(
-			,
 			uint16 objClassExt,
 			uint16 class,
 			uint16 grade,
-			bool canDisenchant,
 			uint128 base,
 			uint128 enhance
 		) = IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
@@ -233,8 +263,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				class: class,
 				grade: grade,
 				prefer: _prefer,
-				canDisenchant: canDisenchant,
 				ids: _ids,
+				tokens: _tokens,
 				amounts: _amounts
 			});
 		uint256 tokenId =
@@ -252,8 +282,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			item.class,
 			item.grade,
 			item.prefer,
-			item.canDisenchant,
 			item.ids,
+			item.tokens,
 			item.amounts,
 			now // solhint-disable-line
 		);
@@ -366,10 +396,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		return (
 			item.class,
-			item.canDisenchant,
+			IFormula(formula).getDisenchant(item.index),
 			IFormula(formula).getMajorAddresses(item.index),
 			item.ids,
-			IFormula(formula).getMinorAddresses(item.index),
+			item.tokens,
 			item.amounts
 		);
 	}

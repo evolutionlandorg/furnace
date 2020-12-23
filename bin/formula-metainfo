@@ -11,4 +11,4 @@ fi
 . $(PWD)/bin/init
 
 index=$(seth --to-uint256 $1)
-seth call $FORMULA_PROXY  "getMetaInfo(uint256)(bytes32,uint16,uint16,uint16,bool,uint128,uint128)" $index 
+seth call $FORMULA_PROXY  "getMetaInfo(uint256)(uint16,uint16,uint16,uint128,uint128)" $index 
