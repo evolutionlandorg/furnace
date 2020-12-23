@@ -16,6 +16,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		address indexed user,
 		uint256 indexed tokenId,
 		uint256 index,
+		uint128 base,
+		uint128 enhance,
+		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
@@ -37,6 +40,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 
 	struct Item {
 		uint256 index;
+		uint128 base;
+		uint128 enhance;
+		uint128 rate;
 		uint16 objClassExt;
 		uint16 class;
 		uint16 grade;
@@ -68,7 +74,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	uint128 public lastItemObjectId;
 	ISettingsRegistry public registry;
 	mapping(uint256 => Item) public tokenId2Item;
-	mapping(uint256 => mapping(uint256 => uint256)) public tokenId2Rate;
+
+	// mapping(uint256 => mapping(uint256 => uint256)) public tokenId2Rate;
 
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
@@ -110,9 +117,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		(, , bytes32[] memory majors, , , bool disable) =
-			IFormula(formula).at(_index);
-		require(disable == false, "Furnace: FORMULA_DISABLE");
+		require(
+			IFormula(formula).isDisable(_index) == false,
+			"Furnace: FORMULA_DISABLE"
+		);
+		bytes32[] memory majors = IFormula(formula).getMajors(_index);
 		require(_ids.length == majors.length, "Furnace: INVALID_LENGTH");
 		for (uint256 i = 0; i < majors.length; i++) {
 			bytes32 major = majors[i];
@@ -125,7 +134,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			) = IFormula(formula).getMajorInfo(major);
 			(uint16 objectClassExt, uint16 class, uint16 grade) =
 				IMetaDataTeller(teller).getMetaData(majorAddress, id);
-			//TODO:: check object class
 			require(
 				objectClassExt == majorObjClassExt,
 				"Furnace: INVALID_OBJECTCLASSEXT"
@@ -146,9 +154,8 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(, , , address[] memory minors, uint256[] memory limits, bool disable) =
-			IFormula(formula).at(_index);
-		require(disable == false, "Furnace: FORMULA_DISABLE");
+		(address[] memory minors, uint256[] memory limits) =
+			IFormula(formula).getMinors(_index);
 		require(
 			_values.length == minors.length,
 			"Furnace: INVALID_VALUES_LENGTH."
@@ -219,6 +226,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		Item memory item =
 			Item({
 				index: _index,
+				base: base,
+				enhance: enhance,
+				rate: _rate,
 				objClassExt: objClassExt,
 				class: class,
 				grade: grade,
@@ -231,11 +241,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
 				.mintObject(msg.sender, lastItemObjectId);
 		tokenId2Item[tokenId] = item;
-		_calculteRate(tokenId, _prefer, _rate, base, enhance);
 		emit Enchanced(
 			msg.sender,
 			tokenId,
 			item.index,
+			item.base,
+			item.enhance,
+			item.rate,
 			item.objClassExt,
 			item.class,
 			item.grade,
@@ -246,31 +258,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			now // solhint-disable-line
 		);
 		return tokenId;
-	}
-
-	function _calculteRate(uint256 _tokenId, uint16 _prefer, uint128 _rate, uint128 _base, uint128 _enhance)
-		internal
-	{
-		tokenId2Rate[_tokenId][1] = _getRate(1, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][2] = _getRate(2, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][3] = _getRate(3, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][4] = _getRate(4, _prefer, _rate, _base, _enhance);	
-		tokenId2Rate[_tokenId][5] = _getRate(5, _prefer, _rate, _base, _enhance);	
-	}
-
-	function _getRate(uint256 _element, uint16 _prefer, uint128 _rate, uint128 _base, uint128 _enhance)
-		internal	
-		pure
-		returns (uint256)
-	{
-		if (uint256(_prefer) & (1 << _element) > 0) {
-			uint128 realEnhanceRate =
-				_base +
-					UQ128x128.mul128(_rate, _enhance) /
-					RATE_PRECISION;
-			return uint256(realEnhanceRate);
-		}
-		return uint256(_base / 2);
 	}
 
 	function _disenchantItem(address to, uint256 tokenId) private {
@@ -332,28 +319,21 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		emit Disenchanted(msg.sender, _tokenId, majors, ids, minors, amounts);
 	}
 
-	// function getItem(uint256 _tokenId)
-	// 	public
-	// 	view
-	// 	returns (
-	// 		uint256,
-	// 		uint16,
-	// 		uint128,
-	// 		uint256[] memory,
-	// 		uint256[] memory
-	// 	)
-	// {
-	// 	Item storage item = tokenId2Item[_tokenId];
-	// 	return (item.index, item.prefer, item.rate, item.ids, item.amounts);
-	// }
-
 	function getRate(uint256 _tokenId, uint256 _element)
 		public
 		view
 		override
 		returns (uint256)
 	{
-		return tokenId2Rate[_tokenId][_element];
+		Item storage item = tokenId2Item[_tokenId];
+		if (uint256(item.prefer) & (1 << _element) > 0) {
+			uint128 realEnhanceRate =
+				item.base +
+					UQ128x128.mul128(item.rate, item.enhance) /
+					RATE_PRECISION;
+			return uint256(realEnhanceRate);
+		}
+		return uint256(item.base / 2);
 	}
 
 	function getBaseInfo(uint256 _tokenId)

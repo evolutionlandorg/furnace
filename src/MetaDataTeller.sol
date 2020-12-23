@@ -155,7 +155,10 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	}
 
 	function isAllowed(address _token, uint256 _id) public view returns (bool) {
-		uint16 objClassExt;
+		return getObjClassExt(_token, _id) > 0;
+	}
+
+	function getObjClassExt(address _token, uint256 _id) public view returns (uint16 objClassExt) {
 		if (_token == ownership) {
 			objClassExt = uint16(
 				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id)
@@ -163,7 +166,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		} else {
 			objClassExt = getExternalObjectClassExt(_token);
 		}
-		return objClassExt > 0;
 	}
 
 	function getMetaData(address _token, uint256 _id)

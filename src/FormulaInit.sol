@@ -48,7 +48,6 @@ contract FormulaInit is FurnaceSettingIds {
 
 	function _initFormula0(address token) private {
 		bytes32 name = "合金镐";	
-		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -57,12 +56,11 @@ contract FormulaInit is FurnaceSettingIds {
 		minors[0] = token;
 		limits[0] = ((200 * UINT) << 128) | (350 * UINT);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		IFormula(formula).insert(name, meta, majors, minors, limits);
+		IFormula(formula).insert(name, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS), uint16(5), uint16(1), uint16(1), true, majors, minors, limits);
 	}
 
 	function _initFormula5(address token) private {
 		bytes32 name = "人力铸铁钻机";	
-		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(1), true, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -71,12 +69,11 @@ contract FormulaInit is FurnaceSettingIds {
 		minors[0] = token;
 		limits[0] = ((200 * UINT) << 128) | (350 * UINT);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		IFormula(formula).insert(name, meta, majors, minors, limits);
+		IFormula(formula).insert(name,uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS), uint16(5), uint16(1), uint16(1), true, majors, minors, limits);
 	}
 
 	function _initFormula10(address token) private {
 		bytes32 name = "人力钨钢钻机";	
-		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(2), true, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -85,12 +82,11 @@ contract FormulaInit is FurnaceSettingIds {
 		minors[0] = token;
 		limits[0] = ((300 * UINT) << 128) | (550 * UINT);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		IFormula(formula).insert(name, meta, majors, minors, limits);
+		IFormula(formula).insert(name, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS),uint16(5), uint16(1), uint16(2), true, majors, minors, limits);
 	}
 
 	function _initFormula15(address token) private {
 		bytes32 name = "人力金刚钻机";	
-		bytes memory meta = abi.encodePacked(uint16(5), uint16(1), uint16(3), true, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS));
 		bytes32[] memory majors = new bytes32[](1);
 		address[] memory minors = new address[](1);
 		uint256[] memory limits = new uint256[](1);
@@ -99,6 +95,6 @@ contract FormulaInit is FurnaceSettingIds {
 		minors[0] = token;
 		limits[0] = ((800 * UINT) << 128) | (2200 * UINT);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
-		IFormula(formula).insert(name, meta, majors, minors, limits);
+		IFormula(formula).insert(name, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS), uint16(5), uint16(1), uint16(3), true, majors, minors, limits);
 	}
 }

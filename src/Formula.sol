@@ -11,8 +11,8 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	using Input for Input.Data;
 	event SetStrength(
 		uint256 indexed inde,
-		uint112 baseRate,
-		uint112 enhanceRate
+		uint128 baseRate,
+		uint128 enhanceRate
 	);
 
 	event SetLimits(uint256 indexed index, uint256[] limits);
@@ -28,7 +28,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 
 	function insert(
 		bytes32 _name,
-		bytes calldata _meta,
+		uint128 _base,
+		uint128 _enhance,
+		uint16 _objClassExt,
+		uint16 _class,
+		uint16 _grade,
+		bool _canDisenchant,
 		bytes32[] calldata _majors,
 		address[] calldata _minors,
 		uint256[] calldata _limits
@@ -36,7 +41,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
-				meta: _meta,
+				base: _base,
+				enhance: _enhance,
+				objClassExt: _objClassExt,
+				class: _class,
+				grade: _grade,
+				canDisenchant: _canDisenchant,
 				majors: _majors,
 				minors: _minors,
 				limits: _limits,
@@ -46,7 +56,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		emit AddFormula(
 			formulas.length - 1,
 			formula.name,
-			formula.meta,
+			formula.base,
+			formula.enhance,
+			formula.objClassExt,
+			formula.class,
+			formula.grade,
+			formula.canDisenchant,
 			formula.majors,
 			formula.minors,
 			formula.limits
@@ -67,23 +82,14 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 
 	function setStrengthRate(
 		uint256 _index,
-		uint112 _baseRate,
-		uint112 _enhanceRate
+		uint128 _baseRate,
+		uint128 _enhanceRate
 	) external auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		Input.Data memory data = Input.from(formula.meta);
-		uint16 class = data.decodeU16();
-		uint16 grade = data.decodeU16();
-		bool canDisenchant = data.decodeBool();
-		formula.meta = abi.encodePacked(
-			class,
-			grade,
-			_baseRate,
-			_enhanceRate,
-			canDisenchant
-		);
-		emit SetStrength(_index, _baseRate, _enhanceRate);
+		formula.base = _baseRate;
+		formula.enhance = _enhanceRate;
+		emit SetStrength(_index, formula.base, formula.enhance);
 	}
 
 	function setLimit(uint256 _index, uint256[] calldata _limits)
@@ -100,29 +106,29 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return formulas.length;
 	}
 
-	function at(uint256 _index)
+	function isDisable(uint256 _index) external view override returns (bool) {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return formulas[_index].disable;
+	}
+
+	function getMajors(uint256 _index)
 		external
 		view
 		override
-		returns (
-			bytes32,
-			bytes memory,
-			bytes32[] memory,
-			address[] memory,
-			uint256[] memory,
-			bool
-		)
+		returns (bytes32[] memory)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		FormulaEntry memory formula = formulas[_index];
-		return (
-			formula.name,
-			formula.meta,
-			formula.majors,
-			formula.minors,
-			formula.limits,
-			formula.disable
-		);
+		return formulas[_index].majors;
+	}
+
+	function getMinors(uint256 _index)
+		external
+		view
+		override
+		returns (address[] memory, uint256[] memory)
+	{
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return (formulas[_index].minors, formulas[_index].limits);
 	}
 
 	function getMajorAddresses(uint256 _index)
@@ -164,22 +170,15 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		FormulaEntry memory formula = formulas[_index];
-		Input.Data memory data = Input.from(formula.meta);
-		uint16 objectClassExt = data.decodeU16();
-		uint16 class = data.decodeU16();
-		uint16 grade = data.decodeU16();
-		bool canDisenchant = data.decodeBool();
-		uint128 base = data.decodeU128();
-		uint128 enhance = data.decodeU128();
+		FormulaEntry storage formula = formulas[_index];
 		return (
 			formula.name,
-			objectClassExt,
-			class,
-			grade,
-			canDisenchant,
-			base,
-			enhance
+			formula.objClassExt,
+			formula.class,
+			formula.grade,
+			formula.canDisenchant,
+			formula.base,
+			formula.enhance
 		);
 	}
 
