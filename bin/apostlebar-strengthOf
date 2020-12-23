@@ -8,4 +8,5 @@ set -e
 tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
 for token in "${tokens[@]}"; do
 	seth call $APOSTLEITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $1
+	seth estimate $APOSTLEITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $1
 done

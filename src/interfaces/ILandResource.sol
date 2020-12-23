@@ -9,4 +9,6 @@ interface ILandResource {
     function updateAllMinerStrengthWhenStart(uint256 _landTokenId) external;
 
     function updateAllMinerStrengthWhenStop(uint256 _landTokenId) external;
+
+    function landWorkingOn(uint256 _apostleTokenId) external view returns (uint256);
 }

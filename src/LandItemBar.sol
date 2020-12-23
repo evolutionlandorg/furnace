@@ -68,7 +68,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		internal
 		updateMinerStrength(_landTokenId)
 	{
-		require(_index < maxAmount, "Index Forbidden.");
+		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN");
 		Bar storage bar = tokenId2Bars[_landTokenId][_index];
 		if (bar.token == address(0)) return;
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
@@ -80,7 +80,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		external
 		onlyLander(_landTokenId)
 	{
-		require(land2IsPrivate[_landTokenId][_index] == false, "Already is private.");
+		require(land2IsPrivate[_landTokenId][_index] == false, "Furnace: ALREADY_PRIVATE");
 		land2IsPrivate[_landTokenId][_index] = true;
 		Bar storage bar = tokenId2Bars[_landTokenId][_index];
 		if (bar.staker != msg.sender) {
@@ -89,7 +89,7 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 	}
 
 	function setPublic(uint256 _landTokenId, uint256 _index) external onlyLander(_landTokenId) {
-		require(land2IsPrivate[_landTokenId][_index] == true, "Already is public.");
+		require(land2IsPrivate[_landTokenId][_index] == true, "Furnace: ALREADY_PUBLIC.");
 		land2IsPrivate[_landTokenId][_index] = false;
 	}
 
@@ -103,8 +103,8 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		return teller.isAllowed(_token, _id);
 	}
 
-	function isAmbassador(uint256 _tokenId) public pure returns (bool) {
-		uint128 objectId = uint128(_tokenId);
+	function isAmbassador(uint256 _landTokenId) public pure returns (bool) {
+		uint128 objectId = uint128(_landTokenId);
 		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
 	}
 }

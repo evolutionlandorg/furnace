@@ -13,4 +13,5 @@ for token in "${tokens[@]}"; do
 	talent=$(seth --to-uint256 $talent)
 	strength=$(seth call $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId)
 	seth --to-fix 18 $strength 
+	seth estimate $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId
 done

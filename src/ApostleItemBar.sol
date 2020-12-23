@@ -33,19 +33,23 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 	modifier onlyAuth(uint256 _apostleTokenId, uint256 _index) override {
 		require(
 			ownership.ownerOf(_apostleTokenId) == msg.sender,
-			"Forbidden."
+			"Furnace: FORBIDDEN"
 		);
 		_;
 	}
 
 	modifier updateMinerStrength(uint256 _apostleTokenId) override {
-		landResource.updateMinerStrengthWhenStop(
-			_apostleTokenId
-		);
+		if (ILandResource(landResource).landWorkingOn(_apostleTokenId) != 0) {
+			landResource.updateMinerStrengthWhenStop(
+				_apostleTokenId
+			);
+		}
 		_;
-		landResource.updateMinerStrengthWhenStart(
-			_apostleTokenId
-		);
+		if (ILandResource(landResource).landWorkingOn(_apostleTokenId) != 0) {
+			landResource.updateMinerStrengthWhenStart(
+				_apostleTokenId
+			);
+		}
 	}
 
 	function isAllowed(uint256 _apostleTokenId, address _token, uint256 _id)
@@ -54,7 +58,7 @@ contract ApostleItemBar is Initializable, ItemBar(address(0), 0) {
 		override
 		returns (bool)
 	{
-        require(interstellarEncoder.getObjectClass(_apostleTokenId) == 1, "Funace: ONLY_APOSTEL");
+        require(interstellarEncoder.getObjectClass(_apostleTokenId) == 2, "Funace: ONLY_APOSTEL");
 		return teller.isAllowed(_token, _id);
 	}
 

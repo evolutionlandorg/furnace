@@ -1337,10 +1337,17 @@ contract ApostleBaseV3 is ApostleBaseV2 {
 	// rate precision
 	uint128 public constant RATE_PRECISION = 10**8;
 
+	//cache for gas saving
+	mapping(uint256 => mapping(uint256 => mapping(address => uint256))) talents2Strength;
+
     function strengthOf(uint256 _tokenId, address _resourceToken, uint256 _landTokenId) public view returns (uint256) {
-        uint talents = tokenId2Apostle[_tokenId].talents;
-        uint256 strength = IGeneScience(registry.addressOf(CONTRACT_GENE_SCIENCE))
-        .getStrength(talents, _resourceToken, _landTokenId);
+        uint256 talents = tokenId2Apostle[_tokenId].talents;
+		uint256 strength = talents2Strength[talents][_landTokenId][_resourceToken];
+		if (strength == 0) {
+			strength = IGeneScience(registry.addressOf(CONTRACT_GENE_SCIENCE))
+			.getStrength(talents, _resourceToken, _landTokenId);
+			talents2Strength[talents][_landTokenId][_resourceToken] = strength;
+		}
 		// V3
 		address itemBar = registry.addressOf(CONTRACT_APOSTLE_ITEM_BAR);
 		uint256 enhanceRate =

@@ -25,3 +25,5 @@ done
 cat $path | jq '.LANDRESOURCEAUTHORITY = $address' --arg address $LANDRESOURCEAUTHORITY | sponge $path
 
 echo >&2 "${0##*/}: info: setauthority finished."
+
+. $(PWD)/bin/landrs-refresh

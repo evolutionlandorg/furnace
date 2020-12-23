@@ -163,7 +163,7 @@ abstract contract ItemBar is DSAuth, DSMath {
 		uint256 _id
 	) internal onlyAuth(_tokenId, _index) {
 		require(isAllowed(_tokenId, _token, _id), "Furnace: PERMISSION");
-		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
+		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN");
 		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token != address(0)) {
 			(, uint16 class, ) = teller.getMetaData(_token, _id);
