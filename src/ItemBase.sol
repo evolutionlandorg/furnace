@@ -12,45 +12,6 @@ import "./common/UQ128x128.sol";
 
 contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	using UQ128x128 for uint256;
-	event Enchanced(
-		address indexed user,
-		uint256 indexed tokenId,
-		uint256 index,
-		uint128 base,
-		uint128 enhance,
-		uint128 rate,
-		uint16 objClassExt,
-		uint16 class,
-		uint16 grade,
-		uint16 prefer,
-		uint256[] ids,
-		address[] tokens,
-		uint256[] amounts,
-		uint256 now
-	);
-
-	event Disenchanted(
-		address indexed user,
-		uint256 tokenId,
-		address[] majors,
-		uint256[] ids,
-		address[] minors,
-		uint256[] amounts
-	);
-
-	struct Item {
-		uint256 index;
-		uint128 base;
-		uint128 enhance;
-		uint128 rate;
-		uint16 objClassExt;
-		uint16 class;
-		uint16 grade;
-		uint16 prefer;
-		uint256[] ids;
-		address[] tokens;
-		uint256[] amounts;
-	}
 
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
@@ -110,13 +71,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		);
 	}
 
-
-	/**
-	 * @dev create a Drill.
-	 * @param grade - Drill grade.
-	 * @param to - owner of the Drill.
-	 * @return   - tokenId.
-	 */
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
@@ -385,6 +339,15 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item storage item = tokenId2Item[_tokenId];
 		return (item.objClassExt, item.class, item.grade);
+	}
+
+	function getObjectClassExt(uint256 _tokenId) 
+		public
+		view
+		override
+		returns (uint16)
+	{
+		return tokenId2Item[_tokenId].objClassExt;
 	}
 
 	function getEnchantedInfo(uint256 _tokenId)

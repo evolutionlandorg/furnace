@@ -157,4 +157,9 @@ interface IELIP002 {
 		external
 		view
 		returns (uint256);
+
+	function getObjectClassExt(uint256 _tokenId) 
+		external	
+		view
+		returns (uint16);
 }

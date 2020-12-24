@@ -159,13 +159,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	}
 
 	function getObjClassExt(address _token, uint256 _id) public view returns (uint16 objClassExt) {
-		if (_token == ownership) {
-			objClassExt = uint16(
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id)
-			);
-		} else {
-			objClassExt = getExternalObjectClassExt(_token);
-		}
+		(objClassExt, , ) = getMetaData(_token, _id);
 	}
 
 	function getMetaData(address _token, uint256 _id)

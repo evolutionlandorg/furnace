@@ -90,7 +90,7 @@ interface IFormula {
 
 	/**
         @dev Returns the length of the formula.
-	    @sig 0x1f7b6d32
+	         0x1f7b6d32
      */
 	function length() external view returns (uint256);
 
@@ -114,7 +114,7 @@ interface IFormula {
 
 	/**
         @dev Decode major info of the major.
-	    @sig 0x6ef2fd27
+	         0x6ef2fd27
 		@return {
 			"token": "Major token address.",
 			"objClassExt": "Major token objClassExt.",
@@ -134,7 +134,7 @@ interface IFormula {
 
 	/**
         @dev Decode major info of limit.
-	    @sig 0x827d6320
+	         0x827d6320
 		@return {
 			"min": "Min amount of minor material.",
 			"max": "Max amount of minor material."
@@ -145,7 +145,7 @@ interface IFormula {
 
 	/**
         @dev Returns meta info of the item.
-	    @sig 0x78533046
+	         0x78533046
 		@return {
 			"objClassExt": "Major token objClassExt.",
 			"class": "Major token class.",
@@ -167,7 +167,7 @@ interface IFormula {
 
 	/**
         @dev returns the minor addresses of the formula.
-		@sig 0x762b8a4d
+		     0x762b8a4d
      */
 	function getMajorAddresses(uint256 _index)
 		external
