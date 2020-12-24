@@ -1,11 +1,18 @@
 pragma solidity ^0.6.7;
 
+/**
+@title IFormula
+@author echo.hu@itering.com
+*/
 interface IFormula {
 	struct FormulaEntry {
-		// Item parameter
+		// item name
 		bytes32 name;
+		// base strength rate
 		uint128 base;
+		// enhance strength rate
 		uint128 enhance;
+		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
 		uint16 grade;
@@ -15,10 +22,10 @@ interface IFormula {
 		// uint256 disenchantTime;
 		// uint256 loseRate;
 
-		// major meterail info
+		// major material info
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
 		bytes32[] majors;
-		// minor meterail info
+		// minor material info
 		bytes32[] minors;
 		// [uint128 min, uint128 max]
 		uint256[] limits;
@@ -66,34 +73,55 @@ interface IFormula {
 	) external;
 
 	/**
-        @notice Only governance can disble `formula`.
-        @dev Disble a formula rule.
+        @notice Only governance can enable `formula`.
+        @dev Enable a formula rule.
         MUST revert on any other error.        
-        @param _index    Disble the formule of index.
+        @param _index  index of formula.
     */
 	function disable(uint256 _index) external;
 
+	/**
+        @notice Only governance can disble `formula`.
+        @dev Disble a formula rule.
+        MUST revert on any other error.        
+        @param _index  index of formula.
+    */
 	function enable(uint256 _index) external;
 
-	//0x1f7b6d32
+	/**
+        @dev Returns the length of the formula.
+	    @sig 0x1f7b6d32
+     */
 	function length() external view returns (uint256);
 
-	function isDisable(uint256 _index)
-		external
-		view
-		returns (bool);
+	/**
+        @dev Returns the availability of the formula.
+     */
+	function isDisable(uint256 _index) external view returns (bool);
 
-	function getMajors(uint256 _index)
-		external
-		view
-		returns (bytes32[] memory);
+	/**
+        @dev returns the major material of the formula.
+     */
+	function getMajors(uint256 _index) external view returns (bytes32[] memory);
 
+	/**
+        @dev returns the minor material of the formula.
+     */
 	function getMinors(uint256 _index)
 		external
 		view
 		returns (bytes32[] memory, uint256[] memory);
 
-	//0x6ef2fd27
+	/**
+        @dev Decode major info of the major.
+	    @sig 0x6ef2fd27
+		@return {
+			"token": "Major token address.",
+			"objClassExt": "Major token objClassExt.",
+			"class": "Major token class.",
+			"grade": "Major token address."
+		}
+     */
 	function getMajorInfo(bytes32 _major)
 		external
 		pure
@@ -104,16 +132,28 @@ interface IFormula {
 			uint16
 		);
 
-	//0x827d6320
-	function getLimit(uint256 _limit)
-		external
-		pure
-		returns (
-			uint128,
-			uint128
-		);
+	/**
+        @dev Decode major info of limit.
+	    @sig 0x827d6320
+		@return {
+			"min": "Min amount of minor material.",
+			"max": "Max amount of minor material."
 
-	//0x78533046
+		}
+     */
+	function getLimit(uint256 _limit) external pure returns (uint128, uint128);
+
+	/**
+        @dev Returns meta info of the item.
+	    @sig 0x78533046
+		@return {
+			"objClassExt": "Major token objClassExt.",
+			"class": "Major token class.",
+			"grade": "Major token address.",
+			"base":  "Base strength rate.",
+			"enhance": "Enhance strength rate.",
+		}
+     */
 	function getMetaInfo(uint256 _index)
 		external
 		view
@@ -125,14 +165,17 @@ interface IFormula {
 			uint128
 		);
 
-	//0x762b8a4d
+	/**
+        @dev returns the minor addresses of the formula.
+		@sig 0x762b8a4d
+     */
 	function getMajorAddresses(uint256 _index)
 		external
 		view
 		returns (address[] memory);
 
-	function getDisenchant(uint256 _index)
-		external
-		view
-		returns (bool);
+	/**
+        @dev returns canDisenchant of the formula.
+     */
+	function getDisenchant(uint256 _index) external view returns (bool);
 }

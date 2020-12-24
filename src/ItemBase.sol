@@ -110,6 +110,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		);
 	}
 
+
+	/**
+	 * @dev create a Drill.
+	 * @param grade - Drill grade.
+	 * @param to - owner of the Drill.
+	 * @return   - tokenId.
+	 */
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,

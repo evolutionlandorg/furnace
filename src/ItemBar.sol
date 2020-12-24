@@ -93,7 +93,6 @@ abstract contract ItemBar is DSAuth, DSMath {
 	address public fire;
 	address public soil;
 
-
 	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
 	modifier updateMinerStrength(uint256 _tokenId) virtual { _; }
@@ -169,6 +168,13 @@ abstract contract ItemBar is DSAuth, DSMath {
 		}
 	}
 
+	/**
+        @dev Equip function, A NFT can equip to EVO Bar (LandBar or ApostleBar).
+        @param _tokenId Token Id which to be quiped.
+        @param _index   Index of the Bar.
+        @param _token   Token address which to quip.
+        @param _id      Token Id which to quip.
+    */
 	function equip(
 		uint256 _tokenId,
 		uint256 _index,
@@ -225,6 +231,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 		}
 	}
 
+	/**
+        @dev Unequip function, A NFT can unequip from EVO Bar (LandBar or ApostleBar).
+        @param _tokenId Token Id which to be unquiped.
+        @param _index   Index of the Bar.
+    */
 	function unequip(uint256 _tokenId, uint256 _index)
 		public
 		updateMinerStrength(_tokenId)
