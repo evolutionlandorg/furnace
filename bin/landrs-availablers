@@ -5,15 +5,17 @@ set -e
 . $(PWD)/bin/init
 
 landId=$1
-itemId=0x000000000000000000000000000000000000000000000000000000000000006a
+itemId=$2
 # itemId=0x2a010001010001050000000000000001000000000000000000000000000003f8
-itemToken=$TOKEN_GEGO
-# itemToken=$IOBJECTOWNERSHIP_PROXY
+# itemToken=$TOKEN_GEGO
+itemToken=$IOBJECTOWNERSHIP_PROXY
 
-seth call $LANDRESOURCE_PROXY "availableLandResources(uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
+resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
+
+seth call $LANDRESOURCE_PROXY "availableLandResources(uint256,address[])(uint256[])" $landId $resources
 
 echo "-----------------------------"
-seth call $LANDRESOURCE_PROXY "availableItemResources(address,uint256,uint256,address[5])(uint256,uint256,uint256,uint256,uint256)" $itemToken $itemId $landId [$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL] 
+seth call $LANDRESOURCE_PROXY "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
 
 echo "-----------------------------"
 tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)

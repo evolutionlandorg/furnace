@@ -75,15 +75,24 @@ abstract contract ItemBar is DSAuth, DSMath {
 		mapping(address => uint256) rates;
 	}
 
+	struct Status {
+		address staker;
+		uint256 tokenId;
+		uint256 index;
+	}
+
 	ISettingsRegistry public registry;
 	uint256 public maxAmount;
 	mapping(uint256 => mapping(uint256 => Bar)) public tokenId2Bars;
+	mapping(address => mapping(uint256 => Status)) public itemId2Index;
+
 	IMetaDataTeller public teller;
 	address public gold;
 	address public wood;
 	address public water;
 	address public fire;
 	address public soil;
+
 
 	modifier onlyAuth(uint256 _tokenId, uint256 _index) virtual { _; }
 
@@ -98,7 +107,6 @@ abstract contract ItemBar is DSAuth, DSMath {
 	constructor(address _registry, uint256 _maxAmount) internal {
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
-
 	}
 
 	function refresh() public virtual auth {
@@ -109,6 +117,17 @@ abstract contract ItemBar is DSAuth, DSMath {
 		water = registry.addressOf(CONTRACT_WATER_ERC20_TOKEN);
 		fire = registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN);
 		soil = registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN);
+	}
+
+	function getTokenIdByItem(address _item, uint256 _itemId)
+		public
+		view
+		returns (address, uint256)
+	{
+		return (
+			itemId2Index[_item][_itemId].staker,
+			itemId2Index[_item][_itemId].tokenId
+		);
 	}
 
 	function getBarStaker(uint256 _tokenId, uint256 _index)
@@ -126,7 +145,10 @@ abstract contract ItemBar is DSAuth, DSMath {
 		returns (address, uint256)
 	{
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		return (tokenId2Bars[_tokenId][_index].token, tokenId2Bars[_tokenId][_index].id);
+		return (
+			tokenId2Bars[_tokenId][_index].token,
+			tokenId2Bars[_tokenId][_index].id
+		);
 	}
 
 	function batchEquip(
@@ -182,6 +204,11 @@ abstract contract ItemBar is DSAuth, DSMath {
 		bar.rates[water] = teller.getRate(bar.token, bar.id, 3);
 		bar.rates[fire] = teller.getRate(bar.token, bar.id, 4);
 		bar.rates[soil] = teller.getRate(bar.token, bar.id, 5);
+		itemId2Index[bar.token][bar.id] = Status({
+			staker: bar.staker,
+			tokenId: _tokenId,
+			index: _index
+		});
 		emit Equip(_tokenId, _index, bar.staker, bar.token, bar.id);
 	}
 
@@ -212,6 +239,12 @@ abstract contract ItemBar is DSAuth, DSMath {
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit Unequip(_tokenId, _index, bar.staker, bar.token, bar.id);
 		//TODO: check
+		delete bar.rates[gold];
+		delete bar.rates[wood];
+		delete bar.rates[water];
+		delete bar.rates[fire];
+		delete bar.rates[soil];
+		delete itemId2Index[bar.token][bar.id];
 		delete tokenId2Bars[_tokenId][_index];
 	}
 

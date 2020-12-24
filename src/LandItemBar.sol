@@ -73,6 +73,12 @@ contract LandItemBar is Initializable, ItemBar(address(0), 0) {
 		if (bar.token == address(0)) return;
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		emit ForceUnequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
+		delete bar.rates[gold];
+		delete bar.rates[wood];
+		delete bar.rates[water];
+		delete bar.rates[fire];
+		delete bar.rates[soil];
+		delete itemId2Index[bar.token][bar.id];
 		delete tokenId2Bars[_landTokenId][_index];
 	}
 
