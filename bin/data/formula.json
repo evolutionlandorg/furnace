@@ -3,7 +3,7 @@
     "index": 0,
     "name": "合金镐",
     "meta": {
-      "objectClassExt": 5,
+      "objectClassExt": 256,
       "class": 1,
       "grade": 1,
       "canDisenchant": true,
@@ -18,18 +18,20 @@
         "grade": 1
       }
     ],
-    "minors": [ "token_gold" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_element"],
+    "limits": [
+      {
+        "min": 200,
+        "max": 350
+      }
+    ],
     "disable": false
   },
   {
     "index": 1,
-    "name": "合金镐",
+    "name": "人力铸铁钻机",
     "meta": {
-      "objectClassExt": 5,
+      "objectClassExt": 4,
       "class": 1,
       "grade": 1,
       "canDisenchant": true,
@@ -38,485 +40,347 @@
     },
     "majors": [
       {
-        "token": "token_gego",
-        "objectClassExt": 256,
+        "token": "token_drill",
+        "objectClassExt": 4,
         "class": 0,
         "grade": 1
       }
     ],
-    "minors": [ "token_wood" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_element"],
+    "limits": [
+      {
+        "min": 200,
+        "max": 350
+      }
+    ],
     "disable": false
   },
   {
     "index": 2,
-    "name": "合金镐",
+    "name": "人力钨钢钻机",
     "meta": {
-      "objectClassExt": 5,
+      "objectClassExt": 4,
       "class": 1,
-      "grade": 1,
+      "grade": 2,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.07,
+      "enhance": 0.08
     },
     "majors": [
       {
-        "token": "token_gego",
-        "objectClassExt": 256,
+        "token": "token_drill",
+        "objectClassExt": 4,
         "class": 0,
-        "grade": 1
+        "grade": 2
       }
     ],
-    "minors": [ "token_water" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_element"],
+    "limits": [
+      {
+        "min": 300,
+        "max": 550
+      }
+    ],
     "disable": false
   },
   {
     "index": 3,
-    "name": "合金镐",
+    "name": "人力金刚钻机",
     "meta": {
-      "objectClassExt": 5,
+      "objectClassExt": 4,
       "class": 1,
-      "grade": 1,
+      "grade": 3,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.3,
+      "enhance": 0.7
     },
     "majors": [
       {
-        "token": "token_gego",
-        "objectClassExt": 256,
+        "token": "token_drill",
+        "objectClassExt": 4,
         "class": 0,
-        "grade": 1
+        "grade": 3
       }
     ],
-    "minors": [ "token_fire" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_element"],
+    "limits": [
+      {
+        "min": 800,
+        "max": 2200
+      }
+    ],
     "disable": false
   },
   {
     "index": 4,
-    "name": "合金镐",
+    "name": "高级合金镐",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 256,
+      "class": 2,
       "grade": 1,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.13,
+      "enhance": 0.13
     },
     "majors": [
       {
-        "token": "token_gego",
+        "token": "token_item",
         "objectClassExt": 256,
-        "class": 0,
+        "class": 1,
         "grade": 1
       }
     ],
-    "minors": [ "token_soil" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element"],
+    "limits": [
+      {
+        "min": 200,
+        "max": 380
+      }
+    ],
     "disable": false
   },
   {
     "index": 5,
-    "name": "人力铸铁钻机",
+    "name": "燃油铸铁钻机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 4,
+      "class": 2,
       "grade": 1,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.13,
+      "enhance": 0.13
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
+        "class": 1,
         "grade": 1
       }
     ],
-    "minors": [ "token_gold" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element"],
+    "limits": [
+      {
+        "min": 200,
+        "max": 380
+      }
+    ],
     "disable": false
   },
   {
     "index": 6,
-    "name": "人力铸铁钻机",
+    "name": "燃油钨钢钻机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 1,
+      "objectClassExt": 4,
+      "class": 2,
+      "grade": 2,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.22,
+      "enhance": 0.22
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
-        "grade": 1
+        "class": 1,
+        "grade": 2
       }
     ],
-    "minors": [ "token_wood" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element"],
+    "limits": [
+      {
+        "min": 300,
+        "max": 580
+      }
+    ],
     "disable": false
   },
   {
     "index": 7,
-    "name": "人力铸铁钻机",
+    "name": "燃油金刚钻机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 1,
+      "objectClassExt": 4,
+      "class": 2,
+      "grade": 3,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.8,
+      "enhance": 1.4
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
-        "grade": 1
+        "class": 1,
+        "grade": 3
       }
     ],
-    "minors": [ "token_water" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element"],
+    "limits": [
+      {
+        "min": 800,
+        "max": 2100
+      }
+    ],
     "disable": false
   },
   {
     "index": 8,
-    "name": "人力铸铁钻机",
+    "name": "超级合金镐",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 256,
+      "class": 3,
       "grade": 1,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.26,
+      "enhance": 0.29
     },
     "majors": [
       {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
+        "token": "token_item",
+        "objectClassExt": 256,
+        "class": 2,
         "grade": 1
       }
     ],
-    "minors": [ "token_fire" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element", "token_lp_kton"],
+    "limits": [
+      {
+        "min": 150,
+        "max": 300
+      },
+      {
+        "min": 150,
+        "max": 300
+      }
+    ],
     "disable": false
   },
   {
     "index": 9,
-    "name": "人力铸铁钻机",
+    "name": "铸铁挖掘机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 4,
+      "class": 3,
       "grade": 1,
       "canDisenchant": true,
-      "base": 0.04,
-      "enhance": 0.04
+      "base": 0.26,
+      "enhance": 0.29
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
+        "class": 2,
         "grade": 1
       }
     ],
-    "minors": [ "token_wood" ],
-    "limits": {
-      "min": 200,
-      "max": 350
-    },
+    "minors": ["token_lp_element", "token_lp_kton"],
+    "limits": [
+      {
+        "min": 150,
+        "max": 300
+      },
+      {
+        "min": 150,
+        "max": 300
+      }
+    ],
     "disable": false
   },
   {
     "index": 10,
-    "name": "人力钨钢钻机",
+    "name": "钨钢挖掘机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 4,
+      "class": 3,
       "grade": 2,
       "canDisenchant": true,
-      "base": 0.07,
-      "enhance": 0.08
+      "base": 0.44,
+      "enhance": 0.76
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
+        "class": 2,
         "grade": 2
       }
     ],
-    "minors": [ "token_gold" ],
-    "limits": {
-      "min": 300,
-      "max": 550
-    },
+    "minors": ["token_lp_element", "token_lp_ring"],
+    "limits": [
+      {
+        "min": 230,
+        "max": 580 
+      },
+      {
+        "min": 230,
+        "max": 580 
+      }
+    ],
     "disable": false
   },
   {
     "index": 11,
-    "name": "人力钨钢钻机",
+    "name": "金刚挖掘机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 2,
+      "objectClassExt": 4,
+      "class": 3,
+      "grade": 3,
       "canDisenchant": true,
-      "base": 0.07,
-      "enhance": 0.08
+      "base": 1.8,
+      "enhance": 1.4
     },
     "majors": [
       {
-        "token": "token_drill",
+        "token": "token_item",
         "objectClassExt": 4,
-        "class": 0,
-        "grade": 2
+        "class": 2,
+        "grade": 3
       }
     ],
-    "minors": [ "token_wood" ],
-    "limits": {
-      "min": 300,
-      "max": 550
-    },
+    "minors": ["token_lp_element", "token_lp_ring"],
+    "limits": [
+      {
+        "min": 800,
+        "max": 1200 
+      },
+      {
+        "min": 800,
+        "max": 1200 
+      }
+    ],
     "disable": false
   },
   {
     "index": 12,
-    "name": "人力钨钢钻机",
+    "name": "蓝翔挖掘机",
     "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 2,
-      "canDisenchant": true,
-      "base": 0.07,
-      "enhance": 0.08
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 2
-      }
-    ],
-    "minors": [ "token_water" ],
-    "limits": {
-      "min": 300,
-      "max": 550
-    },
-    "disable": false
-  },
-  {
-    "index": 13,
-    "name": "人力钨钢钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 2,
-      "canDisenchant": true,
-      "base": 0.07,
-      "enhance": 0.08
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 2
-      }
-    ],
-    "minors": [ "token_fire" ],
-    "limits": {
-      "min": 300,
-      "max": 550
-    },
-    "disable": false
-  },
-  {
-    "index": 14,
-    "name": "人力钨钢钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 2,
-      "canDisenchant": true,
-      "base": 0.07,
-      "enhance": 0.08
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 2
-      }
-    ],
-    "minors": [ "token_soil" ],
-    "limits": {
-      "min": 300,
-      "max": 550
-    },
-    "disable": false
-  },
-  {
-    "index": 15,
-    "name": "人力金刚钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
+      "objectClassExt": 4,
+      "class": 3,
       "grade": 3,
       "canDisenchant": true,
-      "base": 0.3,
-      "enhance": 0.7
+      "base": 2.2,
+      "enhance": 2.8
     },
     "majors": [
       {
-        "token": "token_drill",
-        "objectClassExt": 0,
-        "class": 0,
+        "token": "token_item",
+        "objectClassExt": 4,
+        "class": 2,
         "grade": 3
       }
     ],
-    "minors": [ "token_gold" ],
-    "limits": {
-      "min": 800,
-      "max": 2200 
-    },
-    "disable": false
-  },
-  {
-    "index": 16,
-    "name": "人力金刚钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 3,
-      "canDisenchant": true,
-      "base": 0.3,
-      "enhance": 0.7
-    },
-    "majors": [
+    "minors": ["token_lp_element", "token_lp_kton"],
+    "limits": [
       {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 3
+        "min": 900,
+        "max": 1600 
+      },
+      {
+        "min": 900,
+        "max": 1600 
       }
     ],
-    "minors": [ "token_wood" ],
-    "limits": {
-      "min": 800,
-      "max": 2200 
-    },
-    "disable": false
-  },
-  {
-    "index": 17,
-    "name": "人力金刚钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 3,
-      "canDisenchant": true,
-      "base": 0.3,
-      "enhance": 0.7
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 3
-      }
-    ],
-    "minors": [ "token_water" ],
-    "limits": {
-      "min": 800,
-      "max": 2200 
-    },
-    "disable": false
-  },
-  {
-    "index": 18,
-    "name": "人力金刚钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 3,
-      "canDisenchant": true,
-      "base": 0.3,
-      "enhance": 0.7
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 3
-      }
-    ],
-    "minors": [ "token_fire" ],
-    "limits": {
-      "min": 800,
-      "max": 2200 
-    },
-    "disable": false
-  },
-  {
-    "index": 19,
-    "name": "人力金刚钻机",
-    "meta": {
-      "objectClassExt": 5,
-      "class": 1,
-      "grade": 3,
-      "canDisenchant": true,
-      "base": 0.3,
-      "enhance": 0.7
-    },
-    "majors": [
-      {
-        "token": "token_drill",
-        "objectClassExt": 4,
-        "class": 0,
-        "grade": 3
-      }
-    ],
-    "minors": [ "token_soil" ],
-    "limits": {
-      "min": 800,
-      "max": 2200 
-    },
     "disable": false
   }
 ]
