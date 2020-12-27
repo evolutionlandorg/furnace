@@ -61,7 +61,7 @@
   fi
 
   echo "Installing fnc-cli... (this will take a while)"
-  nix-env -i -f https://github.com/hujw77/furnace/tarball/fnc
+  nix-env -f https://github.com/hujw77/furnace/tarball/fnc -iA fnc
 
   # Finished!
   cat <<EOF
