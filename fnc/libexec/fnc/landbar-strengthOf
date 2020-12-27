@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+
+tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+for token in "${tokens[@]}"; do
+	seth call $LANDITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $1
+	seth estimate $LANDITEMBAR_PROXY "enhanceStrengthRateOf(address,uint256)(uint256)" $token $1
+done
+
+# seth call $LANDITEMBAR_PROXY "getBarStaker(uint256,uint256)(uint256)" $landId $(seth --to-uint256 0) 

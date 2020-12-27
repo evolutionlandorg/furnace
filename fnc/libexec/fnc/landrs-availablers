@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+landId=$1
+itemId=$2
+# itemId=0x2a010001010001050000000000000001000000000000000000000000000003f8
+# itemToken=$TOKEN_GEGO
+itemToken=$IOBJECTOWNERSHIP_PROXY
+
+resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
+
+seth call $LANDRESOURCE_PROXY "availableLandResources(uint256,address[])(uint256[])" $landId $resources
+
+echo "-----------------------------"
+seth call $LANDRESOURCE_PROXY "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
+
+echo "-----------------------------"
+tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+for token in "${tokens[@]}"; do
+	landrs=$(seth call $LANDRESOURCE_PROXY "getLandMinedBalance(uint256,address)(uint256)" $landId $token)
+	barrs=$(seth call $LANDRESOURCE_PROXY "getItemMinedBalance(address,uint256,address)(uint256)" $itemToken $itemId $token)
+	echo "land:"   "$landrs"       bar:  "$barrs"
+	# seth call $LANDRESOURCE_PROXY "land2RSState(uint256,address)(uint256,uint256,uint256)" $landId $token
+done
+
+echo "-----------------------------"
+seth call $LANDRESOURCE_PROXY "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
+seth call $LANDRESOURCE_PROXY "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
+seth call $LANDRESOURCE_PROXY "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+
+
+

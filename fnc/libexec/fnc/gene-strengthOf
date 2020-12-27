@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
+tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+
+for token in "${tokens[@]}"; do
+	info=$(seth call $APOSTLEBASE_PROXY "getApostleInfo(uint256)(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)" $1)
+	talent=$(echo $info | cut -d' ' -f 2)
+	talent=$(seth --to-uint256 $talent)
+	strength=$(seth call $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId)
+	seth --to-fix 18 $strength 
+	seth estimate $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId
+done

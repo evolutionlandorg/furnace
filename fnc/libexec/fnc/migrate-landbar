@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+address=$(dapp create src/LandItemBar.sol:LandItemBar)
+export LANDITEMBAR=$address
+# export LANDITEMBAR=0x040d5d6ca6a7fe7f8949aad2e3e692e5bbc38de2
+
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $LANDITEMBAR_PROXY $LANDITEMBAR
+cat $path | jq '.LANDITEMBAR= $address' --arg address $LANDITEMBAR | sponge $path
+

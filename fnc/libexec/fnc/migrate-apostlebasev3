@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+# export APOSTLEBASE=0x3Fc42eadF609EfBa7552bEE29951561462f69A1C #back
+address=$(dapp create one/ApostleBaseV3.f.sol:ApostleBaseV3)
+export APOSTLEBASE=$address
+
+seth send -F $OWNER $APOSTLEBASE_PROXY "upgradeTo(address)" $APOSTLEBASE
+cat $path | jq '.APOSTLEBASE = $address' --arg address $APOSTLEBASE | sponge $path
+
+if test $(seth call $APOSTLEBASE_PROXY "implementation()(address)") != $APOSTLEBASE; then
+  (echo "check migration failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: migration finished."
+ 

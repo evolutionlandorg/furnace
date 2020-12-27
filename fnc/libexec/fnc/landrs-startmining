@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+landId=$1
+# index=$(seth --to-uint256 $1)
+seth send $LANDRESOURCE_PROXY "startMining(uint256,uint256,address)" $2 $landId $3  
+# seth send $LANDRESOURCE_PROXY "startMining(uint256,uint256,address)" $1 $landId $2  

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+landId=$1
+index=$(seth --to-uint256 $2)
+seth send $LANDITEMBAR_PROXY "unequip(uint256,uint256)" $landId $index 

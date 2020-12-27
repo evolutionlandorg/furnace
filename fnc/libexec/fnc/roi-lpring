@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# importing the csv module
+import csv
+# import the math module
+import math
+
+# my data rows as dictionary objects
+mydict = []
+# if LP_GOLD_RING and LP_RING_ETH all init with 1 : 1
+# liquidity between 50 and 550
+x = 1.1649
+p0 = 1
+p1 = 1
+# Daily ROI in RING: x * y% * p0 / (2 * (a1 + a2)
+for y in range(4, 18):
+    for l0 in range(30, 300, 10):
+        l1 = l0
+        gold = x * y / 100.0
+        a0 = a1 = l0
+        a2 = a3 = l1
+        roi = x * y * p0 / (2 * (a1 + a2))
+        row = {
+            "ApostleStrength": x,
+            "DrillStrength(%)": y,
+            "LP_GOLD_RING": l0,
+            "LP_RING_ETH": l1,
+            "CostOfGold": round(a0, 2),
+            "CostOfRing": round(a1 + a2, 2),
+            "CostOfEth": round(a3, 2),
+            "YielfOfGold": round(gold, 2),
+            "DailyROI(%)": round(roi, 2),
+            "WeeklyROI(%)": round(roi * 7, 2),
+            "YearlyROI(%)": round(roi * 365, 2)
+        }
+        mydict.append(row)
+# field names
+fields = [
+    "ApostleStrength",
+    "DrillStrength(%)",
+    "LP_GOLD_RING",
+    "LP_RING_ETH",
+    "CostOfGold",
+    "CostOfRing",
+    "CostOfEth",
+    "YielfOfGold",
+    "DailyROI(%)",
+    "WeeklyROI(%)",
+    "YearlyROI(%)"
+]
+# name of csv file
+filename = "bin/csv/roi-gold-ring1:1.csv"
+# writing to csv file
+with open(filename, "w") as csvfile:
+    # creating a csv dict writer object
+    writer = csv.DictWriter(csvfile, fieldnames=fields)
+    # writing headers (field names)
+    writer.writeheader()
+    # writing data rows
+    writer.writerows(mydict)

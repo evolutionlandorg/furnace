@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+path=$FNC_CONFIG
+
+address=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
+export METADATATELLER=$address
+
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $METADATATELLER_PROXY $METADATATELLER
+cat $path | jq '.METADATATELLER = $address' --arg address $METADATATELLER | sponge $path
+

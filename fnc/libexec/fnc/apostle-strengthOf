@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+landId=$LAND3
+tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+for token in "${tokens[@]}"; do
+	strength=$(seth call $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $1 $token $landId)
+	seth estimate $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $1 $token $landId
+	seth --to-fix 18 $strength 
+done

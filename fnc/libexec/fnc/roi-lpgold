@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# importing the csv module
+import csv
+
+# my data rows as dictionary objects
+mydict = []
+# if only LP_GOLD_RING init with 1 : 1
+# liquidity between 50 and 550
+x = 1.1649
+p0 = 1
+# Daily ROI in RING: x * y% * p0 / (2 * (a1 + a2)
+for y in range(2, 18):
+    for l0 in range(50, 550, 10):
+        gold = x * y / 100.0
+        a0 = a1 = l0
+        roi = x * y * p0 / (2 * a1)
+        row = {
+            "ApostleStrength": x,
+            "DrillStrength(%)": y,
+            "LP_GOLD_RING": l0,
+            "CostOfGold": a0,
+            "CostOfRing": a1,
+            "YielfOfGold": round(gold, 2),
+            "DailyROI(%)": round(roi, 2),
+            "WeeklyROI(%)": round(roi * 7, 2),
+            "YearlyROI(%)": round(roi * 365, 2)
+        }
+        mydict.append(row)
+# field names
+fields = [
+    "ApostleStrength",
+    "DrillStrength(%)",
+    "LP_GOLD_RING",
+    "CostOfGold",
+    "CostOfRing",
+    "YielfOfGold",
+    "DailyROI(%)",
+    "WeeklyROI(%)",
+    "YearlyROI(%)"
+]
+# name of csv file
+filename = "bin/csv/roi-ring1:1.csv"
+# writing to csv file
+with open(filename, "w") as csvfile:
+    # creating a csv dict writer object
+    writer = csv.DictWriter(csvfile, fieldnames=fields)
+    # writing headers (field names)
+    writer.writeheader()
+    # writing data rows
+    writer.writerows(mydict)

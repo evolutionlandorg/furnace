@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+index=$(seth --to-uint256 $2)
+token=$TOKEN_GEGO
+total=$(seth call $TOKEN_GEGO "totalSupply()(uint256)")
+id=$(seth --to-uint256 $(($total + 1)))
+seth send $TOKEN_GEGO "safeMint(address,uint256)" $AUTH $id 
+# seth send $TOKEN_GEGO "setApprovalForAll(address,bool)" $APOSTLEITEMBAR_PROXY $(seth --to-uint256 1)
+seth send $APOSTLEITEMBAR_PROXY "equip(uint256,uint256,address,uint256)" $1 $index $token $id
