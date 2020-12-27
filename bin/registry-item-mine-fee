@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "FURNACE_ITEM_MINE_FEE")))
-feeRate=$(seth --to-uint256 5000000)
-seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $registry $feeRate

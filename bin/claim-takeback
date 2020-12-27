@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-seth send -F $AUTH $DRILLTAKEBACK "claimTokens(address)" $TOKEN_RING 

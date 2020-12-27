@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-max=$(seth --to-uint256 5)
-seth send -F $OWNER $LANDRESOURCE_PROXY "setMaxMiners(uint256)" $max  

@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-# seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $ITEMBASE_PROXY $(seth --to-uint256 1)
-depth=$(seth --to-uint256 1)
-seth send $ITEMBASE_PROXY "disenchant(uint256,uint256)" $1 $depth

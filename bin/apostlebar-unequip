@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-index=$(seth --to-uint256 $2)
-seth send $APOSTLEITEMBAR_PROXY "unequip(uint256,uint256)" $1 $index 
