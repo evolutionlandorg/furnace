@@ -1,7 +1,7 @@
 { lib, stdenv, fetchFromGitHub, makeWrapper, glibcLocales
 , bc, coreutils, curl, findutils, gawk, gnugrep, gnused, perl
 , jshon, jq, nodejs, git
-, solc, go-ethereum, seth, ethabi, ethsign
+, solc, go-ethereum, seth, ethsign
 }:
 
 stdenv.mkDerivation rec {
@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     bc coreutils curl findutils gawk gnugrep gnused perl
     jshon jq nodejs git
-    solc go-ethereum seth ethabi ethsign
+    solc go-ethereum seth ethsign
   ];
 
   buildPhase = "true";

@@ -1346,6 +1346,22 @@ contract ApostleBaseV3 is ApostleBaseV2 {
 		if (strength == 0) {
 			strength = IGeneScience(registry.addressOf(CONTRACT_GENE_SCIENCE))
 			.getStrength(talents, _resourceToken, _landTokenId);
+		}
+		// V3
+		address itemBar = registry.addressOf(CONTRACT_APOSTLE_ITEM_BAR);
+		uint256 enhanceRate =
+			IItemBar(itemBar).enhanceStrengthRateOf(_resourceToken, _tokenId);
+		uint256 enhanceStrength = strength.mul(enhanceRate).div(RATE_PRECISION);
+		uint256 totalStrength = strength.add(enhanceStrength);
+		return totalStrength;
+    }
+
+    function cachedStrengthOf(uint256 _tokenId, address _resourceToken, uint256 _landTokenId) public returns (uint256) {
+        uint256 talents = tokenId2Apostle[_tokenId].talents;
+		uint256 strength = talents2Strength[talents][_landTokenId][_resourceToken];
+		if (strength == 0) {
+			strength = IGeneScience(registry.addressOf(CONTRACT_GENE_SCIENCE))
+			.getStrength(talents, _resourceToken, _landTokenId);
 			talents2Strength[talents][_landTokenId][_resourceToken] = strength;
 		}
 		// V3

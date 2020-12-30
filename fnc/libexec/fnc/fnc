@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-### FNC - Furnace Command Line Input
+### FNC - Furnace Command Line Interface
 shopt -s extglob
 
 OPTS="fnc [<options>] <command> [<args>]
@@ -14,7 +14,6 @@ G,gas=number          number of gas units to provide
 async                 don't wait for tx receipts
 
   FNC options:
-F,fml=string          fml identifier
 I,itb=string          itb identifier
 
   Filter options:
@@ -26,7 +25,11 @@ J,config=file         custom deployment address file (json)
 
 set -e
 
-. .fncrc
+
+if  [[ -e .fncrc ]]; then
+  . .fncrc
+fi
+
 
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 
@@ -56,7 +59,6 @@ while [[ $1 ]]; do
     -C|--chain)     shift; export FNC_CHAIN=$1;;
     -J|--config)    shift; export FNC_CONFIG=$1;;
 
-    -F|--fml)       shift; export FNC_FML=$1;;
     -I|--itb)       shift; export FNC_ITB=$1;;
 
     -B|--block)     shift; export ETH_BLOCK=$1;;
@@ -142,3 +144,5 @@ if ! [[ $FNC_INIT ]]; then
   export FNC_INIT=1
   fnc-init
 fi
+
+"${0##*/}-${1-help}" "${@:2}"

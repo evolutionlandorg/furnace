@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+### fnc-itb -- Furnace itembase interactive
+### Usage: fnc itb [<command>]
+###
+### Commands: itb meta               Itembase base info 
+###           itb objc               Itembase object class extension
+###           itb item               Itembase item info
+###           itb rate               Itembase rate info
+###           itb join <amt>         Add collateral to an urn
+###           itb exit <amt> [<guy>] Remove collateral from an urn
+###
+### Example:  fnc itb meta
+###           fnc itb objc
+set -e
+
+export FNC_ITB=${FNC_ITB-CONTRACT_ITEM_BASE}
+
+case $1 in
+  itb)
+    gem="$(fnc --get-add "${FNC_ITB?}")" 
+  ;;
+  meta)
+    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{$1=$2=$3=""; print $0}' | sed 's/^ *//g'
+  ;;
+  symbol)
+    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{print $2}'
+  ;;
+  decimals)
+    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{print $3}'
+  ;;
+  balance)
+    mcd-gem-balance "$2";
+  ;;
+  supply)
+    ilk="$(mcd --get-ilk)"
+    case $2 in
+      mcd) { mcd gem-supply; };;
+      ext) { mcd gem-supply-ext; };;
+      "")   {
+        exec 3< <(mcd gem supply mcd)
+        exec 4< <(mcd gem supply ext)
+        echo "mcd $(cat <&3) Total system balance ($MCD_ILK)"
+        echo "ext $(cat <&4) Total supply ($MCD_ILK)"
+      };;
+      *)   { mcd gem supply; };;
+    esac
+  ;;
+  join) mcd gem-join "$2"; ;;
+  exit) mcd gem-exit "$2"; ;;
+    "") mcd-gem;         ;;
+     *) mcd help gem;    ;;
+esac

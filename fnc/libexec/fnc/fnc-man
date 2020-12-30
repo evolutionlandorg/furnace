@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+for file in ${0%/*}/fnc-*; do
+  commands+=("$file")  # no shellcheck
+done
+
+cat "${commands[@]}" |
+  sed -n '/^###/p' | sed 's/###//g' | sed '/With/d'

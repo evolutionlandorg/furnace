@@ -3,20 +3,12 @@ buildone:; dapp --use solc:0.4.24 buildone
 clean   :; dapp clean
 test    :; dapp test
 deploy  :; dapp create Furnance
+flat    :; bash flat.sh 
 lint    :; solhint --max-warnings 0 'src/**/*.sol' 
 link    :;
 	rm -rf 'one'
 	mkdir 'one'
 	ln lib/apostle/contracts-flattener/ApostleBaseV3.sol one/ApostleBaseV3.f.sol
 	ln lib/land/contracts-flattener/LandResourceV5.sol one/LandResourceV5.f.sol
-	  
-flatten :; 
-	rm -rf 'bin/flatten'
-	mkdir -p 'bin/flatten'
-	hevm flatten --source-file src/DrillBase.sol >> bin/flatten/DrillBase.f.sol
-	hevm flatten --source-file src/DrillBaseAuthority.sol >> bin/flatten/DrillBaseAuthority.f.sol
-	hevm flatten --source-file src/DrillBaseProxy.sol >> bin/flatten/DrillBaseProxy.f.sol
-	hevm flatten --source-file src/DrillLuckyBox.sol >> bin/flatten/DrillLuckyBox.f.sol
-	hevm flatten --source-file src/DrillTakeBack.sol >> bin/flatten/DrillTakeBack.f.sol
-	hevm flatten --source-file src/FurnaceProxyAdmin.sol >> bin/flatten/FurnaceProxyAdmin.f.sol
-	hevm flatten --source-file src/ObjectOwnershipAuthorityV3.sol >> bin/flatten/ObjectOwnershipAuthorityV3.f.sol
+
+.PHONY: all buildone clean test deploy flat lint link
