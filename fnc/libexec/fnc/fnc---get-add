@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-contract=$(seth --to-bytes32 $(seth --from-ascii $1))
-seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $contract

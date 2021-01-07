@@ -25,11 +25,9 @@ J,config=file         custom deployment address file (json)
 
 set -e
 
-
 if  [[ -e .fncrc ]]; then
   . .fncrc
 fi
-
 
 if [ "$FNC_VERBOSE" ]; then set -x; fi
 

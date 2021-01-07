@@ -2,51 +2,38 @@
 ### fnc-itb -- Furnace itembase interactive
 ### Usage: fnc itb [<command>]
 ###
-### Commands: itb meta               Itembase base info 
-###           itb objc               Itembase object class extension
-###           itb item               Itembase item info
-###           itb rate               Itembase rate info
-###           itb join <amt>         Add collateral to an urn
-###           itb exit <amt> [<guy>] Remove collateral from an urn
+### Commands: itb meta <id>          Itembase base info 
+###           itb objc <id>          Itembase object class extension
+###           itb rate <id> <ele>    Itembase item rate 
+###           itb item <id>          Itembase item info
+###           itb ent  <params>      Itembase enchant
+###           itb dis  <params>      Itembase disenchant
 ###
 ### Example:  fnc itb meta
 ###           fnc itb objc
-set -e
+set -ex
 
-export FNC_ITB=${FNC_ITB-CONTRACT_ITEM_BASE}
+itb="$(fnc --get-itb)" 
 
 case $1 in
-  itb)
-    gem="$(fnc --get-add "${FNC_ITB?}")" 
-  ;;
   meta)
-    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{$1=$2=$3=""; print $0}' | sed 's/^ *//g'
+    seth call $itb "getBaseInfo(uint256)(uint16,uint16,uint16)" $2
   ;;
-  symbol)
-    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{print $2}'
+  objc)
+    seth call $itb "getObjectClassExt(uint256)(uint16)" $2
   ;;
-  decimals)
-    mcd ilks | sed -n "/$MCD_ILK/p" | awk '{print $3}'
+  rate)
+    seth call $itb "getRate(uint256,uint256)(uint256)" $2 $3
   ;;
-  balance)
-    mcd-gem-balance "$2";
+  item)
+    seth call $itb "getObjectClassExt(uint256)(uint16)" $2
   ;;
-  supply)
-    ilk="$(mcd --get-ilk)"
-    case $2 in
-      mcd) { mcd gem-supply; };;
-      ext) { mcd gem-supply-ext; };;
-      "")   {
-        exec 3< <(mcd gem supply mcd)
-        exec 4< <(mcd gem supply ext)
-        echo "mcd $(cat <&3) Total system balance ($MCD_ILK)"
-        echo "ext $(cat <&4) Total supply ($MCD_ILK)"
-      };;
-      *)   { mcd gem supply; };;
-    esac
+  ent)
+    seth send $itb "enchant(uint256,uint256[],address[],uint256[])" "${@:2}"
   ;;
-  join) mcd gem-join "$2"; ;;
-  exit) mcd gem-exit "$2"; ;;
-    "") mcd-gem;         ;;
-     *) mcd help gem;    ;;
+  dis)
+    seth send $itb "disenchant(uint256,uint256)" "${@:2}"
+  ;;
+     *) fnc help itb;    ;;
 esac
+	

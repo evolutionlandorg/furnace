@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -e
 export FNC_ITB=${FNC_ITB-CONTRACT_ITEM_BASE}
-seth --to-bytes32 "$(seth --from-ascii "$FNC_ITB")"
+id=$(seth --to-bytes32 "$(seth --from-ascii "$FNC_ITB")")
+fnc --get-addr "$id"
