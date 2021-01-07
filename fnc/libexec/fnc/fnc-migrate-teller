@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+METADATATELLER=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $METADATATELLER_PROXY $METADATATELLER
+addAddress "DRILLLUCKYBOX" "$DRILLLUCKYBOX"

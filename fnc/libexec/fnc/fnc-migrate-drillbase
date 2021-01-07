@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+DRILLBASE=$(dapp create src/DrillBase.sol:DrillBase)
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
+addAddress "DRILLBASE" "$DRILLBASE"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+DRILLTAKEBACK=$(dapp create src/DrillTakeBack.sol:DrillTakeBack $ISETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $CHAINID))
+
+DRILLBASE_AUTHORITY=$(dapp create src/DrillBaseAuthority.sol:DrillBaseAuthority [$DRILLTAKEBACK])
+seth call $DRILLBASE_AUTHORITY "whiteList(address)" $DRILLTAKEBACK   
+seth send -F $AUTH $DRILLBASE_PROXY "setAuthority(address)" $DRILLBASE_AUTHORITY 
+addAddress "DRILLBASE_AUTHORITY" "$DRILLBASE_AUTHORITY"

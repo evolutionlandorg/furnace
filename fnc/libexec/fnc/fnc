@@ -76,6 +76,7 @@ config-init() {
     echo "Config file not found: $path not found"
     exit 1
   fi
+  export ADDRESSES_FILE=$path
   exports=$(cat $path | jq -r ".deploy_data // . | \
     to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]")
   for e in $exports; do export "$e"; done

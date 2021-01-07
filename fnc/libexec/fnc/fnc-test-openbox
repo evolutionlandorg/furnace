@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -e
+
+# open box
+# _hashmessage = hash("${address(this)}${_user}${networkId}${boxId[]}${amount[]}")
+networkId=$(seth --to-uint256 $CHAINID)
+boxId1=0xffffffffff4143545f52494e475f45524332305f544f4b454e00000000000003
+boxId2=0x0fffffffff4143545f52494e475f45524332305f544f4b454e00000000000003
+amount1=$(seth --to-uint256 $(seth --to-wei 1000 ether))
+amount2=$(seth --to-uint256 $(seth --to-wei 100 ether))
+# abi.encodePacked( address(this), _user, networkId, _ids, _amounts)
+msg="${DRILLTAKEBACK}${AUTH:2}${networkId:2}${boxId1:2}${boxId2:2}${amount1:2}${amount2:2}" 
+hashmsg=$(seth keccak $msg)
+signedmsg=$(ethsign msg --from $SUPERVISOR --data $hashmsg --passphrase-file $ETH_PASSWORD --key-store $ETH_KEYSTORE)
+prefixedHash=$(seth call $ECDSA "toEthSignedMessageHash(bytes32)" $hashmsg)
+signer=$(seth call $ECDSA "recover(bytes32,bytes)" $prefixedHash $signedmsg)
+dec=$(seth --abi-decode 'f()(address,bytes32,bytes32,uint8)' "$signer")
+sup=$(echo $dec | cut -d' ' -f 1)
+r=$(echo $dec | cut -d' ' -f 2)
+s=$(echo $dec | cut -d' ' -f 3)
+v=$(echo $dec | cut -d' ' -f 4)
+seth send -F $AUTH $DRILLTAKEBACK "openBoxes(uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" [$boxId1,$boxId2] [$amount1,$amount2] $hashmsg $v $r $s  
+

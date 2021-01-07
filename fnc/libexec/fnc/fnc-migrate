@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+### fnc-migrate -- Furnace migrate contract
+### Usage: fnc migrate [<command>]
+###
+### Commands: migrate formula       migrate Formula contract
+###           migrate drillbase     migrate DrillBase contract
+###           migrate itembase      migrate ItemBase contract
+###           migrate landbar       migrate LandItemBar contract
+###           migrate teller        migrate MetaDataTeller contract
+###           migrate apostlebase   migrate ApostleBaseV3 contract
+###           migrate landrsauth    migrate LandResourceAuthorityV4 contract
+###           migrate landrs        migrate LandResourceV5 contract
+###           migrate luckybox      migrate DrillLuckyBox contract
+###           migrate takeback      migrate DrillTakeBack contract
+###           migrate all           migrate all contract
+###
+### Example:  fnc migrate formula
+###           fnc migrate drillbase
+set -e
+
+if [ "$FNC_VERBOSE" ]; then set -x; fi
+
+
+case $1 in
+  formula)
+    fnc migrate-formula
+  ;;
+  drillbase)
+    fnc migrate-drillbase
+  ;;
+  itembase)
+    fnc migrate-itembase
+  ;;
+  landbar)
+    fnc migrate-landbar
+  ;;
+  teller)
+    fnc migrate-teller
+  ;;
+  apostlebase)
+    fnc migrate-apostlebase
+  ;;
+  landrsauth)
+    fnc migrate-landrsauth
+  ;;
+  landrs)
+    fnc migrate-landrs
+  ;;
+  luckybox)
+    fnc migrate-luckybox
+  ;;
+  takeback)
+    fnc migrate-takeback
+  ;;
+  all)
+    fnc migrate-drillbase
+    fnc migrate-luckybox
+    fnc migrate-takeback
+    fnc migrate-formula
+    fnc migrate-itembase
+    fnc migrate-landbar
+    fnc migrate-teller
+    fnc migrate-apostlebase
+    fnc migrate-landrs
+    fnc migrate-landrsauth
+  ;;
+  help)
+    fnc help migrate    
+  ;;
+  *)  
+    # shellcheck source=lib/common.sh
+    . "${0%/*}/../../lib/common.sh"
+    key=$1
+    value=$(dapp create src/$key.sol:$key)
+    key=$(toUpper "$key")
+    addAddress "$key" "$value"
+  ;;
+esac
+	
+set -e
+

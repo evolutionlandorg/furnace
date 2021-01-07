@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+### fnc-teller -- Furnace metatellerler interactive
+### Usage: fnc teller [<command>]
+###
+### Commands: teller meta   <addr> <id>                     MetaDataTeller meta data
+###           teller objc   <addr> <id>                     MetaDataTeller object class extension
+###           teller rate   <addr> <id> <ele>               MetaDataTeller item rate 
+###           teller addi   <id> <grade> <rate>             MetaDataTeller addInternalTokenMeta
+###           teller addx   <addr> <objc> <grade> <rate>    MetaDataTeller addExternalTokenMeta
+###           teller rmi    <id> <grade>                    MetaDataTeller removeInternalTokenMeta
+###           teller rmx    <addr>                          MetaDataTeller removeExternalTokenMeta
+###
+### Example:  fnc teller meta
+###           fnc teller objc
+set -ex
+
+teller="$(fnc --get-teller)" 
+
+case $1 in
+  meta)
+    seth call $teller "getMetaData(address,uint256)(uint16,uint16,uint16)" $2 $3
+  ;;
+  objc)
+    seth call $teller "getObjClassExt(address,uint256)(uint16)" $2 $3
+  ;;
+  rate)
+    seth call $teller "getRate(address,uint256,uint256)(uint16)" $2 $3 $4
+  ;;
+  addi)
+    seth call $teller "addInternalTokenMeta(bytes32,uint16,uint256)" "${@:2}"
+  ;;
+  addx)
+    seth call $teller "addExternalTokenMeta(address,uint16,uint16,uint256)" "${@:2}"
+  ;;
+  rmi)
+    seth call $teller "removeInternalTokenMeta(bytes32,uint16)" "${@:2}"
+  ;;
+  rmx)
+    seth call $teller "removeExternalTokenMeta(address)" "${@:2}"
+  ;;
+     *) fnc help teller;    ;;
+esac
+	

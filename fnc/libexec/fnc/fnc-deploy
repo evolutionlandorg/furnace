@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+### fnc-deploy -- Furnace deploy contract
+### Usage: fnc deploy [<command>]
+###
+### Commands: deploy formula       Deploy Formula contract
+###           deploy drillbase     Deploy DrillBase contract
+###           deploy itembase      Deploy ItemBase contract
+###           deploy landbar       Deploy LandItemBar contract
+###           deploy teller        Deploy MetaDataTeller contract
+###           deploy all           Deploy all Furnace contract
+###
+### Example:  fnc deploy formula
+###           fnc deploy drillbase
+set -e
+
+case $1 in
+  formula)
+    fnc deploy-formula
+  ;;
+  drillbase)
+    fnc deploy-drillbase
+  ;;
+  itembase)
+    fnc deploy-itembase
+  ;;
+  landbar)
+    fnc deploy-landbar
+  ;;
+  teller)
+    fnc deploy-teller
+  ;;
+  registry)
+    fnc deploy-registry
+  ;;
+  all)
+    fnc deploy-formula
+    fnc deploy-drillbase
+    fnc deploy-itembase
+    fnc deploy-landbar
+    fnc deploy-teller
+  ;;
+     *) fnc help deploy;    ;;
+esac
+	
+set -e
+

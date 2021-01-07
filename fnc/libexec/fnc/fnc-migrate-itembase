@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+ITEMBASE=$(dapp create src/ItemBase.sol:ItemBase)
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $ITEMBASE_PROXY $ITEMBASE
+addAddress "ITEMBASE" "$ITEMBASE"

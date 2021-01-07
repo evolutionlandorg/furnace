@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+APOSTLEBASEV3=$(dapp create one/ApostleBaseV3.f.sol:ApostleBaseV3)
+seth send -F $OWNER $APOSTLEBASE_PROXY "upgradeTo(address)" $APOSTLEBASEV3
+
+if test $(seth call $APOSTLEBASE_PROXY "implementation()(address)") != $APOSTLEBASEV3; then
+  (echo "check migration failed."; exit 1;)
+fi
+
+addAddress "APOSTLEBASEV3" "$APOSTLEBASEV3"
+echo >&2 "${0##*/}: info: migration finished."
+ 

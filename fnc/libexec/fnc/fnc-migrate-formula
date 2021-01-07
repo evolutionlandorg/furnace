@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+FORMULA=$(dapp create src/Formula.sol:Formula)
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $FORMULA_PROXY $FORMULA
+addAddress "FORMULA" "$FORMULA"

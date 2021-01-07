@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+### fnc-admin -- Furnace admin interactive
+### Usage: fnc admin [<command>]
+###
+### Commands: admin change-owner          Furnace Admin change owner
+###
+
+set -ex
+
+admin="${FURNACEPROXYADMIN?}" 
+
+case $1 in
+  change-owner)
+    seth send -F $AUTH $FURNACEPROXYADMIN "transferOwnership(address)" $MUILTISIG   
+  ;;
+     *) fnc help admin;    ;;
+esac
+	

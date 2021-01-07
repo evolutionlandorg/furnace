@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+ITEMBASE=$(dapp create src/ItemBase.sol:ItemBase)
+addAddress "ITEMBASE" "$ITEMBASE"
+echo >&2 "${0##*/}: info: ItemBase created."
+
+# 1
+calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
+ITEMBASE_PROXY=$(dapp create src/ItemBaseProxy.sol:ItemBaseProxy $ITEMBASE $FURNACEPROXYADMIN $calldata)
+addAddress "ITEMBASE_PROXY" "$ITEMBASE_PROXY"
+echo >&2 "${0##*/}: info: ItemBaseProxy inited."
+
+OWNERSHIPV4WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
+OBJECTOWNERSHIPV4_AUTHORITY=$(dapp create src/ObjectOwnershipAuthorityV4.sol:ObjectOwnershipAuthorityV4 $OWNERSHIPV4WHITELIST)
+addAddress "OBJECTOWNERSHIPV4_AUTHORITY" "$OBJECTOWNERSHIPV4_AUTHORITY"
+echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV4 created."
+
+seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV4_AUTHORITY 
+if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV4_AUTHORITY ; then
+  (echo "migrate ObjectOwnershipAuthorityV4 failed ${auth}"; exit 1;)
+fi
+
+allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
+for allow in "${allowlist[@]}"; do
+  res=$(seth call $OBJECTOWNERSHIPV4_AUTHORITY "whiteList(address)(bool)" $allow)
+  if test "$res" != true; then
+    (echo "migrate OWNERSHIPV4WHITELIST failed ${allow}"; exit 1;)
+  fi
+done
+
+echo >&2 "${0##*/}: info: setAuthority finished."
+
+seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $ITEMBASE_PROXY $(seth --to-hex 5) 
+if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $ITEMBASE_PROXY) != 5; then
+  (echo "check classAddress2Id failed."; exit 1;)
+fi
+
+if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $IOBJECTOWNERSHIP_PROXY; then
+  (echo "check ownershipId2Address failed."; exit 1;)
+fi
+  
+# setting registry
+item=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ITEM_BASE")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $item) != $ITEMBASE_PROXY; then
+  (echo "check regist ${item} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+index=$(seth --to-uint256 0)
+total=$(seth call $TOKEN_GEGO "totalSupply()(uint256)")
+id=$(seth --to-uint256 $(($total + 1)))
+seth send $TOKEN_GEGO "safeMint(address,uint256)" $AUTH $id 
+
+# seth send $TOKEN_GEGO "setApprovalForAll(address,bool)" $ITEMBASE_PROXY $(seth --to-uint256 1)
+address=$TOKEN_GOLD
+value=$(seth --to-uint256 $(seth --to-wei 0.033 ether))
+# seth send $TOKEN_GOLD "approve(address)	" $ITEMBASE_PROXY 
+# seth send $ITEMBASE_PROXY "enchant(uint256,uint256[],address[],uint256[])(uint256)" $index [$id] [$address] [$value]

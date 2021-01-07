@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+### fnc-encoder -- Furnace InterstellarEncoder interactive
+### Usage: fnc encoder [<command>]
+###
+### Commands: encoder addr                InterstellarEncoder price info
+###           encoder objc                InterstellarEncoder claim tokens
+###           encoder buy   <params>      InterstellarEncoder buy encoder
+###           encoder start               InterstellarEncoder start
+###           encoder stop                InterstellarEncoder stop
+###
+### Example:  fnc encoder price
+###           fnc encoder buy
+set -ex
+
+encoder="$(fnc --get-encoder)" 
+
+case $1 in
+  addr)
+    seth call $encoder "getObjectAddress(uint256)(address)" $2
+  ;;
+  objc)
+    seth call $encoder "getObjectClass(uint256)(uint8)" $2
+  ;;
+     *) fnc help encoder;    ;;
+esac
+	

@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-landId=$1
-seth send $LANDRESOURCE_PROXY "mine(uint256)" $landId  

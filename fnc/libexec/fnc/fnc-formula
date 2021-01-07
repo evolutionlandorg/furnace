@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+### fnc-formula -- Furnace formula interactive
+### Usage: fnc formula [<command>]
+###
+### Commands: formula insert  <params>            Formula insert 
+###           formula disable <params>            Formula disable
+###           formula enable  <index>             Formula enable 
+###           formula length  <index>             Formula length 
+###           formula major   <index>             Formula majors info
+###           formula minor   <index>             Formula minors info
+###           formula limit   <limit>             Formula limit info
+###           formula meta    <index>             Formula meta info
+###
+### Example:  fnc formula insert
+###           fnc formula enable 
+set -ex
+
+formula="$(fnc --get-formula)" 
+
+case $1 in
+  insert)
+    seth call $formula "insert(bytes32,uint128,uint128,uint16,uint16,uint16,bool,bytes32[],bytes32[],uint256[])" "${@:2}"
+  ;;
+  disable)
+    seth call $formula "disable(uint256)" "${@:2}"
+  ;;
+  enable)
+    seth call $formula "enable(uint256)" "${@:2}"
+  ;;
+  length)
+    seth call $formula "length()" "${@:2}"
+  ;;
+  major)
+    seth call $formula "getMajors(uint256)" "${@:2}"
+  ;;
+  minor)
+    seth call $formula "getMinors(uint256)" "${@:2}"
+  ;;
+  limit)
+    seth call $formula "getLimit(uint256)" "${@:2}"
+  ;;
+  meta)
+    seth call $formula "getMetaInfo(uint256)" "${@:2}"
+  ;;
+     *) fnc help formula;    ;;
+esac
+	

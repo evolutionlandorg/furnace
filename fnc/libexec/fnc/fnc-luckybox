@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+### fnc-luckybox -- Furnace luckybox interactive
+### Usage: fnc luckybox [<command>]
+###
+### Commands: luckybox price               DRILLLUCKYBOX price info
+###           luckybox claim <addr>        DRILLLUCKYBOX claim tokens
+###           luckybox buy   <params>      DRILLLUCKYBOX buy luckybox
+###           luckybox start               DRILLLUCKYBOX start
+###           luckybox stop                DRILLLUCKYBOX stop
+###
+### Example:  fnc luckybox price
+###           fnc luckybox buy
+set -ex
+
+luckybox="${DRILLLUCKYBOX?}" 
+
+case $1 in
+  price)
+    seth call $luckybox "getPrice()(uint256,uint256)" "${@:2}"
+  ;;
+  claim)
+    seth send $luckybox "claimTokens(address)" "${@:2}"
+  ;;
+  buy)
+    seth send ${TOKEN_RING?} "transfer(address,uint256,bytes)" $luckybox "${@:2}"
+  ;;
+  start)
+    seth send $luckybox "start()"
+  ;;
+  stop)
+    seth send $luckybox "stop()"
+  ;;
+     *) fnc help luckybox;    ;;
+esac
+	

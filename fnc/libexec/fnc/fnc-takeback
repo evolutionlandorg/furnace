@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+### fnc-takeback -- Furnace drilltakebackback interactive
+### Usage: fnc takeback [<command>]
+###
+### Commands: takeback back    <params>    DrillTakeBack takeback back
+###           takeback openbox <params>    DrillTakeBack open box
+###           takeback claim   <addr>      DrillTakeBack claim tokens
+###           takeback start               DrillTakeBack start
+###           takeback stop                DrillTakeBack stop
+###
+### Example:  fnc takeback back 
+###           fnc takeback claim
+set -ex
+
+takeback="${DRILLTAKEBACK?}" 
+
+case $1 in
+  back)
+    seth send $takeback "takebackBack(uint256[],uint16[],bytes32,uint8,bytes32,bytes32)" "${@:2}"  
+  ;;
+  claim)
+    seth send $takeback "claimTokens(address)" "${@:2}"
+  ;;
+  openbox)
+    seth send $takeback "openBoxes(uint256[],uint256[],bytes32,uint8,bytes32,bytes32)" "${@:2}"
+  ;;
+  start)
+    seth send $takeback "start()"
+  ;;
+  stop)
+    seth send $takeback "stop()"
+  ;;
+     *) fnc help takeback;    ;;
+esac
+	

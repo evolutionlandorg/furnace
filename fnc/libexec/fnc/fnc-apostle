@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+### fnc-apostle -- Furnace apostle interactive
+### Usage: fnc apostle [<command>]
+###
+### Commands: apostle strength <id>          apostle strength info
+###
+set -ex
+
+apostle="${APOSTLEBASE_PROXY?}" 
+
+case $1 in
+  strength)
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      strength=$(seth call $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3)
+      seth estimate $APOSTLEBASE_PROXY "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3
+      seth --to-fix 18 $strength 
+    done
+  ;;
+     *) fnc help apostle;    ;;
+esac
+	

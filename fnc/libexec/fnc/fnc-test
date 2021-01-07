@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+### fnc-test -- Furnace test contract
+### Usage: fnc test [<command>]
+###
+### Commands: test equip-drill        Test land bar equip drill
+###           test equip-gego         Test land bar equip gego 
+###           test enchant-drill      Test enchant drill
+###           test enchant-gego       Test enchant gego
+###           test disenchant         Test disenchant 
+###           test buybox             Test buy lucky box
+###           test openbox            Test open lucky box
+###           test takeback           Test take back
+###           test landbase-assign    Test landbase assign new land
+###
+### Example:  fnc test formula
+###           fnc test drillbase
+set -e
+
+case $1 in
+  equip-drill)
+    fnc test-equip-drill "${@:2}"
+  ;;
+  equip-gego)
+    fnc test-equip-gego "${@:2}"
+  ;;
+  enchant-drill)
+    fnc test-enchant-drill "${@:2}"
+  ;;
+  enchant-gego)
+    fnc test-enchant-gego "${@:2}"
+  ;;
+  disenchant)
+    fnc test-disenchant "${@:2}"
+  ;;
+  buybox)
+    fnc test-buybox "${@:2}"
+  ;;
+  openbox)
+    fnc test-openbox "${@:2}"
+  ;;
+  takeback)
+    fnc test-takeback "${@:2}"
+  ;;
+  landbase-assign)
+    fnc test-landbase-assign "${@:2}"
+  ;;
+  all)
+    fnc test-equip-drill 
+    fnc test-equip-gego 
+    fnc test-enchant-drill 
+    fnc test-enchant-gego 
+    fnc test-disenchant 
+    fnc test-buybox 
+    fnc test-openbox 
+    fnc test-takeback 
+    fnc test-landbase-assign 
+  ;;
+     *) fnc help test;    ;;
+esac
+	
+set -e
+

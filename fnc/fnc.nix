@@ -1,7 +1,7 @@
 { lib, stdenv, fetchFromGitHub, makeWrapper, glibcLocales
 , bc, coreutils, curl, findutils, gawk, gnugrep, gnused, perl
-, jshon, jq, nodejs, git
-, solc, go-ethereum, seth, ethsign
+, jshon, jq, nodejs, git, moreutils
+, solc, go-ethereum, seth, dapp, ethsign
 }:
 
 stdenv.mkDerivation rec {
@@ -9,6 +9,7 @@ stdenv.mkDerivation rec {
   version = lib.fileContents ./version;
   src = lib.sourceByRegex ./. [
     "bin" "bin/.*"
+    "lib" "lib/.*"
     "libexec" "libexec/.*"
     "Makefile"
   ];
@@ -16,8 +17,8 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ makeWrapper ];
   buildInputs = [
     bc coreutils curl findutils gawk gnugrep gnused perl
-    jshon jq nodejs git
-    solc go-ethereum seth ethsign
+    jshon jq nodejs git moreutils
+    solc go-ethereum seth dapp ethsign
   ];
 
   buildPhase = "true";

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+### fnc-itembase -- Furnace itembase interactive
+### Usage: fnc itembase [<command>]
+###
+### Commands: itembase meta <id>          Itembase base info 
+###           itembase objc <id>          Itembase object class extension
+###           itembase rate <id> <ele>    Itembase item rate 
+###           itembase item <id>          Itembase item info
+###           itembase ent  <params>      Itembase enchant
+###           itembase dis  <params>      Itembase disenchant
+###
+### Example:  fnc itembase meta
+###           fnc itembase objc
+set -ex
+
+itembase="$(fnc --get-itembase)" 
+
+case $1 in
+  meta)
+    seth call $itembase "getBaseInfo(uint256)(uint16,uint16,uint16)" $2
+  ;;
+  objc)
+    seth call $itembase "getObjectClassExt(uint256)(uint16)" $2
+  ;;
+  rate)
+    seth call $itembase "getRate(uint256,uint256)(uint256)" $2 $3
+    seth estimate $itembase  "getRate(uint256,uint256)(uint256)" $2 $3
+  ;;
+  item)
+    seth call $itembase "getObjectClassExt(uint256)(uint16)" $2
+  ;;
+  ent)
+    seth send $itembase "enchant(uint256,uint256[],address[],uint256[])" "${@:2}"
+  ;;
+  dis)
+    seth send $itembase "disenchant(uint256,uint256)" "${@:2}"
+  ;;
+     *) fnc help itembase;    ;;
+esac
+	

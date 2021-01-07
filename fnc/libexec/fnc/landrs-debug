@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-
-landId=0x2a0100010100010100000000000000010000000000000000000000000000011e
-seth send $LANDRESOURCE_PROXY  "debug(uint256,address)" $landId $TOKEN_WATER

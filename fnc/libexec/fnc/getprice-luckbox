@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-seth call $DRILLLUCKYBOX "getPrice()(uint256,uint256)"   # 1000 100  

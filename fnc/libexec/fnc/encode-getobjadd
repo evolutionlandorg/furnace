@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-seth call $INTERSTELLARENCODER "getObjectAddress(uint256)(address)" $1
