@@ -51,7 +51,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test
-		// lastItemObjectId = 3000;
+		// lastItemObjectId = 4000;
 	}
 
 	function _safeTransfer(

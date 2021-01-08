@@ -21,6 +21,13 @@ addAddress() {
     log "$1=$2"
 }
 
+loadAddresses() {
+    local exports
+    exports=$(cat "$FNC_CONFIG" | jq -r ".deploy_data // . | \
+        to_entries|map(\"\(.key)=\(.value|tostring)\")|.[]")
+    for e in $exports; do export "$e"; done
+}
+
 toUpper() {
     echo "$1" | tr '[:lower:]' '[:upper:]'
 }

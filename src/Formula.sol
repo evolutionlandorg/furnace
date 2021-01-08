@@ -9,10 +9,7 @@ import "./FurnaceSettingIds.sol";
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	using Input for Input.Data;
-	event SetStrength(
-		uint256 indexed inde,
-		uint128 rate 
-	);
+	event SetStrength(uint256 indexed inde, uint128 rate);
 
 	event SetAmounts(uint256 indexed index, uint256[] amounts);
 
@@ -76,10 +73,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		emit EnableFormula(_index);
 	}
 
-	function setStrengthRate(
-		uint256 _index,
-		uint128 _rate
-	) external auth {
+	function setStrengthRate(uint256 _index, uint128 _rate) external auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
 		formula.rate = _rate;
@@ -189,5 +183,4 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint16 majorGrade = data.decodeU16();
 		return (majorAddress, objectClassExt, majorClass, majorGrade);
 	}
-
 }
