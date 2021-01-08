@@ -13,7 +13,6 @@ echo >&2 "${0##*/}: info: MetaDataTeller created."
 calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
 METADATATELLER_PROXY=$(dapp create src/MetaDataTellerProxy.sol:MetaDataTellerProxy $METADATATELLER $FURNACEPROXYADMIN $calldata)
 addAddress "METADATATELLER_PROXY" "$METADATATELLER_PROXY"
-export =$tellerProxy
 echo >&2 "${0##*/}: info: MetaDataTellerProxy inited."
 
 # setting registry

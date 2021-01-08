@@ -9,13 +9,8 @@ interface IELIP002 {
 	struct Item {
 		// index of `Formula`
 		uint256 index;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
-		// rate of enhance
+		//  strength rate
 		uint128 rate;
-		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
 		uint16 grade;
@@ -34,8 +29,6 @@ interface IELIP002 {
         The `user` argument MUST be the address of an account/contract that is approved to make the enchant (SHOULD be msg.sender).
         The `tokenId` argument MUST be token Id of the item which it is enchanted.
         The `index` argument MUST be index of the `Formula`.
-        The `base` argument MUST be base strength rate of the item.
-        The `enhance` argument MUST be enhance strength rate of the item.
         The `rate` argument MUST be rate of minor material.
         The `objClassExt` argument MUST be extension of `ObjectClass`.
         The `class` argument MUST be class of the item.
@@ -50,8 +43,6 @@ interface IELIP002 {
 		address indexed user,
 		uint256 indexed tokenId,
 		uint256 index,
-		uint128 base,
-		uint128 enhance,
 		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
@@ -90,7 +81,6 @@ interface IELIP002 {
         MUST revert on any other error.        
         @param _ids     IDs of NFT tokens(order and length must match `formula` index rules).
         @param _tokens  Addresses of FT tokens(order and length must match `formula` index rules).
-        @param _values  Amounts of FT tokens(order and length must match `formula` index rules).
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
@@ -98,8 +88,7 @@ interface IELIP002 {
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
-		address[] calldata _tokens,
-		uint256[] calldata _values
+		address[] calldata _tokens
 	) external returns (uint256);
 
 	// {

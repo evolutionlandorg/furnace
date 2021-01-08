@@ -7,6 +7,7 @@
 ###           deploy itembase      Deploy ItemBase contract
 ###           deploy landbar       Deploy LandItemBar contract
 ###           deploy teller        Deploy MetaDataTeller contract
+###           deploy registry      Deploy contract registry
 ###           deploy all           Deploy all Furnace contract
 ###
 ### Example:  fnc deploy formula
@@ -34,10 +35,11 @@ case $1 in
   ;;
   all)
     fnc deploy-formula
-    fnc deploy-drillbase
+    # fnc deploy-drillbase
     fnc deploy-itembase
     fnc deploy-landbar
     fnc deploy-teller
+    fnc deploy-registry
   ;;
      *) fnc help deploy;    ;;
 esac

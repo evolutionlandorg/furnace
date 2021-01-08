@@ -11,11 +11,10 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	using Input for Input.Data;
 	event SetStrength(
 		uint256 indexed inde,
-		uint128 baseRate,
-		uint128 enhanceRate
+		uint128 rate 
 	);
 
-	event SetLimits(uint256 indexed index, uint256[] limits);
+	event SetAmounts(uint256 indexed index, uint256[] amounts);
 
 	/*** STORAGE ***/
 
@@ -28,43 +27,40 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		uint256[] calldata _amounts
 	) external override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
-				base: _base,
-				enhance: _enhance,
+				rate: _rate,
 				objClassExt: _objClassExt,
 				class: _class,
 				grade: _grade,
 				canDisenchant: _canDisenchant,
 				majors: _majors,
 				minors: _minors,
-				limits: _limits,
+				amounts: _amounts,
 				disable: false
 			});
 		formulas.push(formula);
 		emit AddFormula(
 			formulas.length - 1,
 			formula.name,
-			formula.base,
-			formula.enhance,
+			formula.rate,
 			formula.objClassExt,
 			formula.class,
 			formula.grade,
 			formula.canDisenchant,
 			formula.majors,
 			formula.minors,
-			formula.limits
+			formula.amounts
 		);
 	}
 
@@ -82,24 +78,22 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 
 	function setStrengthRate(
 		uint256 _index,
-		uint128 _baseRate,
-		uint128 _enhanceRate
+		uint128 _rate
 	) external auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		formula.base = _baseRate;
-		formula.enhance = _enhanceRate;
-		emit SetStrength(_index, formula.base, formula.enhance);
+		formula.rate = _rate;
+		emit SetStrength(_index, formula.rate);
 	}
 
-	function setLimit(uint256 _index, uint256[] calldata _limits)
+	function setAmounts(uint256 _index, uint256[] calldata _amounts)
 		external
 		auth
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		formula.limits = _limits;
-		emit SetLimits(_index, formula.limits);
+		formula.amounts = _amounts;
+		emit SetAmounts(_index, formula.amounts);
 	}
 
 	function length() external view override returns (uint256) {
@@ -128,7 +122,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		returns (bytes32[] memory, uint256[] memory)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return (formulas[_index].minors, formulas[_index].limits);
+		return (formulas[_index].minors, formulas[_index].amounts);
 	}
 
 	function getMajorAddresses(uint256 _index)
@@ -164,7 +158,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		)
 	{
@@ -174,8 +167,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			formula.objClassExt,
 			formula.class,
 			formula.grade,
-			formula.base,
-			formula.enhance
+			formula.rate
 		);
 	}
 
@@ -198,12 +190,4 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return (majorAddress, objectClassExt, majorClass, majorGrade);
 	}
 
-	function getLimit(uint256 _limit)
-		public
-		pure
-		override
-		returns (uint128, uint128)
-	{
-		return (uint128(_limit >> 128), uint128((_limit << 128) >> 128));
-	}
 }

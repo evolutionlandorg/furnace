@@ -8,11 +8,8 @@ import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
 import "./interfaces/IObjectOwnership.sol";
-import "./common/UQ128x128.sol";
 
 contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
-	using UQ128x128 for uint256;
-
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
@@ -54,7 +51,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test
-		lastItemObjectId = 1000;
+		// lastItemObjectId = 3000;
 	}
 
 	function _safeTransfer(
@@ -74,13 +71,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function enchant(
 		uint256 _index,
 		uint256[] calldata _ids,
-		address[] calldata _tokens,
-		uint256[] calldata _values
+		address[] calldata _tokens
 	) external override stoppable returns (uint256) {
 		_dealMajor(_index, _ids);
-		(uint16 prefer, uint128 rate, uint256[] memory amounts) =
-			_dealMinor(_index, _tokens, _values);
-		return _enchanceItem(_index, prefer, rate, _ids, _tokens, amounts);
+		(uint16 prefer, uint256[] memory amounts) = _dealMinor(_index, _tokens);
+		return _enchanceItem(_index, prefer, _ids, _tokens, amounts);
 	}
 
 	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
@@ -113,67 +108,29 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		}
 	}
 
-	function _dealMinor(
-		uint256 _index,
-		address[] memory _tokens,
-		uint256[] memory _values
-	)
+	function _dealMinor(uint256 _index, address[] memory _tokens)
 		private
-		returns (
-			uint16,
-			uint128,
-			uint256[] memory
-		)
+		returns (uint16, uint256[] memory)
 	{
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(bytes32[] memory minors, uint256[] memory limits) =
+		(bytes32[] memory minors, uint256[] memory amounts) =
 			IFormula(formula).getMinors(_index);
 		require(
-			_tokens.length == minors.length && _values.length == minors.length,
+			_tokens.length == minors.length && _tokens.length == amounts.length,
 			"Furnace: INVALID_VALUES_LENGTH."
 		);
 		uint16 prefer;
-		//TODO: check rate calculate.
-		uint128 rate = RATE_PRECISION;
-		uint256[] memory amounts = new uint256[](minors.length);
 		for (uint256 i = 0; i < minors.length; i++) {
 			address minorAddress = _tokens[i];
-			uint256 value = _values[i];
-			(uint128 minorMin, uint128 minorMax) =
-				IFormula(formula).getLimit(limits[i]);
-			require(minorMax > minorMin, "Furnace: INVALID_LIMIT");
+			uint256 value = amounts[i];
 			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
 			_checkMinorAddress(element, minors[i], minorAddress);
 			prefer |= uint16(1 << element);
-			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
 			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-			uint128 numerator;
-			uint128 denominator;
-			if (value > minorMax) {
-				numerator = minorMax - minorMin;
-				_safeTransfer(
-					minorAddress,
-					msg.sender,
-					address(this),
-					minorMax
-				);
-				amounts[i] = minorMax;
-			} else {
-				numerator = uint128(value) - minorMin;
-				_safeTransfer(minorAddress, msg.sender, address(this), value);
-				amounts[i] = value;
-			}
-			denominator = minorMax - minorMin;
-			uint128 enhanceRate =
-				UQ128x128
-					.encode(numerator)
-					.uqdiv(denominator)
-					.uqmul(RATE_PRECISION)
-					.decode();
-			rate = UQ128x128.mul128(rate, enhanceRate) / RATE_PRECISION;
+			_safeTransfer(minorAddress, msg.sender, address(this), value);
 		}
-		return (prefer, rate, amounts);
+		return (prefer, amounts);
 	}
 
 	function _checkMinorAddress(
@@ -198,28 +155,19 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	function _enchanceItem(
 		uint256 _index,
 		uint16 _prefer,
-		uint128 _rate,
 		uint256[] memory _ids,
 		address[] memory _tokens,
 		uint256[] memory _amounts
 	) private returns (uint256) {
 		lastItemObjectId += 1;
 		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
-
-		(
-			uint16 objClassExt,
-			uint16 class,
-			uint16 grade,
-			uint128 base,
-			uint128 enhance
-		) = IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
+		(uint16 objClassExt, uint16 class, uint16 grade, uint128 rate) =
+			IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
 
 		Item memory item =
 			Item({
 				index: _index,
-				base: base,
-				enhance: enhance,
-				rate: _rate,
+				rate: rate,
 				objClassExt: objClassExt,
 				class: class,
 				grade: grade,
@@ -236,8 +184,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			msg.sender,
 			tokenId,
 			item.index,
-			item.base,
-			item.enhance,
 			item.rate,
 			item.objClassExt,
 			item.class,
@@ -318,13 +264,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item storage item = tokenId2Item[_tokenId];
 		if (uint256(item.prefer) & (1 << _element) > 0) {
-			uint128 realEnhanceRate =
-				item.base +
-					UQ128x128.mul128(item.rate, item.enhance) /
-					RATE_PRECISION;
-			return uint256(realEnhanceRate);
+			return uint256(item.rate);
 		}
-		return uint256(item.base / 2);
+		return uint256(item.rate / 2);
 	}
 
 	function getBaseInfo(uint256 _tokenId)
@@ -341,7 +283,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		return (item.objClassExt, item.class, item.grade);
 	}
 
-	function getObjectClassExt(uint256 _tokenId) 
+	function getObjectClassExt(uint256 _tokenId)
 		public
 		view
 		override

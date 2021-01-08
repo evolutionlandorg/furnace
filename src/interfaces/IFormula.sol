@@ -8,10 +8,8 @@ interface IFormula {
 	struct FormulaEntry {
 		// item name
 		bytes32 name;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
+		// strength rate
+		uint128 rate;
 		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
@@ -27,23 +25,21 @@ interface IFormula {
 		bytes32[] majors;
 		// minor material info
 		bytes32[] minors;
-		// [uint128 min, uint128 max]
-		uint256[] limits;
+		uint256[] amounts;
 		bool disable;
 	}
 
 	event AddFormula(
 		uint256 indexed index,
 		bytes32 name,
-		uint128 base,
-		uint128 enhance,
+		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
 		bytes32[] majors,
 		bytes32[] minors,
-		uint256[] limits
+		uint256[] amounts
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -57,19 +53,18 @@ interface IFormula {
         @param _name     New enchanted NFT name.
         @param _majors   FT token addresses of major meterail for enchanting.
         @param _minors   FT Token addresses of minor meterail for enchanting.
-        @param _limits   FT Token limits of minor meterail for enchanting.
+        @param _amounts   FT Token amounts of minor meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
 		bytes32[] calldata _majors,
 		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		uint256[] calldata _amounts
 	) external;
 
 	/**
@@ -133,17 +128,6 @@ interface IFormula {
 		);
 
 	/**
-        @dev Decode major info of limit.
-	         0x827d6320
-		@return {
-			"min": "Min amount of minor material.",
-			"max": "Max amount of minor material."
-
-		}
-     */
-	function getLimit(uint256 _limit) external pure returns (uint128, uint128);
-
-	/**
         @dev Returns meta info of the item.
 	         0x78533046
 		@return {
@@ -161,7 +145,6 @@ interface IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		);
 

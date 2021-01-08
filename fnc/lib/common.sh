@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Set fail flags
-set -eox pipefail
+set -eo pipefail
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color

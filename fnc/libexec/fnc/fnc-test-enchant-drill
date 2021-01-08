@@ -38,6 +38,5 @@ fi
 index=$(seth --to-uint256 1)
 # seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $ITEMBASE_PROXY $(seth --to-uint256 1)
 address=$TOKEN_WATER
-value=$(seth --to-uint256 $(seth --to-wei 0.034 ether))
 # seth send $TOKEN_WATER "approve(address)" $ITEMBASE_PROXY 
-seth send $ITEMBASE_PROXY "enchant(uint256,uint256[],address[],uint256[])(uint256)" $index [$drillId] [$address] [$value]
+seth send $ITEMBASE_PROXY "enchant(uint256,uint256[],address[])(uint256)" $index [$drillId] [$address] 

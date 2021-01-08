@@ -11,7 +11,7 @@
 ###
 ### Example:  fnc itembase meta
 ###           fnc itembase objc
-set -ex
+set -e
 
 itembase="$(fnc --get-itembase)" 
 
@@ -33,7 +33,9 @@ case $1 in
     seth send $itembase "enchant(uint256,uint256[],address[],uint256[])" "${@:2}"
   ;;
   dis)
-    seth send $itembase "disenchant(uint256,uint256)" "${@:2}"
+    id=$(seth --to-uint256 $2)
+    depth=$(seth --to-uint256 ${3-1})
+    seth send $itembase "disenchant(uint256,uint256)" "$id" "$depth"
   ;;
      *) fnc help itembase;    ;;
 esac
