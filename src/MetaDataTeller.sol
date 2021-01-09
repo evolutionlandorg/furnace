@@ -43,10 +43,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	mapping(address => uint8) public resourceLPToken2RateAttrId;
 	mapping(address => Meta) public externalToken2Meta;
 	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
-	address public ownership;
-	address public interstellarEncoder;
-	address public landbase;
-	address public itembase;
 
 	function initialize(address _registry) public initializer {
 		owner = msg.sender;
@@ -68,15 +64,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		resourceLPToken2RateAttrId[
 			registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN)
 		] = 5;
-
-		refresh();
-	}
-
-	function refresh() public auth {
-		ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		interstellarEncoder = registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
-		landbase = registry.addressOf(CONTRACT_LAND_BASE);
-		itembase = registry.addressOf(CONTRACT_ITEM_BASE);
 	}
 
 	function addInternalTokenMeta(
@@ -171,11 +158,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			uint16
 		)
 	{
-		if (_token == ownership) {
+		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(itembase).getBaseInfo(_id);
+				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getBaseInfo(_id);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				return (
 					objectClass,
@@ -216,7 +203,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	}
 
 	function getPrefer(address _token) external view returns (uint256) {
-		uint256 prefer = ILandBase(landbase).resourceToken2RateAttrId(_token); 
+		uint256 prefer = ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_token); 
 		if (prefer > 0) {
 			return prefer;
 		} else {
@@ -232,11 +219,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		if (_token == address(0)) {
 			return 0;
 		}
-		if (_token == ownership) {
+		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(itembase).getRate(_id, _element);
+				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getRate(_id, _element);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);

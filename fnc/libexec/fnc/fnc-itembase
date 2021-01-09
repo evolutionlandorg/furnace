@@ -23,8 +23,10 @@ case $1 in
     seth call $itembase "getObjectClassExt(uint256)(uint16)" $2
   ;;
   rate)
-    seth call $itembase "getRate(uint256,uint256)(uint256)" $2 $3
-    seth estimate $itembase  "getRate(uint256,uint256)(uint256)" $2 $3
+    id=$(seth --to-uint256 $2)
+    ele=$(seth --to-uint256 $3)
+    seth call $itembase "getRate(uint256,uint256)(uint256)" "$id" "$ele" 
+    seth estimate $itembase  "getRate(uint256,uint256)(uint256)" "$id" "$ele"
   ;;
   item)
     seth call $itembase "getObjectClassExt(uint256)(uint16)" $2

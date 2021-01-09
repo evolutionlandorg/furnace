@@ -26,13 +26,6 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		address token,
 		uint256 id
 	);
-	event ForceUnequip(
-		uint256 indexed tokenId,
-		uint256 index,
-		address staker,
-		address token,
-		uint256 id
-	);
 
 	// 0x434f4e54524143545f4c414e445f424153450000000000000000000000000000
 	bytes32 public constant CONTRACT_LAND_BASE = "CONTRACT_LAND_BASE";
@@ -95,10 +88,6 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 	mapping(address => mapping(uint256 => Status)) public itemId2Index;
 	mapping(address => mapping(uint256 => uint256)) public protectPeriod;
 
-	IERC721 public ownership;
-	ILandResource public landResource;
-	IInterstellarEncoder public interstellarEncoder; 
-	IMetaDataTeller public teller;
 	address public gold;
 	address public wood;
 	address public water;
@@ -106,11 +95,11 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 	address public soil;
 
 	modifier updateMinerStrength(uint256 _landTokenId) {
-		landResource.updateAllMinerStrengthWhenStop(
+		ILandResource(registry.addressOf(CONTRACT_LAND_RESOURCE)).updateAllMinerStrengthWhenStop(
 			_landTokenId
 		);
 		_;
-		landResource.updateAllMinerStrengthWhenStart(
+		ILandResource(registry.addressOf(CONTRACT_LAND_RESOURCE)).updateAllMinerStrengthWhenStart(
 			_landTokenId
 		);
 	}
@@ -124,15 +113,6 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		registry = ISettingsRegistry(_registry);
 		maxAmount = _maxAmount;
 
-		refresh();
-	}
-
-	function refresh() public virtual auth {
-		ownership = IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP));
-		landResource = ILandResource(registry.addressOf(CONTRACT_LAND_RESOURCE));
-		interstellarEncoder = IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER));
-		teller = IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER));
-
 		gold = registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN);
 		wood = registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN);
 		water = registry.addressOf(CONTRACT_WATER_ERC20_TOKEN);
@@ -145,7 +125,7 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		view
 		returns (bool)
 	{
-		return ownership.ownerOf(_landTokenId) == msg.sender;
+		return IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP).ownerOf(_landTokenId) == msg.sender;
 	}
 
 	function isAllowed(uint256 _landTokenId, address _token, uint256 _id)
@@ -153,8 +133,8 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		view
 		returns (bool)
 	{
-        require(interstellarEncoder.getObjectClass(_landTokenId) == 1, "Funace: ONLY_LAND");
-		return teller.isAllowed(_token, _id);
+        require(IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_landTokenId) == 1, "Funace: ONLY_LAND");
+		return IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).isAllowed(_token, _id);
 	}
 
 	function isNotProtect(address _token, uint256 _id)
@@ -239,11 +219,12 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 	) internal {
 		require(isAllowed(_tokenId, _token, _id), "Furnace: PERMISSION");
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN");
+		IMetaDataTeller teller = IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER));
 		Bar storage bar = tokenId2Bars[_tokenId][_index];
 		if (bar.token != address(0) && isNotProtect(bar.token, bar.id)) {
 			(, uint16 class, ) = teller.getMetaData(_token, _id);
 			(, uint16 originClass, ) = teller.getMetaData(bar.token, bar.id);
-			require(class > originClass || isLander(_tokenId), "Furnace: FORBIDDEN");
+			require(class >= originClass || isLander(_tokenId), "Furnace: FORBIDDEN");
 			IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		}
 		IERC721(_token).transferFrom(msg.sender, address(this), _id);
@@ -268,7 +249,7 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 	}
 
 	function calculateProtectPeriod(address _token, uint256 _id) internal view returns (uint256)  {
-		(, uint16 class, ) = teller.getMetaData(_token, _id);
+		(, uint16 class, ) = IMetaDataTeller(registry.addressOf(CONTRACT_METADATA_TELLER)).getMetaData(_token, _id);
 		uint256 baseProtectPeriod = registry.uintOf(UINT_ITEMBAR_PROTECT_PERIOD);
 		return add(baseProtectPeriod, mul(uint256(class), baseProtectPeriod));
 	}
@@ -312,29 +293,6 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		delete bar.rates[soil];
 		delete itemId2Index[bar.token][bar.id];
 		delete tokenId2Bars[_tokenId][_index];
-	}
-
-	function _forceUneqiup(uint256 _landTokenId, uint256 _index)
-		internal
-		updateMinerStrength(_landTokenId)
-	{
-		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN");
-		Bar storage bar = tokenId2Bars[_landTokenId][_index];
-		if (bar.token == address(0)) return;
-		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
-		emit ForceUnequip(_landTokenId, _index, bar.staker, bar.token, bar.id);
-		delete bar.rates[gold];
-		delete bar.rates[wood];
-		delete bar.rates[water];
-		delete bar.rates[fire];
-		delete bar.rates[soil];
-		delete itemId2Index[bar.token][bar.id];
-		delete tokenId2Bars[_landTokenId][_index];
-	}
-
-	function isAmbassador(uint256 _landTokenId) public pure returns (bool) {
-		uint128 objectId = uint128(_landTokenId);
-		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
 	}
 
 	function setMaxAmount(uint256 _maxAmount) public auth {
