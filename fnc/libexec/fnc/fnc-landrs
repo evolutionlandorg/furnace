@@ -14,10 +14,11 @@
 ###           landrs setmax              LandResource set max miner
 ###           landrs start               LandResource start mining
 ###           landrs stop                LandResource stop mining
+###           landrs refresh             LandResource refresh
 ###
 ### Example:  fnc landrs speed 
 ###           fnc landrs claimbar
-set -ex
+set -e
 
 landrs="${LANDRESOURCE_PROXY?}" 
 
@@ -25,6 +26,7 @@ case $1 in
   availables)
     landId=$2
     itemId=$3
+    itemToken=$TOKEN_GEGO
     resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
     seth call $landrs "availableLandResources(uint256,address[])(uint256[])" $landId $resources
     echo "-----------------------------"
@@ -36,6 +38,10 @@ case $1 in
       barrs=$(seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" $itemToken $itemId $token)
       echo "land:"   "$landrss"       bar:  "$barrs"
     done
+    echo "-----------------------------"
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
   ;;
   claimall)
     seth send $landrs "claimAllResource(uint256)" $2 
@@ -57,6 +63,9 @@ case $1 in
   ;;
   setmax)
     seth send -F $OWNER $LANDRESOURCE_PROXY "setMaxMiners(uint256)" $2  
+  ;;
+  refresh)
+    seth send -F $OWNER $LANDRESOURCE_PROXY "refresh()"  
   ;;
   miner)
     for i in {0..4}; do

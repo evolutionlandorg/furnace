@@ -10,7 +10,7 @@
 ###
 ### Example:  fnc luckybox price
 ###           fnc luckybox buy
-set -ex
+set -e
 
 luckybox="${DRILLLUCKYBOX?}" 
 

@@ -12,7 +12,7 @@
 ###
 ### Example:  fnc landbar equip
 ###           fnc landbar uneqp
-set -ex
+set -e
 
 landbar="$(fnc --get-landbar)" 
 

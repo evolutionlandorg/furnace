@@ -12,7 +12,7 @@
 ###
 ### Example:  fnc teller meta
 ###           fnc teller objc
-set -ex
+set -e
 
 teller="$(fnc --get-teller)" 
 

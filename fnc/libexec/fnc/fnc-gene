@@ -4,7 +4,7 @@
 ###
 ### Commands: gene strength          GeneScience  strength info
 ###
-set -ex
+set -e
 
 gene="${IGENESCIENCE?}" 
 

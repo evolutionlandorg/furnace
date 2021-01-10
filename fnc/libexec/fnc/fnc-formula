@@ -13,7 +13,7 @@
 ###
 ### Example:  fnc formula insert
 ###           fnc formula enable 
-set -ex
+set -e
 
 formula="$(fnc --get-formula)" 
 

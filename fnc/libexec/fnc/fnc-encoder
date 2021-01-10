@@ -10,7 +10,7 @@
 ###
 ### Example:  fnc encoder price
 ###           fnc encoder buy
-set -ex
+set -e
 
 encoder="$(fnc --get-encoder)" 
 

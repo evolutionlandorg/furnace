@@ -125,7 +125,7 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		view
 		returns (bool)
 	{
-		return IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP).ownerOf(_landTokenId) == msg.sender;
+		return IERC721(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)).ownerOf(_landTokenId) == msg.sender;
 	}
 
 	function isAllowed(uint256 _landTokenId, address _token, uint256 _id)

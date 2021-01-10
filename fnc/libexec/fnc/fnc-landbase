@@ -6,7 +6,7 @@
 ###           landbase assign            MetaDatalandbase assign new land
 ###
 ### Example:  fnc landbase rate 
-set -ex
+set -e
 
 landbase="${LANDBASE_PROXY?}" 
 

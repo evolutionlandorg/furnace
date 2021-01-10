@@ -11,5 +11,5 @@ seth send -F $OWNER $LANDRESOURCE_PROXY "upgradeTo(address)" $LANDRESOURCEV5
 if test $(seth call $LANDRESOURCE_PROXY "implementation()(address)") != $LANDRESOURCEV5; then
   (echo "check migration failed."; exit 1;)
 fi
-addAddress "LANDRESOURCEV4_AUTHORITY" "$LANDRESOURCEV4_AUTHORITY"
+addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
 echo >&2 "${0##*/}: info: migration finished." 

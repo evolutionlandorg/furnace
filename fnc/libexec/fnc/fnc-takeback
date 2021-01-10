@@ -10,7 +10,7 @@
 ###
 ### Example:  fnc takeback back 
 ###           fnc takeback claim
-set -ex
+set -e
 
 takeback="${DRILLTAKEBACK?}" 
 

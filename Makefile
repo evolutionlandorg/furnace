@@ -8,7 +8,7 @@ lint    :; solhint --max-warnings 0 'src/**/*.sol'
 link    :;
 	rm -rf 'one'
 	mkdir 'one'
-	ln lib/apostle/contracts-flattener/ApostleBaseV3.sol one/ApostleBaseV3.f.sol
-	ln lib/land/contracts-flattener/LandResourceV5.sol one/LandResourceV5.f.sol
+	ln -s $(PWD)/lib/land/flat/LandResourceV5.sol $(PWD)/one/LandResourceV5.f.sol
+	ln -s $(PWD)/lib/apostle/flat/ApostleBaseV3.sol $(PWD)/one/ApostleBaseV3.f.sol
 
 .PHONY: all buildone clean test deploy flat lint link

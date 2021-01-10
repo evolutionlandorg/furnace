@@ -5,7 +5,7 @@
 ### Commands: admin change-owner          Furnace Admin change owner
 ###
 
-set -ex
+set -e
 
 admin="${FURNACEPROXYADMIN?}" 
 
