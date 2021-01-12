@@ -75,12 +75,12 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		address staker;
 		address token;
 		uint256 id;
+		address resource;
 	}
 
 	struct Status {
 		address staker;
 		uint256 tokenId;
-		address resource;
 		uint256 index;
 	}
 
@@ -125,19 +125,6 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		return protectPeriod[_token][_id] < now;	
 	}
 
-	function getStatusByItem(address _item, uint256 _itemId)
-		public
-		view
-		returns (address, uint256, address, uint256)
-	{
-		return (
-			itemId2Index[_item][_itemId].staker,
-			itemId2Index[_item][_itemId].tokenId,
-			itemId2Index[_item][_itemId].resource,
-			itemId2Index[_item][_itemId].index
-		);
-	}
-
 	function getBarStaker(uint256 _tokenId, uint256 _index)
 		public
 		view
@@ -153,12 +140,21 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		returns (address, uint256, address)
 	{
 		require(_index < maxAmount, "Furnace: INDEX_FORBIDDEN.");
-		address token = tokenId2Bars[_tokenId][_index].token; 
-		uint256 id = tokenId2Bars[_tokenId][_index].id;
 		return (
-			token,
-			id,
-			itemId2Index[token][id].resource
+			tokenId2Bars[_tokenId][_index].token,
+			tokenId2Bars[_tokenId][_index].id,
+			tokenId2Bars[_tokenId][_index].resource
+		);
+	}
+
+	function getTokenIdByItem(address _item, uint256 _itemId)
+		public
+		view
+		returns (address, uint256)
+	{
+		return (
+			itemId2Index[_item][_itemId].staker,
+			itemId2Index[_item][_itemId].tokenId
 		);
 	}
 
@@ -204,10 +200,10 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		bar.staker = msg.sender;
 		bar.token = _token;
 		bar.id = _id;
+		bar.resource = _resource;
 		itemId2Index[bar.token][bar.id] = Status({
 			staker: bar.staker,
 			tokenId: _tokenId,
-			resource: _resource,
 			index: _index
 		});
 		if (isNotProtect(bar.token, bar.id)) {
@@ -256,13 +252,11 @@ contract LandItemBar is Initializable, DSAuth, DSMath {
 		require(bar.staker == msg.sender, "Furnace: FORBIDDEN");
 		IERC721(bar.token).transferFrom(address(this), bar.staker, bar.id);
 		//TODO: check
-		address resource = itemId2Index[bar.token][bar.id].resource;
-		afterUnequiped(_index, _tokenId, resource);
+		afterUnequiped(_index, _tokenId, bar.resource);
 		//clean
 		delete itemId2Index[bar.token][bar.id];
 		delete tokenId2Bars[_tokenId][_index];
-		require(resource != address(0), "Furnace: REMOVED");
-		emit Unequip(_tokenId, resource, _index, bar.staker, bar.token, bar.id);
+		emit Unequip(_tokenId, bar.resource, _index, bar.staker, bar.token, bar.id);
 	}
 
 	function setMaxAmount(uint256 _maxAmount) public auth {
