@@ -29,11 +29,11 @@ contract LandResourceAuthorityV4 {
 				bytes4(keccak256("updateMinerStrengthWhenStop(uint256)"))) ||
 			(whiteList[_src] &&
 				_sig ==
-				bytes4(keccak256("updateAllMinerStrengthWhenStop(uint256)"))) ||
+				bytes4(keccak256("afterLandItemBarEquiped(uint256,uint256,address)"))) ||
 			(whiteList[_src] &&
 				_sig ==
 				bytes4(
-					keccak256("updateAllMinerStrengthWhenStart(uint256)")
+					keccak256("afterLandItemBarUnequiped(uint256,uint256,address)")
 				)) ||
 			(whiteList[_src] &&
 				_sig ==

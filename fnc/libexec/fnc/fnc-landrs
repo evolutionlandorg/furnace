@@ -14,7 +14,7 @@
 ###           landrs setmax              LandResource set max miner
 ###           landrs start               LandResource start mining
 ###           landrs stop                LandResource stop mining
-###           landrs refresh             LandResource refresh
+###           landrs bar                 LandResource bar 
 ###
 ### Example:  fnc landrs speed 
 ###           fnc landrs claimbar
@@ -28,7 +28,7 @@ case $1 in
     itemId=$3
     itemToken=$TOKEN_GEGO
     resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
-    seth call $landrs "availableLandResources(uint256,address[])(uint256[])" $landId $resources
+    seth call $landrs "availableResources(uint256,address[5])(uint256[5])" "$landId" "$resources"
     echo "-----------------------------"
     seth call $landrs "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
     echo "-----------------------------"
@@ -43,14 +43,11 @@ case $1 in
     seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
     seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
   ;;
-  claimall)
-    seth send $landrs "claimAllResource(uint256)" $2 
-  ;;
   claimbar)
     seth send $landrs "claimItemResource(address,uint256)" $2 $3  
   ;;
   claimland)
-    seth send $landrs "claimLandResource(uint256)" $2  
+    seth send $landrs "claimAllResource(uint256)" $2  
   ;;
   mine)
     seth send $landrs "mine(uint256)" $2  
@@ -59,19 +56,35 @@ case $1 in
     seth send $landrs "startMining(uint256,uint256,address)" $2 $3 $4  
   ;;
   stop)
-    seth send $LANDRESOURCE_PROXY "stopMining(uint256)" $2   
+    seth send $landrs "stopMining(uint256)" $2   
   ;;
   setmax)
-    seth send -F $OWNER $LANDRESOURCE_PROXY "setMaxMiners(uint256)" $2  
+    seth send -F $OWNER $landrs "setMaxMiners(uint256)" $2  
   ;;
   refresh)
-    seth send -F $OWNER $LANDRESOURCE_PROXY "refresh()"  
+    seth send -F $OWNER $landrs "refresh()"  
   ;;
   miner)
     for i in {0..4}; do
       index=$(seth --to-uint256 $i)
-      seth call $landrs "getMinerOnLand(uint256,addressuint256)(uint256)" $2 $2 $index  
+      seth call $landrs "getMinerOnLand(uint256,address,uint256)(uint256)" $2 $3 $index  
     done
+  ;;
+  worker)
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+  ;;
+  barrs)
+    seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" "${@:2}"
+  ;;
+  bar)
+    # seth call $landrs "land2Bar(uint256,address,uint256)(uint256,uint256)" "${@:2}"
+    seth call $landrs "getBarMiningStrength(uint256,address,uint256)(uint256)" "${@:2}"
+    seth call $landrs "getBarLastUpdateTime(uint256,address,uint256)(uint256)" "${@:2}"
+  ;;
+  bars)
+    seth call $landrs "getBarsMiningStrength(uint256,address)(uint256)" "${@:2}" 
   ;;
   state)
     tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
@@ -119,7 +132,7 @@ case $1 in
     tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
     for token in "${tokens[@]}"; do
       landstrength=$(seth call $LANDRESOURCE_PROXY "getLandMiningStrength(uint256,address)(uint256)" $tokenId $token)
-      barstrength=$(seth call $LANDRESOURCE_PROXY "getBarMiningStrength(uint256,address)(uint256)" $tokenId $token)
+      barstrength=$(seth call $LANDRESOURCE_PROXY "getBarsMiningStrength(uint256,address)(uint256)" $tokenId $token)
       echo "landstrength:"   "$landstrength"       barstrength:  "$barstrength"
     done
   ;;

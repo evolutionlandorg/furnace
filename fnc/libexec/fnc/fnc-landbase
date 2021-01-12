@@ -26,11 +26,15 @@ case $1 in
     soil_rate=$(seth --to-dec ${attr:46:4})
     echo "soil_rate"   "$soil_rate"
   ;;
-  address)
-    x=$(seth --to-int256 $2)
-    y=$(seth --to-int256 $3)
-    attr=$3
-    mask=$4
+  assign)
+    # x=$(seth --to-int256 $2)
+    # y=$(seth --to-int256 $3)
+    # attr=$4
+    # mask=$5
+    x=$(seth --to-int256 -75)
+    y=$(seth --to-int256 11)
+    attr=0x0000000000000000000000000000000000000000000000010f0400850102005f
+    mask=0x0000000000000000000000000000000000000000000000000000000000000000
     seth send -F $OWNER $LANDBASE_PROXY  "assignNewLand(int256,int256,address,uint256,uint256)" $x $y $AUTH $attr $mask
   ;;
      *) fnc help landbase;    ;;

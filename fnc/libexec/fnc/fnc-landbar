@@ -27,6 +27,12 @@ case $1 in
   bar)
     seth call $landbar "tokenId2Bars(uint256,uint256)(address,address,uint256)" "${@:2}"
   ;;
+  status)
+    seth call $landbar "getStatusByItem(address,uint256)(address,uint256,address,uint256)" "${@:2}"
+  ;;
+  max)
+    seth call $landbar "maxAmount()(uint256)" 
+  ;;
   index)
     seth call $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		
     seth estimate $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		
