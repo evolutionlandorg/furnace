@@ -58,11 +58,11 @@ case $1 in
     fnc migrate-takeback
     fnc migrate-formula
     fnc migrate-itembase
-    fnc migrate-landbar
+    # fnc migrate-landbar
     fnc migrate-teller
     # fnc migrate-apostlebase
     fnc migrate-landrs
-    fnc migrate-landrsauth
+    # fnc migrate-landrsauth
   ;;
   help)
     fnc help migrate    

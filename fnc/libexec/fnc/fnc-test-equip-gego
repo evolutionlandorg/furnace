@@ -8,5 +8,5 @@ token=$TOKEN_GEGO
 total=$(seth call $TOKEN_GEGO "totalSupply()(uint256)")
 id=$(seth --to-uint256 $(($total + 1)))
 seth send $TOKEN_GEGO "safeMint(address,uint256)" $AUTH $id 
-seth send $TOKEN_GEGO "setApprovalForAll(address,bool)" $LANDITEMBAR_PROXY $(seth --to-uint256 1)
-seth send $LANDITEMBAR_PROXY "equip(uint256,address,uint256,address,uint256)" $landId $3 $index $token $id
+seth send $TOKEN_GEGO "setApprovalForAll(address,bool)" $LANDRESOURCE_PROXY $(seth --to-uint256 1)
+seth send $LANDRESOURCE_PROXY "equip(uint256,address,uint256,address,uint256)" $landId $3 $index $token $id
