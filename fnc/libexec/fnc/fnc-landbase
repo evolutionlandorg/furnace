@@ -32,7 +32,7 @@ case $1 in
     # attr=$4
     # mask=$5
     x=$(seth --to-int256 -75)
-    y=$(seth --to-int256 12)
+    y=$(seth --to-int256 19)
     attr=0x0000000000000000000000000000000000000000000000010f0400850102005f
     mask=0x0000000000000000000000000000000000000000000000000000000000000000
     seth send -F $OWNER $LANDBASE_PROXY  "assignNewLand(int256,int256,address,uint256,uint256)" $x $y $AUTH $attr $mask

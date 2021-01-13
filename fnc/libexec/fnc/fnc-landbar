@@ -14,7 +14,8 @@
 ###           fnc landbar uneqp
 set -e
 
-landbar="$(fnc --get-landbar)" 
+# landbar="$(fnc --get-landbar)" 
+landbar="$LANDRESOURCE_PROXY" 
 
 case $1 in
   equip)

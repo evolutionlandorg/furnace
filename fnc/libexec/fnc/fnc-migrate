@@ -60,7 +60,7 @@ case $1 in
     fnc migrate-itembase
     fnc migrate-landbar
     fnc migrate-teller
-    fnc migrate-apostlebase
+    # fnc migrate-apostlebase
     fnc migrate-landrs
     fnc migrate-landrsauth
   ;;

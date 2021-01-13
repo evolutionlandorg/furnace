@@ -11,7 +11,7 @@
 ###           landrs state               LandResource item to resource state 
 ###           landrs mine                LandResource mine 
 ###           landrs miner               LandResource miner on land 
-###           landrs setmax              LandResource set max miner
+###           landrs setmaxminer         LandResource set max miner
 ###           landrs start               LandResource start mining
 ###           landrs stop                LandResource stop mining
 ###           landrs bar                 LandResource bar 
@@ -28,7 +28,7 @@ case $1 in
     itemId=$3
     itemToken=$TOKEN_GEGO
     resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
-    seth call $landrs "availableResources(uint256,address[5])(uint256[5])" "$landId" "$resources"
+    seth call $landrs "availableLandResources(uint256,address[])(uint256[])" "$landId" "$resources"
     echo "-----------------------------"
     seth call $landrs "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
     echo "-----------------------------"
@@ -42,12 +42,14 @@ case $1 in
     seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
     seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
     seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE4
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE5
   ;;
   claimbar)
     seth send $landrs "claimItemResource(address,uint256)" $2 $3  
   ;;
   claimland)
-    seth send $landrs "claimAllResource(uint256)" $2  
+    seth send $landrs "claimLandResource(uint256)" $2  
   ;;
   mine)
     seth send $landrs "mine(uint256)" $2  
@@ -58,8 +60,11 @@ case $1 in
   stop)
     seth send $landrs "stopMining(uint256)" $2   
   ;;
-  setmax)
+  setmaxminer)
     seth send -F $OWNER $landrs "setMaxMiners(uint256)" $2  
+  ;;
+  setmaxamount)
+    seth send -F $OWNER $landrs "setMaxAmount(uint256)" $2  
   ;;
   refresh)
     seth send -F $OWNER $landrs "refresh()"  

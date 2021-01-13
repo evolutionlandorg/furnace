@@ -42,6 +42,9 @@ case $1 in
   meta)
     seth call $formula "getMetaInfo(uint256)" "${@:2}"
   ;;
+  majorInfo)
+    seth call $formula "getMajorInfo(uint256)" "${@:2}"
+  ;;
      *) fnc help formula;    ;;
 esac
 	
