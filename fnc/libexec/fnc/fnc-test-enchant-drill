@@ -4,7 +4,7 @@ set -e
 
 p() { printf "%-7s %-50s %-10s\n" "$1" "$2" "$3"; }
 
-grade=$(seth --to-uint16 1)
+grade=$(seth --to-uint16 2)
 sig="createDrill(uint16,address)(uint256)"
 tx=$(seth send --async "${DRILLBASE_PROXY?}" "$sig" "$grade" "$AUTH" )
 echo >&2 -n "${0##*/}: Waiting for transaction receipt..."
@@ -35,7 +35,7 @@ else
   exit 1
 fi
 
-index=$(seth --to-uint256 1)
+index=$(seth --to-uint256 2)
 seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $ITEMBASE_PROXY $(seth --to-uint256 1)
 address=$TOKEN_WATER
 seth send $TOKEN_WATER "approve(address)" $ITEMBASE_PROXY 
