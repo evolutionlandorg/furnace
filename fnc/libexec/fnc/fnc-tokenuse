@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+### fnc-tokenuse -- Furnace TokenUse interactive
+### Usage: fnc tokenuse [<command>]
+###
+### Commands: tokenuse activity                TokenUse price info
+###
+### Example:  fnc tokenuse activity
+set -e
+
+tokenuse="$TOKENUSE_PROXY" 
+
+case $1 in
+  activity)
+    seth call $tokenuse "tokenId2CurrentActivity(uint256)(address,uint48)" $2
+  ;;
+  ready)
+    seth call $tokenuse "isObjectReadyToUse(uint256)(bool)" $2
+  ;;
+     *) fnc help tokenuse;    ;;
+esac
+	

@@ -76,9 +76,7 @@ case $1 in
     done
   ;;
   worker)
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $2 
   ;;
   barrs)
     seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" "${@:2}"
