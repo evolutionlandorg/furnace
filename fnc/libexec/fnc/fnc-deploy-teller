@@ -5,6 +5,17 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_GOLD_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_GOLD_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WOOD_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WOOD_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WATER_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WATER_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_FIRE_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_FIRE_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_SOIL_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_SOIL_RING
+
 METADATATELLER=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
 addAddress "METADATATELLER" "$METADATATELLER"
 echo >&2 "${0##*/}: info: MetaDataTeller created."

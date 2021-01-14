@@ -26,7 +26,7 @@ case $1 in
   availables)
     landId=$2
     itemId=$3
-    itemToken=$TOKEN_GEGO
+    itemToken=$4
     resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
     seth call $landrs "availableLandResources(uint256,address[])(uint256[])" "$landId" "$resources"
     echo "-----------------------------"

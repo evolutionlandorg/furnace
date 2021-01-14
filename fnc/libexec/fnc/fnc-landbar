@@ -19,7 +19,7 @@ landbar="$LANDRESOURCE_PROXY"
 
 case $1 in
   equip)
-    seth send $landbar "equip(uint256,uint256,address,uint256)" "${@:2}"
+    seth send $landbar "equip(uint256,address,uint256,address,uint256)" "${@:2}"
   ;;
   unequip)
     index=$(seth --to-uint256 $3)
@@ -33,6 +33,9 @@ case $1 in
   ;;
   max)
     seth call $landbar "maxAmount()(uint256)" 
+  ;;
+  protect)
+    seth call $landbar "protectPeriod(address,uint256)(uint256)" "${@:2}"
   ;;
   index)
     seth call $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		

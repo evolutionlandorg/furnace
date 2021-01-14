@@ -50,19 +50,19 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		registry = ISettingsRegistry(_registry);
 
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
 		] = 1;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
 		] = 2;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_WATER_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
 		] = 3;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
 		] = 4;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
 		] = 5;
 	}
 

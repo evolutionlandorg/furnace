@@ -70,67 +70,68 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 
 	function enchant(
 		uint256 _index,
-		uint256[] calldata _ids,
-		address[] calldata _tokens
+		uint256 _id,
+		address _token
 	) external override stoppable returns (uint256) {
-		_dealMajor(_index, _ids);
-		(uint16 prefer, uint256[] memory amounts) = _dealMinor(_index, _tokens);
-		return _enchanceItem(_index, prefer, _ids, _tokens, amounts);
-	}
-
-	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		require(
 			IFormula(formula).isDisable(_index) == false,
 			"Furnace: FORMULA_DISABLE"
 		);
-		bytes32[] memory majors = IFormula(formula).getMajors(_index);
-		require(_ids.length == majors.length, "Furnace: INVALID_LENGTH");
-		for (uint256 i = 0; i < majors.length; i++) {
-			bytes32 major = majors[i];
-			uint256 id = _ids[i];
-			(
-				address majorAddress,
-				uint16 majorObjClassExt,
-				uint16 majorClass,
-				uint16 majorGrade
-			) = IFormula(formula).getMajorInfo(major);
-			(uint16 objectClassExt, uint16 class, uint16 grade) =
-				IMetaDataTeller(teller).getMetaData(majorAddress, id);
-			require(
-				objectClassExt == majorObjClassExt,
-				"Furnace: INVALID_OBJECTCLASSEXT"
-			);
-			require(class == majorClass, "Furnace: INVALID_CLASS");
-			require(grade == majorGrade, "Furnace: INVALID_GRADE");
-			_safeTransfer(majorAddress, msg.sender, address(this), id);
+		(uint16 originClass, uint16 originPrefer) =
+			_dealMajor(teller, formula, _index, _id);
+		(uint16 prefer, uint256 amount) =
+			_dealMinor(teller, formula, _index, _token);
+		if (originClass > 0) {
+			require(prefer == originPrefer, "Furnace: INVALID_PREFER");
 		}
+		return _enchanceItem(formula, _index, prefer, _id, _token, amount);
 	}
 
-	function _dealMinor(uint256 _index, address[] memory _tokens)
-		private
-		returns (uint16, uint256[] memory)
-	{
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(bytes32[] memory minors, uint256[] memory amounts) =
-			IFormula(formula).getMinors(_index);
+	function _dealMajor(
+		address teller,
+		address formula,
+		uint256 _index,
+		uint256 _id
+	) private returns (uint16, uint16) {
+		bytes32 major = IFormula(formula).getMajor(_index);
+		(
+			address majorAddress,
+			uint16 majorObjClassExt,
+			uint16 majorClass,
+			uint16 majorGrade
+		) = IFormula(formula).getMajorInfo(major);
+		(uint16 objectClassExt, uint16 class, uint16 grade) =
+			IMetaDataTeller(teller).getMetaData(majorAddress, _id);
 		require(
-			_tokens.length == minors.length && _tokens.length == amounts.length,
-			"Furnace: INVALID_VALUES_LENGTH."
+			objectClassExt == majorObjClassExt,
+			"Furnace: INVALID_OBJECTCLASSEXT"
 		);
-		uint16 prefer;
-		for (uint256 i = 0; i < minors.length; i++) {
-			address minorAddress = _tokens[i];
-			uint256 value = amounts[i];
-			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
-			_checkMinorAddress(element, minors[i], minorAddress);
-			prefer |= uint16(1 << element);
-			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-			_safeTransfer(minorAddress, msg.sender, address(this), value);
+		require(class == majorClass, "Furnace: INVALID_CLASS");
+		require(grade == majorGrade, "Furnace: INVALID_GRADE");
+		_safeTransfer(majorAddress, msg.sender, address(this), _id);
+		uint16 prefer = 0;
+		if (class > 0) {
+			prefer = getPrefer(_id);
 		}
-		return (prefer, amounts);
+		return (class, prefer);
+	}
+
+	function _dealMinor(
+		address teller,
+		address formula,
+		uint256 _index,
+		address _token
+	) private returns (uint16, uint256) {
+		(bytes32 minor, uint256 amount) = IFormula(formula).getMinor(_index);
+		uint16 prefer = 0;
+		uint256 element = IMetaDataTeller(teller).getPrefer(_token);
+		_checkMinorAddress(element, minor, _token);
+		prefer |= uint16(1 << element);
+		require(amount <= uint128(-1), "Furnace: VALUE_OVERFLOW");
+		_safeTransfer(_token, msg.sender, address(this), amount);
+		return (prefer, amount);
 	}
 
 	function _checkMinorAddress(
@@ -153,17 +154,17 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	}
 
 	function _enchanceItem(
+		address formula,
 		uint256 _index,
 		uint16 _prefer,
-		uint256[] memory _ids,
-		address[] memory _tokens,
-		uint256[] memory _amounts
+		uint256 _id,
+		address _token,
+		uint256 _amount
 	) private returns (uint256) {
 		lastItemObjectId += 1;
 		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
 		(uint16 objClassExt, uint16 class, uint16 grade, uint128 rate) =
-			IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
-
+			IFormula(formula).getMetaInfo(_index);
 		Item memory item =
 			Item({
 				index: _index,
@@ -172,9 +173,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				class: class,
 				grade: grade,
 				prefer: _prefer,
-				ids: _ids,
-				tokens: _tokens,
-				amounts: _amounts
+				id: _id,
+				token: _token,
+				amount: _amount
 			});
 		uint256 tokenId =
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
@@ -189,9 +190,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			item.class,
 			item.grade,
 			item.prefer,
-			item.ids,
-			item.tokens,
-			item.amounts,
+			item.id,
+			item.token,
+			item.amount,
 			now // solhint-disable-line
 		);
 		return tokenId;
@@ -225,35 +226,22 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		(
 			uint16 class,
 			bool canDisenchant,
-			address[] memory majors,
-			uint256[] memory ids,
-			address[] memory minors,
-			uint256[] memory amounts
+			address major,
+			uint256 id,
+			address minor,
+			uint256 amount
 		) = getEnchantedInfo(_tokenId);
 		require(_depth > 0, "Furnace: INVALID_DEPTH");
 		require(canDisenchant == true, "Furnace: DISENCHANT_DISABLE");
 		require(class > 0, "Furnace: INVALID_CLASS");
-		require(ids.length == majors.length, "Furnace: INVALID_MAJORS_LENGTH.");
-		require(
-			amounts.length == minors.length,
-			"Furnace: INVALID_MINORS_LENGTH."
-		);
 		_disenchantItem(address(this), _tokenId);
-		for (uint256 i = 0; i < majors.length; i++) {
-			address major = majors[i];
-			uint256 id = ids[i];
-			if (_depth == 1 || class == 0) {
-				_safeTransfer(major, address(this), msg.sender, id);
-			} else {
-				_disenchant(id, _depth - 1);
-			}
+		if (_depth == 1 || class == 0) {
+			_safeTransfer(major, address(this), msg.sender, id);
+		} else {
+			_disenchant(id, _depth - 1);
 		}
-		for (uint256 i = 0; i < minors.length; i++) {
-			address minor = minors[i];
-			uint256 amount = amounts[i];
-			_safeTransfer(minor, address(this), msg.sender, amount);
-		}
-		emit Disenchanted(msg.sender, _tokenId, majors, ids, minors, amounts);
+		_safeTransfer(minor, address(this), msg.sender, amount);
+		emit Disenchanted(msg.sender, _tokenId, major, id, minor, amount);
 	}
 
 	function getRate(uint256 _tokenId, uint256 _element)
@@ -283,6 +271,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		return (item.objClassExt, item.class, item.grade);
 	}
 
+	function getPrefer(uint256 _tokenId) public view override returns (uint16) {
+		return tokenId2Item[_tokenId].prefer;
+	}
+
 	function getObjectClassExt(uint256 _tokenId)
 		public
 		view
@@ -298,10 +290,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		returns (
 			uint16,
 			bool,
-			address[] memory,
-			uint256[] memory,
-			address[] memory,
-			uint256[] memory
+			address,
+			uint256,
+			address,
+			uint256
 		)
 	{
 		Item storage item = tokenId2Item[_tokenId];
@@ -309,10 +301,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		return (
 			item.class,
 			IFormula(formula).getDisenchant(item.index),
-			IFormula(formula).getMajorAddresses(item.index),
-			item.ids,
-			item.tokens,
-			item.amounts
+			IFormula(formula).getMajorAddress(item.index),
+			item.id,
+			item.token,
+			item.amount
 		);
 	}
 }

@@ -18,7 +18,7 @@ contract FormulaAuthority {
 			whiteList[_src] &&
 			_sig ==
 			bytes4(
-				keccak256("insert(bytes32,uint128,uint16,uint16,uint16,bool,bytes32[],bytes32[],uint256[])")
+				keccak256("insert(bytes32,uint128,uint16,uint16,uint16,bool,bytes32,bytes32,uint256)")
 			);
 	}
 }

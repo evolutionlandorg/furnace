@@ -17,11 +17,11 @@ interface IELIP002 {
 		// element prefer
 		uint16 prefer;
 		// ids of major material
-		uint256[] ids;
+		uint256 id;
 		// addresses of major material
-		address[] tokens;
+		address token;
 		// amounts of minor material
-		uint256[] amounts;
+		uint256 amount;
 	}
 
 	/**
@@ -34,9 +34,9 @@ interface IELIP002 {
         The `class` argument MUST be class of the item.
         The `grade` argument MUST be grade of the item.
         The `prefer` argument MUST be prefer of the item.
-        The `ids` argument MUST be token ids of major material.
-        The `tokens` argument MUST be token addresses of minor material.
-        The `amounts` argument MUST be token amounts of minor material.
+        The `id` argument MUST be token ids of major material.
+        The `token` argument MUST be token address of minor material.
+        The `amount` argument MUST be token amount of minor material.
         The `now` argument MUST be timestamp of enchant.
     */
 	event Enchanced(
@@ -48,9 +48,9 @@ interface IELIP002 {
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
-		uint256[] ids,
-		address[] tokens,
-		uint256[] amounts,
+		uint256 id,
+		address token,
+		uint256 amount,
 		uint256 now
 	);
 
@@ -66,10 +66,10 @@ interface IELIP002 {
 	event Disenchanted(
 		address indexed user,
 		uint256 tokenId,
-		address[] majors,
-		uint256[] ids,
-		address[] minors,
-		uint256[] amounts
+		address major,
+		uint256 id,
+		address minor,
+		uint256 amount
 	);
 
 	/**
@@ -79,23 +79,23 @@ interface IELIP002 {
         MUST revert if length of `_ids` is not the same as length of `formula` index rules.
         MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
-        @param _ids     IDs of NFT tokens(order and length must match `formula` index rules).
-        @param _tokens  Addresses of FT tokens(order and length must match `formula` index rules).
+        @param _id     ID of NFT tokens(order and length must match `formula` index rules).
+        @param _token  Address of FT tokens(order and length must match `formula` index rules).
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
     */
 	function enchant(
 		uint256 _index,
-		uint256[] calldata _ids,
-		address[] calldata _tokens
+		uint256 _id,
+		address _token
 	) external returns (uint256);
 
 	// {
 	// 	### smelt
 	// 	1. check Formula rule by index
-	//  2. transfer FTs and NFTs to address(this)
-	// 	3. track FTs NFTs to new NFT
+	//  2. transfer FT and NFT to address(this)
+	// 	3. track FTs NFT to new NFT
 	// 	4. mint new NFT to caller
 	// }
 
@@ -103,10 +103,10 @@ interface IELIP002 {
         @notice Caller must be owner of token id to disenchat.
         @dev Disenchant function, A enchanted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
         MUST revert on any other error.        
-        @param _ids     Token IDs to disenchant.
+        @param _id     Token ID to disenchant.
         @param _depth   Depth of disenchanting recursively.
     */
-	function disenchant(uint256 _ids, uint256 _depth) external;
+	function disenchant(uint256 _id, uint256 _depth) external;
 
 	// {
 	// 	### disenchant
@@ -146,6 +146,11 @@ interface IELIP002 {
 		external
 		view
 		returns (uint256);
+
+	function getPrefer(uint256 _tokenId)
+		external
+		view
+		returns (uint16);
 
 	function getObjectClassExt(uint256 _tokenId) 
 		external	

@@ -38,5 +38,6 @@ feeRate=$(seth --to-uint256 5000000)
 seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $fee $feeRate
 
 protect=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "UINT_ITEMBAR_PROTECT_PERIOD")))
-feeRate=$(seth --to-uint256 604800)
-seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $protect $feeRate
+# period=$(seth --to-uint256 604800)
+period=$(seth --to-uint256 300)
+seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $protect $period

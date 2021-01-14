@@ -11,7 +11,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 	using Input for Input.Data;
 	event SetStrength(uint256 indexed inde, uint128 rate);
 
-	event SetAmounts(uint256 indexed index, uint256[] amounts);
+	event SetAmount(uint256 indexed index, uint256 amount);
 
 	/*** STORAGE ***/
 
@@ -29,9 +29,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _amounts
+		bytes32 _major,
+		bytes32 _minor,
+		uint256 _amount
 	) external override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
@@ -41,9 +41,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 				class: _class,
 				grade: _grade,
 				canDisenchant: _canDisenchant,
-				majors: _majors,
-				minors: _minors,
-				amounts: _amounts,
+				major: _major,
+				minor: _minor,
+				amount: _amount,
 				disable: false
 			});
 		formulas.push(formula);
@@ -55,9 +55,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			formula.class,
 			formula.grade,
 			formula.canDisenchant,
-			formula.majors,
-			formula.minors,
-			formula.amounts
+			formula.major,
+			formula.minor,
+			formula.amount
 		);
 	}
 
@@ -80,14 +80,14 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		emit SetStrength(_index, formula.rate);
 	}
 
-	function setAmounts(uint256 _index, uint256[] calldata _amounts)
+	function setAmount(uint256 _index, uint256 _amount)
 		external
 		auth
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		formula.amounts = _amounts;
-		emit SetAmounts(_index, formula.amounts);
+		formula.amount = _amount;
+		emit SetAmount(_index, formula.amount);
 	}
 
 	function length() external view override returns (uint256) {
@@ -99,39 +99,35 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return formulas[_index].disable;
 	}
 
-	function getMajors(uint256 _index)
+	function getMajor(uint256 _index)
 		external
 		view
 		override
-		returns (bytes32[] memory)
+		returns (bytes32)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return formulas[_index].majors;
+		return formulas[_index].major;
 	}
 
-	function getMinors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
 		override
-		returns (bytes32[] memory, uint256[] memory)
+		returns (bytes32, uint256)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return (formulas[_index].minors, formulas[_index].amounts);
+		return (formulas[_index].minor, formulas[_index].amount);
 	}
 
-	function getMajorAddresses(uint256 _index)
+	function getMajorAddress(uint256 _index)
 		external
 		view
 		override
-		returns (address[] memory)
+		returns (address)
 	{
-		FormulaEntry memory formula = formulas[_index];
-		address[] memory majorAddresses = new address[](formula.majors.length);
-		for (uint256 i = 0; i < formula.majors.length; i++) {
-			(address majorAddress, , , ) = getMajorInfo(formula.majors[i]);
-			majorAddresses[i] = majorAddress;
-		}
-		return majorAddresses;
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		(address majorAddress, , , ) = getMajorInfo(formulas[_index].major);
+		return majorAddress;
 	}
 
 	function getDisenchant(uint256 _index)

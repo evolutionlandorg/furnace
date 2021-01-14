@@ -22,10 +22,10 @@ interface IFormula {
 
 		// major material info
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
-		bytes32[] majors;
+		bytes32 major;
 		// minor material info
-		bytes32[] minors;
-		uint256[] amounts;
+		bytes32 minor;
+		uint256 amount;
 		bool disable;
 	}
 
@@ -37,9 +37,9 @@ interface IFormula {
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
-		bytes32[] majors,
-		bytes32[] minors,
-		uint256[] amounts
+		bytes32 major,
+		bytes32 minor,
+		uint256 amount
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -51,9 +51,9 @@ interface IFormula {
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
         @param _name     New enchanted NFT name.
-        @param _majors   FT token addresses of major meterail for enchanting.
-        @param _minors   FT Token addresses of minor meterail for enchanting.
-        @param _amounts   FT Token amounts of minor meterail for enchanting.
+        @param _major   FT token addresses of major meterail for enchanting.
+        @param _minor   FT Token addresses of minor meterail for enchanting.
+        @param _amount   FT Token amounts of minor meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
@@ -62,9 +62,9 @@ interface IFormula {
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _amounts
+		bytes32 _major,
+		bytes32 _minor,
+		uint256 _amount
 	) external;
 
 	/**
@@ -97,15 +97,15 @@ interface IFormula {
 	/**
         @dev returns the major material of the formula.
      */
-	function getMajors(uint256 _index) external view returns (bytes32[] memory);
+	function getMajor(uint256 _index) external view returns (bytes32);
 
 	/**
         @dev returns the minor material of the formula.
      */
-	function getMinors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
-		returns (bytes32[] memory, uint256[] memory);
+		returns (bytes32, uint256);
 
 	/**
         @dev Decode major info of the major.
@@ -152,10 +152,10 @@ interface IFormula {
         @dev returns the minor addresses of the formula.
 		     0x762b8a4d
      */
-	function getMajorAddresses(uint256 _index)
+	function getMajorAddress(uint256 _index)
 		external
 		view
-		returns (address[] memory);
+		returns (address);
 
 	/**
         @dev returns canDisenchant of the formula.
