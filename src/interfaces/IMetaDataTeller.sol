@@ -16,7 +16,7 @@ interface IMetaDataTeller {
 		returns (uint16, uint16, uint16);
 
     //0x7999a5cf
-	function getPrefer(address _token) external view returns (uint256);
+	function getPrefer(bytes32 _minor, address _token) external view returns (uint256);
 
 	//0x33281815
 	function getRate(

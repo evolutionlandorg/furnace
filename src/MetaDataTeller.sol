@@ -141,14 +141,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint256(internalToken2Meta[_token][_grade]);
 	}
 
-	function isAllowed(address _token, uint256 _id) public view returns (bool) {
-		return getObjClassExt(_token, _id) > 0;
-	}
-
-	function getObjClassExt(address _token, uint256 _id) public view returns (uint16 objClassExt) {
-		(objClassExt, , ) = getMetaData(_token, _id);
-	}
-
 	function getMetaData(address _token, uint256 _id)
 		public
 		view
@@ -202,12 +194,13 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint16(uint16(objectId >> 112) & 0x3FF);
 	}
 
-	function getPrefer(address _token) external view returns (uint256) {
-		uint256 prefer = ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_token); 
-		if (prefer > 0) {
-			return prefer;
-		} else {
+	function getPrefer(bytes32 _minor, address _token) external view returns (uint256) {
+		if (_minor == CONTRACT_ELEMENT_TOKEN) {
+			return ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_token);
+		} else if (_minor == CONTRACT_LP_ELEMENT_TOKEN) {
 			return resourceLPToken2RateAttrId[_token];
+		} {
+			return 0;
 		}
 	}
 

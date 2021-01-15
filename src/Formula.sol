@@ -4,11 +4,9 @@ import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
-import "./common/Input.sol";
 import "./FurnaceSettingIds.sol";
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-	using Input for Input.Data;
 	event SetStrength(uint256 indexed inde, uint128 rate);
 
 	event SetAmount(uint256 indexed index, uint256 amount);
@@ -29,22 +27,28 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32 _major,
 		bytes32 _minor,
-		uint256 _amount
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
 				rate: _rate,
 				objClassExt: _objClassExt,
+				disable: false,
 				class: _class,
 				grade: _grade,
 				canDisenchant: _canDisenchant,
-				major: _major,
 				minor: _minor,
 				amount: _amount,
-				disable: false
+				majorAddr: _majorAddr,
+		        majorObjClassExt: _majorObjClassExt,
+		        majorClass: _majorClass,
+		        majorGrade:_majorGrade
 			});
 		formulas.push(formula);
 		emit AddFormula(
@@ -55,9 +59,12 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			formula.class,
 			formula.grade,
 			formula.canDisenchant,
-			formula.major,
 			formula.minor,
-			formula.amount
+			formula.amount,
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
 		);
 	}
 
@@ -99,16 +106,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return formulas[_index].disable;
 	}
 
-	function getMajor(uint256 _index)
-		external
-		view
-		override
-		returns (bytes32)
-	{
-		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return formulas[_index].major;
-	}
-
 	function getMinor(uint256 _index)
 		external
 		view
@@ -119,18 +116,7 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return (formulas[_index].minor, formulas[_index].amount);
 	}
 
-	function getMajorAddress(uint256 _index)
-		external
-		view
-		override
-		returns (address)
-	{
-		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		(address majorAddress, , , ) = getMajorInfo(formulas[_index].major);
-		return majorAddress;
-	}
-
-	function getDisenchant(uint256 _index)
+	function canDisenchant(uint256 _index)
 		external
 		view
 		override
@@ -161,9 +147,9 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		);
 	}
 
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		public
-		pure
+		view	
 		override
 		returns (
 			address,
@@ -172,11 +158,13 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			uint16
 		)
 	{
-		Input.Data memory data = Input.from(abi.encodePacked(_major));
-		address majorAddress = address(data.decodeBytes20());
-		uint16 objectClassExt = data.decodeU16();
-		uint16 majorClass = data.decodeU16();
-		uint16 majorGrade = data.decodeU16();
-		return (majorAddress, objectClassExt, majorClass, majorGrade);
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		return (
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
+		);
 	}
 }

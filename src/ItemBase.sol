@@ -79,14 +79,14 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			IFormula(formula).isDisable(_index) == false,
 			"Furnace: FORMULA_DISABLE"
 		);
-		(uint16 originClass, uint16 originPrefer) =
+		(address majorAddr, uint16 originClass, uint16 originPrefer) =
 			_dealMajor(teller, formula, _index, _id);
 		(uint16 prefer, uint256 amount) =
 			_dealMinor(teller, formula, _index, _token);
 		if (originClass > 0) {
 			require(prefer == originPrefer, "Furnace: INVALID_PREFER");
 		}
-		return _enchanceItem(formula, _index, prefer, _id, _token, amount);
+		return _enchanceItem(formula, _index, prefer, majorAddr, _id, _token, amount);
 	}
 
 	function _dealMajor(
@@ -94,14 +94,13 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		address formula,
 		uint256 _index,
 		uint256 _id
-	) private returns (uint16, uint16) {
-		bytes32 major = IFormula(formula).getMajor(_index);
+	) private returns (address, uint16, uint16) {
 		(
 			address majorAddress,
 			uint16 majorObjClassExt,
 			uint16 majorClass,
 			uint16 majorGrade
-		) = IFormula(formula).getMajorInfo(major);
+		) = IFormula(formula).getMajorInfo(_index);
 		(uint16 objectClassExt, uint16 class, uint16 grade) =
 			IMetaDataTeller(teller).getMetaData(majorAddress, _id);
 		require(
@@ -115,7 +114,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		if (class > 0) {
 			prefer = getPrefer(_id);
 		}
-		return (class, prefer);
+		return (majorAddress, class, prefer);
 	}
 
 	function _dealMinor(
@@ -126,39 +125,21 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	) private returns (uint16, uint256) {
 		(bytes32 minor, uint256 amount) = IFormula(formula).getMinor(_index);
 		uint16 prefer = 0;
-		uint256 element = IMetaDataTeller(teller).getPrefer(_token);
-		_checkMinorAddress(element, minor, _token);
+		uint256 element = IMetaDataTeller(teller).getPrefer(minor, _token);
+		require(element > 0 && element < 6, "Furnace: INVALID_MINOR");
 		prefer |= uint16(1 << element);
 		require(amount <= uint128(-1), "Furnace: VALUE_OVERFLOW");
 		_safeTransfer(_token, msg.sender, address(this), amount);
 		return (prefer, amount);
 	}
 
-	function _checkMinorAddress(
-		uint256 element,
-		bytes32 minor,
-		address minorAddress
-	) internal view {
-		if (element > 0) {
-			require(
-				minor == CONTRACT_ELEMENT_TOKEN ||
-					minor == CONTRACT_LP_ELEMENT_TOKEN,
-				"Funace: INVALID_TOKEN"
-			);
-		} else {
-			require(
-				minorAddress == registry.addressOf(minor),
-				"Furnace: INVALID_TOKEN"
-			);
-		}
-	}
-
 	function _enchanceItem(
 		address formula,
 		uint256 _index,
 		uint16 _prefer,
+		address _major,
 		uint256 _id,
-		address _token,
+		address _minor,
 		uint256 _amount
 	) private returns (uint256) {
 		lastItemObjectId += 1;
@@ -173,8 +154,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 				class: class,
 				grade: grade,
 				prefer: _prefer,
+				major: _major,
 				id: _id,
-				token: _token,
+				minor: _minor,
 				amount: _amount
 			});
 		uint256 tokenId =
@@ -190,8 +172,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			item.class,
 			item.grade,
 			item.prefer,
+			item.major,
 			item.id,
-			item.token,
+			item.minor,
 			item.amount,
 			now // solhint-disable-line
 		);
@@ -297,13 +280,12 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		)
 	{
 		Item storage item = tokenId2Item[_tokenId];
-		address formula = registry.addressOf(CONTRACT_FORMULA);
 		return (
 			item.class,
-			IFormula(formula).getDisenchant(item.index),
-			IFormula(formula).getMajorAddress(item.index),
+			IFormula(registry.addressOf(CONTRACT_FORMULA)).canDisenchant(item.index),
+			item.major,
 			item.id,
-			item.token,
+			item.minor,
 			item.amount
 		);
 	}

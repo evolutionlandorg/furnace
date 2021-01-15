@@ -16,11 +16,11 @@ interface IELIP002 {
 		uint16 grade;
 		// element prefer
 		uint16 prefer;
-		// ids of major material
+		//  major material
+		address major;
 		uint256 id;
-		// addresses of major material
-		address token;
-		// amounts of minor material
+		// amount of minor material
+		address minor;
 		uint256 amount;
 	}
 
@@ -34,8 +34,9 @@ interface IELIP002 {
         The `class` argument MUST be class of the item.
         The `grade` argument MUST be grade of the item.
         The `prefer` argument MUST be prefer of the item.
-        The `id` argument MUST be token ids of major material.
-        The `token` argument MUST be token address of minor material.
+        The `major` argument MUST be token address of major material.
+        The `id` argument MUST be token id of major material.
+        The `minor` argument MUST be token address of minor material.
         The `amount` argument MUST be token amount of minor material.
         The `now` argument MUST be timestamp of enchant.
     */
@@ -48,8 +49,9 @@ interface IELIP002 {
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
+		address major,
 		uint256 id,
-		address token,
+		address minor,
 		uint256 amount,
 		uint256 now
 	);

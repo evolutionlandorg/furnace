@@ -26,6 +26,9 @@ case $1 in
   enchant-drill)
     fnc test-enchant-drill "${@:2}"
   ;;
+  enchant-drill2)
+    fnc test-enchant-drill2 "${@:2}"
+  ;;
   enchant-gego)
     fnc test-enchant-gego "${@:2}"
   ;;

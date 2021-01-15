@@ -16,6 +16,9 @@ set -e
 itembase="$(fnc --get-itembase)" 
 
 case $1 in
+  at)
+    seth call $itembase "tokenId2Item(uint256)(uint256,uint128,uint16,uint16,uint16,uint16,address,uint256,address,uint256)" $2
+  ;;
   meta)
     seth call $itembase "getBaseInfo(uint256)(uint16,uint16,uint16)" $2
   ;;

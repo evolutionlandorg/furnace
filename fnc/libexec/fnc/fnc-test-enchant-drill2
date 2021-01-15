@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+grade=$(seth --to-uint16 2)
+drillId=$1
+
+index=$(seth --to-uint256 6)
+seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $ITEMBASE_PROXY $(seth --to-uint256 1)
+address=$TOKEN_LP_GOLD_RING
+seth send $TOKEN_LP_GOLD_RING "approve(address,uint256)" $ITEMBASE_PROXY $(seth --to-int256 -1) 
+seth send $ITEMBASE_PROXY "enchant(uint256,uint256,address)(uint256)" $index $drillId $address 

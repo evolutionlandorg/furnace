@@ -20,13 +20,17 @@ interface IFormula {
 		// uint256 disenchantTime;
 		// uint256 loseRate;
 
-		// major material info
-		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
-		bytes32 major;
+		bool disable;
+
 		// minor material info
 		bytes32 minor;
 		uint256 amount;
-		bool disable;
+		// major material info
+		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
+		address majorAddr;
+		uint16 majorObjClassExt;
+		uint16 majorClass;
+		uint16 majorGrade;
 	}
 
 	event AddFormula(
@@ -37,9 +41,12 @@ interface IFormula {
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
-		bytes32 major,
 		bytes32 minor,
-		uint256 amount
+		uint256 amount,
+		address majorAddr,
+		uint16 majorObjClassExt,
+		uint16 majorClass,
+		uint16 majorGrade
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -50,10 +57,17 @@ interface IFormula {
         MUST revert if length of `_majors` is not the same as length of `_class`.
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name     New enchanted NFT name.
-        @param _major   FT token addresses of major meterail for enchanting.
-        @param _minor   FT Token addresses of minor meterail for enchanting.
-        @param _amount   FT Token amounts of minor meterail for enchanting.
+        @param _name         New enchanted NFT name.
+        @param _rate         New enchanted NFT rate.
+        @param _objClassExt  New enchanted NFT objectClassExt.
+        @param _class        New enchanted NFT class.
+        @param _grade        New enchanted NFT grade.
+        @param _minor        FT Token address of minor meterail for enchanting.
+        @param _amount       FT Token amount of minor meterail for enchanting.
+        @param _majorAddr    FT token address of major meterail for enchanting.
+        @param _majorObjClassExt   FT token objectClassExt of major meterail for enchanting.
+        @param _majorClass   FT token class of major meterail for enchanting.
+        @param _majorGrade   FT token grade of major meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
@@ -62,9 +76,12 @@ interface IFormula {
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32 _major,
 		bytes32 _minor,
-		uint256 _amount
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external;
 
 	/**
@@ -95,11 +112,6 @@ interface IFormula {
 	function isDisable(uint256 _index) external view returns (bool);
 
 	/**
-        @dev returns the major material of the formula.
-     */
-	function getMajor(uint256 _index) external view returns (bytes32);
-
-	/**
         @dev returns the minor material of the formula.
      */
 	function getMinor(uint256 _index)
@@ -117,9 +129,9 @@ interface IFormula {
 			"grade": "Major token address."
 		}
      */
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		external
-		pure
+		view	
 		returns (
 			address,
 			uint16,
@@ -149,16 +161,7 @@ interface IFormula {
 		);
 
 	/**
-        @dev returns the minor addresses of the formula.
-		     0x762b8a4d
-     */
-	function getMajorAddress(uint256 _index)
-		external
-		view
-		returns (address);
-
-	/**
         @dev returns canDisenchant of the formula.
      */
-	function getDisenchant(uint256 _index) external view returns (bool);
+	function canDisenchant(uint256 _index) external view returns (bool);
 }
