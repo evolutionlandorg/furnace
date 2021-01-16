@@ -9,6 +9,5 @@ link    :;
 	rm -rf 'one'
 	mkdir 'one'
 	ln -s $(PWD)/lib/land/flat/LandResourceV5.sol $(PWD)/one/LandResourceV5.f.sol
-	ln -s $(PWD)/lib/apostle/flat/ApostleBaseV3.sol $(PWD)/one/ApostleBaseV3.f.sol
 
 .PHONY: all buildone clean test deploy flat lint link
