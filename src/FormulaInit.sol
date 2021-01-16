@@ -13,7 +13,7 @@ contract FormulaInit is FurnaceSettingIds {
 
 	bool public isInit;
 	ISettingsRegistry public registry;
-	address formula;
+	address public formula;
 	
 	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
