@@ -549,6 +549,10 @@ interface IERC223Recipient {
 /* pragma solidity ^0.6.7; */
 
 interface ISettingsRegistry {
+    function uintOf(bytes32 _propertyName) external view returns (uint256);
+
+    function stringOf(bytes32 _propertyName) external view returns (string memory);
+
     function addressOf(bytes32 _propertyName) external view returns (address);
 
     function bytesOf(bytes32 _propertyName) external view returns (bytes memory);

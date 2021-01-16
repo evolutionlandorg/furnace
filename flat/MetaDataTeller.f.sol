@@ -285,14 +285,6 @@ contract FurnaceSettingIds {
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
 
-	//0x434f4e54524143545f4c505f52494e475f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_RING_ERC20_TOKEN =
-		"CONTRACT_LP_RING_ERC20_TOKEN";
-
-	//0x434f4e54524143545f4c505f4b544f4e5f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_KTON_ERC20_TOKEN =
-		"CONTRACT_LP_KTON_ERC20_TOKEN";
-
 	//0x434f4e54524143545f4c505f454c454d454e545f544f4b454e00000000000000
 	bytes32 public constant CONTRACT_LP_ELEMENT_TOKEN = 
 		"CONTRACT_LP_ELEMENT_TOKEN";
@@ -362,24 +354,19 @@ interface IELIP002 {
 	struct Item {
 		// index of `Formula`
 		uint256 index;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
-		// rate of enhance
+		//  strength rate
 		uint128 rate;
-		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
 		uint16 grade;
 		// element prefer
 		uint16 prefer;
-		// ids of major material
-		uint256[] ids;
-		// addresses of major material
-		address[] tokens;
-		// amounts of minor material
-		uint256[] amounts;
+		//  major material
+		address major;
+		uint256 id;
+		// amount of minor material
+		address minor;
+		uint256 amount;
 	}
 
 	/**
@@ -387,32 +374,30 @@ interface IELIP002 {
         The `user` argument MUST be the address of an account/contract that is approved to make the enchant (SHOULD be msg.sender).
         The `tokenId` argument MUST be token Id of the item which it is enchanted.
         The `index` argument MUST be index of the `Formula`.
-        The `base` argument MUST be base strength rate of the item.
-        The `enhance` argument MUST be enhance strength rate of the item.
         The `rate` argument MUST be rate of minor material.
         The `objClassExt` argument MUST be extension of `ObjectClass`.
         The `class` argument MUST be class of the item.
         The `grade` argument MUST be grade of the item.
         The `prefer` argument MUST be prefer of the item.
-        The `ids` argument MUST be token ids of major material.
-        The `tokens` argument MUST be token addresses of minor material.
-        The `amounts` argument MUST be token amounts of minor material.
+        The `major` argument MUST be token address of major material.
+        The `id` argument MUST be token id of major material.
+        The `minor` argument MUST be token address of minor material.
+        The `amount` argument MUST be token amount of minor material.
         The `now` argument MUST be timestamp of enchant.
     */
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
 		uint256 index,
-		uint128 base,
-		uint128 enhance,
 		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
-		uint256[] ids,
-		address[] tokens,
-		uint256[] amounts,
+		address major,
+		uint256 id,
+		address minor,
+		uint256 amount,
 		uint256 now
 	);
 
@@ -428,10 +413,10 @@ interface IELIP002 {
 	event Disenchanted(
 		address indexed user,
 		uint256 tokenId,
-		address[] majors,
-		uint256[] ids,
-		address[] minors,
-		uint256[] amounts
+		address major,
+		uint256 id,
+		address minor,
+		uint256 amount
 	);
 
 	/**
@@ -441,25 +426,23 @@ interface IELIP002 {
         MUST revert if length of `_ids` is not the same as length of `formula` index rules.
         MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
-        @param _ids     IDs of NFT tokens(order and length must match `formula` index rules).
-        @param _tokens  Addresses of FT tokens(order and length must match `formula` index rules).
-        @param _values  Amounts of FT tokens(order and length must match `formula` index rules).
+        @param _id     ID of NFT tokens(order and length must match `formula` index rules).
+        @param _token  Address of FT tokens(order and length must match `formula` index rules).
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
     */
 	function enchant(
 		uint256 _index,
-		uint256[] calldata _ids,
-		address[] calldata _tokens,
-		uint256[] calldata _values
+		uint256 _id,
+		address _token
 	) external returns (uint256);
 
 	// {
 	// 	### smelt
 	// 	1. check Formula rule by index
-	//  2. transfer FTs and NFTs to address(this)
-	// 	3. track FTs NFTs to new NFT
+	//  2. transfer FT and NFT to address(this)
+	// 	3. track FTs NFT to new NFT
 	// 	4. mint new NFT to caller
 	// }
 
@@ -467,10 +450,10 @@ interface IELIP002 {
         @notice Caller must be owner of token id to disenchat.
         @dev Disenchant function, A enchanted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
         MUST revert on any other error.        
-        @param _ids     Token IDs to disenchant.
+        @param _id     Token ID to disenchant.
         @param _depth   Depth of disenchanting recursively.
     */
-	function disenchant(uint256 _ids, uint256 _depth) external;
+	function disenchant(uint256 _id, uint256 _depth) external;
 
 	// {
 	// 	### disenchant
@@ -510,6 +493,11 @@ interface IELIP002 {
 		external
 		view
 		returns (uint256);
+
+	function getPrefer(uint256 _tokenId)
+		external
+		view
+		returns (uint16);
 
 	function getObjectClassExt(uint256 _tokenId) 
 		external	
@@ -575,6 +563,10 @@ interface ILandBase {
 /* pragma solidity ^0.6.7; */
 
 interface ISettingsRegistry {
+    function uintOf(bytes32 _propertyName) external view returns (uint256);
+
+    function stringOf(bytes32 _propertyName) external view returns (string memory);
+
     function addressOf(bytes32 _propertyName) external view returns (address);
 
     function bytesOf(bytes32 _propertyName) external view returns (bytes memory);
@@ -706,10 +698,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	mapping(address => uint8) public resourceLPToken2RateAttrId;
 	mapping(address => Meta) public externalToken2Meta;
 	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
-	address public ownership;
-	address public interstellarEncoder;
-	address public landbase;
-	address public itembase;
 
 	function initialize(address _registry) public initializer {
 		owner = msg.sender;
@@ -717,29 +705,20 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		registry = ISettingsRegistry(_registry);
 
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_GOLD_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
 		] = 1;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_WOOD_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
 		] = 2;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_WATER_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
 		] = 3;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_FIRE_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
 		] = 4;
 		resourceLPToken2RateAttrId[
-			registry.addressOf(CONTRACT_SOIL_ERC20_TOKEN)
+			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
 		] = 5;
-
-		refresh();
-	}
-
-	function refresh() public auth {
-		ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		interstellarEncoder = registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER);
-		landbase = registry.addressOf(CONTRACT_LAND_BASE);
-		itembase = registry.addressOf(CONTRACT_ITEM_BASE);
 	}
 
 	function addInternalTokenMeta(
@@ -817,14 +796,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint256(internalToken2Meta[_token][_grade]);
 	}
 
-	function isAllowed(address _token, uint256 _id) public view returns (bool) {
-		return getObjClassExt(_token, _id) > 0;
-	}
-
-	function getObjClassExt(address _token, uint256 _id) public view returns (uint16 objClassExt) {
-		(objClassExt, , ) = getMetaData(_token, _id);
-	}
-
 	function getMetaData(address _token, uint256 _id)
 		public
 		view
@@ -834,11 +805,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			uint16
 		)
 	{
-		if (_token == ownership) {
+		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(itembase).getBaseInfo(_id);
+				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getBaseInfo(_id);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				return (
 					objectClass,
@@ -878,12 +849,13 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint16(uint16(objectId >> 112) & 0x3FF);
 	}
 
-	function getPrefer(address _token) external view returns (uint256) {
-		uint256 prefer = ILandBase(landbase).resourceToken2RateAttrId(_token); 
-		if (prefer > 0) {
-			return prefer;
-		} else {
+	function getPrefer(bytes32 _minor, address _token) external view returns (uint256) {
+		if (_minor == CONTRACT_ELEMENT_TOKEN) {
+			return ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_token);
+		} else if (_minor == CONTRACT_LP_ELEMENT_TOKEN) {
 			return resourceLPToken2RateAttrId[_token];
+		} {
+			return 0;
 		}
 	}
 
@@ -895,11 +867,11 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		if (_token == address(0)) {
 			return 0;
 		}
-		if (_token == ownership) {
+		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(interstellarEncoder).getObjectClass(_id);
+				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(itembase).getRate(_id, _element);
+				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getRate(_id, _element);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);

@@ -310,52 +310,6 @@ abstract contract Initializable {
     }
 }
 
-////// src/common/UQ128x128.sol
-/* pragma solidity ^0.6.7; */
-
-// a library for handling binary fixed point numbers (https://en.wikipedia.org/wiki/Q_(number_format))
-
-// range: [0, 2**128 - 1]
-// resolution: 1 / 2**128
-
-library UQ128x128 {
-    uint8 public constant RESOLUTION = 128;
-    uint256 public constant Q128 = 2**128;
-
-    // encode a uint128 as a UQ128x128
-    function encode(uint128 y) internal pure returns (uint256 z) {
-        z = uint256(y) * Q128; // never overflows
-    }
-
-    // decode a UQ128x128 into a uint128 by truncating after the radix point
-    function decode(uint256 x) internal pure returns (uint128) {
-        return uint128(x >> RESOLUTION);
-    }
-
-    // divide a UQ128x128 by a uint128, returning a UQ128x128
-    function uqdiv(uint256 x, uint128 y) internal pure returns (uint256 z) {
-        require(y != 0, "UQ128x128: DIV_BY_ZERO");
-        z = x / uint256(y);
-    }
-
-    // multiply a UQ128x128 by a uint128, returning a UQ128x128
-    // reverts on overflow
-    function uqmul(uint256 x, uint128 y) internal pure returns (uint256 z) {
-        require(y == 0 || (z = x * uint256(y)) / uint256(y) == x, "UQ128x128: MULTIPLICATION_OVERFLOW");
-    }
-
-	function mul128(uint128 a, uint128 b) internal pure returns (uint128) {
-		if (a == 0) {
-			return 0;
-		}
-
-		uint128 c = a * b;
-		require(c / a == b, "UQ128x128: MULTIPLICATION128_OVERFLOW");
-
-		return c;
-	}
-}
-
 ////// src/interfaces/IELIP002.sol
 /* pragma solidity ^0.6.7; */
 
@@ -368,24 +322,19 @@ interface IELIP002 {
 	struct Item {
 		// index of `Formula`
 		uint256 index;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
-		// rate of enhance
+		//  strength rate
 		uint128 rate;
-		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
 		uint16 grade;
 		// element prefer
 		uint16 prefer;
-		// ids of major material
-		uint256[] ids;
-		// addresses of major material
-		address[] tokens;
-		// amounts of minor material
-		uint256[] amounts;
+		//  major material
+		address major;
+		uint256 id;
+		// amount of minor material
+		address minor;
+		uint256 amount;
 	}
 
 	/**
@@ -393,32 +342,30 @@ interface IELIP002 {
         The `user` argument MUST be the address of an account/contract that is approved to make the enchant (SHOULD be msg.sender).
         The `tokenId` argument MUST be token Id of the item which it is enchanted.
         The `index` argument MUST be index of the `Formula`.
-        The `base` argument MUST be base strength rate of the item.
-        The `enhance` argument MUST be enhance strength rate of the item.
         The `rate` argument MUST be rate of minor material.
         The `objClassExt` argument MUST be extension of `ObjectClass`.
         The `class` argument MUST be class of the item.
         The `grade` argument MUST be grade of the item.
         The `prefer` argument MUST be prefer of the item.
-        The `ids` argument MUST be token ids of major material.
-        The `tokens` argument MUST be token addresses of minor material.
-        The `amounts` argument MUST be token amounts of minor material.
+        The `major` argument MUST be token address of major material.
+        The `id` argument MUST be token id of major material.
+        The `minor` argument MUST be token address of minor material.
+        The `amount` argument MUST be token amount of minor material.
         The `now` argument MUST be timestamp of enchant.
     */
 	event Enchanced(
 		address indexed user,
 		uint256 indexed tokenId,
 		uint256 index,
-		uint128 base,
-		uint128 enhance,
 		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		uint16 prefer,
-		uint256[] ids,
-		address[] tokens,
-		uint256[] amounts,
+		address major,
+		uint256 id,
+		address minor,
+		uint256 amount,
 		uint256 now
 	);
 
@@ -434,10 +381,10 @@ interface IELIP002 {
 	event Disenchanted(
 		address indexed user,
 		uint256 tokenId,
-		address[] majors,
-		uint256[] ids,
-		address[] minors,
-		uint256[] amounts
+		address major,
+		uint256 id,
+		address minor,
+		uint256 amount
 	);
 
 	/**
@@ -447,25 +394,23 @@ interface IELIP002 {
         MUST revert if length of `_ids` is not the same as length of `formula` index rules.
         MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
-        @param _ids     IDs of NFT tokens(order and length must match `formula` index rules).
-        @param _tokens  Addresses of FT tokens(order and length must match `formula` index rules).
-        @param _values  Amounts of FT tokens(order and length must match `formula` index rules).
+        @param _id     ID of NFT tokens(order and length must match `formula` index rules).
+        @param _token  Address of FT tokens(order and length must match `formula` index rules).
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
     */
 	function enchant(
 		uint256 _index,
-		uint256[] calldata _ids,
-		address[] calldata _tokens,
-		uint256[] calldata _values
+		uint256 _id,
+		address _token
 	) external returns (uint256);
 
 	// {
 	// 	### smelt
 	// 	1. check Formula rule by index
-	//  2. transfer FTs and NFTs to address(this)
-	// 	3. track FTs NFTs to new NFT
+	//  2. transfer FT and NFT to address(this)
+	// 	3. track FTs NFT to new NFT
 	// 	4. mint new NFT to caller
 	// }
 
@@ -473,10 +418,10 @@ interface IELIP002 {
         @notice Caller must be owner of token id to disenchat.
         @dev Disenchant function, A enchanted NFT can be disenchanted into origin ERC721 tokens and ERC20 tokens recursively.
         MUST revert on any other error.        
-        @param _ids     Token IDs to disenchant.
+        @param _id     Token ID to disenchant.
         @param _depth   Depth of disenchanting recursively.
     */
-	function disenchant(uint256 _ids, uint256 _depth) external;
+	function disenchant(uint256 _id, uint256 _depth) external;
 
 	// {
 	// 	### disenchant
@@ -517,6 +462,11 @@ interface IELIP002 {
 		view
 		returns (uint256);
 
+	function getPrefer(uint256 _tokenId)
+		external
+		view
+		returns (uint16);
+
 	function getObjectClassExt(uint256 _tokenId) 
 		external	
 		view
@@ -534,10 +484,8 @@ interface IFormula {
 	struct FormulaEntry {
 		// item name
 		bytes32 name;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
+		// strength rate
+		uint128 rate;
 		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
@@ -548,28 +496,33 @@ interface IFormula {
 		// uint256 disenchantTime;
 		// uint256 loseRate;
 
+		bool disable;
+
+		// minor material info
+		bytes32 minor;
+		uint256 amount;
 		// major material info
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
-		bytes32[] majors;
-		// minor material info
-		bytes32[] minors;
-		// [uint128 min, uint128 max]
-		uint256[] limits;
-		bool disable;
+		address majorAddr;
+		uint16 majorObjClassExt;
+		uint16 majorClass;
+		uint16 majorGrade;
 	}
 
 	event AddFormula(
 		uint256 indexed index,
 		bytes32 name,
-		uint128 base,
-		uint128 enhance,
+		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
-		bytes32[] majors,
-		bytes32[] minors,
-		uint256[] limits
+		bytes32 minor,
+		uint256 amount,
+		address majorAddr,
+		uint16 majorObjClassExt,
+		uint16 majorClass,
+		uint16 majorGrade
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -580,22 +533,31 @@ interface IFormula {
         MUST revert if length of `_majors` is not the same as length of `_class`.
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name     New enchanted NFT name.
-        @param _majors   FT token addresses of major meterail for enchanting.
-        @param _minors   FT Token addresses of minor meterail for enchanting.
-        @param _limits   FT Token limits of minor meterail for enchanting.
+        @param _name         New enchanted NFT name.
+        @param _rate         New enchanted NFT rate.
+        @param _objClassExt  New enchanted NFT objectClassExt.
+        @param _class        New enchanted NFT class.
+        @param _grade        New enchanted NFT grade.
+        @param _minor        FT Token address of minor meterail for enchanting.
+        @param _amount       FT Token amount of minor meterail for enchanting.
+        @param _majorAddr    FT token address of major meterail for enchanting.
+        @param _majorObjClassExt   FT token objectClassExt of major meterail for enchanting.
+        @param _majorClass   FT token class of major meterail for enchanting.
+        @param _majorGrade   FT token grade of major meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		bytes32 _minor,
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external;
 
 	/**
@@ -626,17 +588,12 @@ interface IFormula {
 	function isDisable(uint256 _index) external view returns (bool);
 
 	/**
-        @dev returns the major material of the formula.
-     */
-	function getMajors(uint256 _index) external view returns (bytes32[] memory);
-
-	/**
         @dev returns the minor material of the formula.
      */
-	function getMinors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
-		returns (bytes32[] memory, uint256[] memory);
+		returns (bytes32, uint256);
 
 	/**
         @dev Decode major info of the major.
@@ -648,26 +605,15 @@ interface IFormula {
 			"grade": "Major token address."
 		}
      */
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		external
-		pure
+		view	
 		returns (
 			address,
 			uint16,
 			uint16,
 			uint16
 		);
-
-	/**
-        @dev Decode major info of limit.
-	         0x827d6320
-		@return {
-			"min": "Min amount of minor material.",
-			"max": "Max amount of minor material."
-
-		}
-     */
-	function getLimit(uint256 _limit) external pure returns (uint128, uint128);
 
 	/**
         @dev Returns meta info of the item.
@@ -687,23 +633,13 @@ interface IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		);
 
 	/**
-        @dev returns the minor addresses of the formula.
-		     0x762b8a4d
-     */
-	function getMajorAddresses(uint256 _index)
-		external
-		view
-		returns (address[] memory);
-
-	/**
         @dev returns canDisenchant of the formula.
      */
-	function getDisenchant(uint256 _index) external view returns (bool);
+	function canDisenchant(uint256 _index) external view returns (bool);
 }
 
 ////// src/interfaces/IMetaDataTeller.sol
@@ -725,7 +661,7 @@ interface IMetaDataTeller {
 		returns (uint16, uint16, uint16);
 
     //0x7999a5cf
-	function getPrefer(address _token) external view returns (uint256);
+	function getPrefer(bytes32 _minor, address _token) external view returns (uint256);
 
 	//0x33281815
 	function getRate(
@@ -751,6 +687,10 @@ interface IObjectOwnership {
 /* pragma solidity ^0.6.7; */
 
 interface ISettingsRegistry {
+    function uintOf(bytes32 _propertyName) external view returns (uint256);
+
+    function stringOf(bytes32 _propertyName) external view returns (string memory);
+
     function addressOf(bytes32 _propertyName) external view returns (address);
 
     function bytesOf(bytes32 _propertyName) external view returns (bytes memory);
@@ -787,11 +727,8 @@ interface ISettingsRegistry {
 /* import "./interfaces/ISettingsRegistry.sol"; */
 /* import "./interfaces/IMetaDataTeller.sol"; */
 /* import "./interfaces/IObjectOwnership.sol"; */
-/* import "./common/UQ128x128.sol"; */
 
 contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
-	using UQ128x128 for uint256;
-
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
@@ -833,7 +770,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test
-		lastItemObjectId = 1000;
+		lastItemObjectId = 10000;
 	}
 
 	function _safeTransfer(
@@ -852,160 +789,94 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 
 	function enchant(
 		uint256 _index,
-		uint256[] calldata _ids,
-		address[] calldata _tokens,
-		uint256[] calldata _values
+		uint256 _id,
+		address _token
 	) external override stoppable returns (uint256) {
-		_dealMajor(_index, _ids);
-		(uint16 prefer, uint128 rate, uint256[] memory amounts) =
-			_dealMinor(_index, _tokens, _values);
-		return _enchanceItem(_index, prefer, rate, _ids, _tokens, amounts);
-	}
-
-	function _dealMajor(uint256 _index, uint256[] memory _ids) private {
 		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
 		address formula = registry.addressOf(CONTRACT_FORMULA);
 		require(
 			IFormula(formula).isDisable(_index) == false,
 			"Furnace: FORMULA_DISABLE"
 		);
-		bytes32[] memory majors = IFormula(formula).getMajors(_index);
-		require(_ids.length == majors.length, "Furnace: INVALID_LENGTH");
-		for (uint256 i = 0; i < majors.length; i++) {
-			bytes32 major = majors[i];
-			uint256 id = _ids[i];
-			(
-				address majorAddress,
-				uint16 majorObjClassExt,
-				uint16 majorClass,
-				uint16 majorGrade
-			) = IFormula(formula).getMajorInfo(major);
-			(uint16 objectClassExt, uint16 class, uint16 grade) =
-				IMetaDataTeller(teller).getMetaData(majorAddress, id);
-			require(
-				objectClassExt == majorObjClassExt,
-				"Furnace: INVALID_OBJECTCLASSEXT"
-			);
-			require(class == majorClass, "Furnace: INVALID_CLASS");
-			require(grade == majorGrade, "Furnace: INVALID_GRADE");
-			_safeTransfer(majorAddress, msg.sender, address(this), id);
+		(address majorAddr, uint16 originClass, uint16 originPrefer) =
+			_dealMajor(teller, formula, _index, _id);
+		(uint16 prefer, uint256 amount) =
+			_dealMinor(teller, formula, _index, _token);
+		if (originClass > 0) {
+			require(prefer == originPrefer, "Furnace: INVALID_PREFER");
 		}
+		return _enchanceItem(formula, _index, prefer, majorAddr, _id, _token, amount);
+	}
+
+	function _dealMajor(
+		address teller,
+		address formula,
+		uint256 _index,
+		uint256 _id
+	) private returns (address, uint16, uint16) {
+		(
+			address majorAddress,
+			uint16 majorObjClassExt,
+			uint16 majorClass,
+			uint16 majorGrade
+		) = IFormula(formula).getMajorInfo(_index);
+		(uint16 objectClassExt, uint16 class, uint16 grade) =
+			IMetaDataTeller(teller).getMetaData(majorAddress, _id);
+		require(
+			objectClassExt == majorObjClassExt,
+			"Furnace: INVALID_OBJECTCLASSEXT"
+		);
+		require(class == majorClass, "Furnace: INVALID_CLASS");
+		require(grade == majorGrade, "Furnace: INVALID_GRADE");
+		_safeTransfer(majorAddress, msg.sender, address(this), _id);
+		uint16 prefer = 0;
+		if (class > 0) {
+			prefer = getPrefer(_id);
+		}
+		return (majorAddress, class, prefer);
 	}
 
 	function _dealMinor(
+		address teller,
+		address formula,
 		uint256 _index,
-		address[] memory _tokens,
-		uint256[] memory _values
-	)
-		private
-		returns (
-			uint16,
-			uint128,
-			uint256[] memory
-		)
-	{
-		address formula = registry.addressOf(CONTRACT_FORMULA);
-		address teller = registry.addressOf(CONTRACT_METADATA_TELLER);
-		(bytes32[] memory minors, uint256[] memory limits) =
-			IFormula(formula).getMinors(_index);
-		require(
-			_tokens.length == minors.length && _values.length == minors.length,
-			"Furnace: INVALID_VALUES_LENGTH."
-		);
-		uint16 prefer;
-		//TODO: check rate calculate.
-		uint128 rate = RATE_PRECISION;
-		uint256[] memory amounts = new uint256[](minors.length);
-		for (uint256 i = 0; i < minors.length; i++) {
-			address minorAddress = _tokens[i];
-			uint256 value = _values[i];
-			(uint128 minorMin, uint128 minorMax) =
-				IFormula(formula).getLimit(limits[i]);
-			require(minorMax > minorMin, "Furnace: INVALID_LIMIT");
-			uint256 element = IMetaDataTeller(teller).getPrefer(minorAddress);
-			_checkMinorAddress(element, minors[i], minorAddress);
-			prefer |= uint16(1 << element);
-			require(value >= minorMin, "Furnace: VALUE_INSUFFICIENT");
-			require(value <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-			uint128 numerator;
-			uint128 denominator;
-			if (value > minorMax) {
-				numerator = minorMax - minorMin;
-				_safeTransfer(
-					minorAddress,
-					msg.sender,
-					address(this),
-					minorMax
-				);
-				amounts[i] = minorMax;
-			} else {
-				numerator = uint128(value) - minorMin;
-				_safeTransfer(minorAddress, msg.sender, address(this), value);
-				amounts[i] = value;
-			}
-			denominator = minorMax - minorMin;
-			uint128 enhanceRate =
-				UQ128x128
-					.encode(numerator)
-					.uqdiv(denominator)
-					.uqmul(RATE_PRECISION)
-					.decode();
-			rate = UQ128x128.mul128(rate, enhanceRate) / RATE_PRECISION;
-		}
-		return (prefer, rate, amounts);
-	}
-
-	function _checkMinorAddress(
-		uint256 element,
-		bytes32 minor,
-		address minorAddress
-	) internal view {
-		if (element > 0) {
-			require(
-				minor == CONTRACT_ELEMENT_TOKEN ||
-					minor == CONTRACT_LP_ELEMENT_TOKEN,
-				"Funace: INVALID_TOKEN"
-			);
-		} else {
-			require(
-				minorAddress == registry.addressOf(minor),
-				"Furnace: INVALID_TOKEN"
-			);
-		}
+		address _token
+	) private returns (uint16, uint256) {
+		(bytes32 minor, uint256 amount) = IFormula(formula).getMinor(_index);
+		uint16 prefer = 0;
+		uint256 element = IMetaDataTeller(teller).getPrefer(minor, _token);
+		require(element > 0 && element < 6, "Furnace: INVALID_MINOR");
+		prefer |= uint16(1 << element);
+		require(amount <= uint128(-1), "Furnace: VALUE_OVERFLOW");
+		_safeTransfer(_token, msg.sender, address(this), amount);
+		return (prefer, amount);
 	}
 
 	function _enchanceItem(
+		address formula,
 		uint256 _index,
 		uint16 _prefer,
-		uint128 _rate,
-		uint256[] memory _ids,
-		address[] memory _tokens,
-		uint256[] memory _amounts
+		address _major,
+		uint256 _id,
+		address _minor,
+		uint256 _amount
 	) private returns (uint256) {
 		lastItemObjectId += 1;
 		require(lastItemObjectId <= uint128(-1), "Furnace: OBJECTID_OVERFLOW");
-
-		(
-			uint16 objClassExt,
-			uint16 class,
-			uint16 grade,
-			uint128 base,
-			uint128 enhance
-		) = IFormula(registry.addressOf(CONTRACT_FORMULA)).getMetaInfo(_index);
-
+		(uint16 objClassExt, uint16 class, uint16 grade, uint128 rate) =
+			IFormula(formula).getMetaInfo(_index);
 		Item memory item =
 			Item({
 				index: _index,
-				base: base,
-				enhance: enhance,
-				rate: _rate,
+				rate: rate,
 				objClassExt: objClassExt,
 				class: class,
 				grade: grade,
 				prefer: _prefer,
-				ids: _ids,
-				tokens: _tokens,
-				amounts: _amounts
+				major: _major,
+				id: _id,
+				minor: _minor,
+				amount: _amount
 			});
 		uint256 tokenId =
 			IObjectOwnership(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP))
@@ -1015,16 +886,15 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			msg.sender,
 			tokenId,
 			item.index,
-			item.base,
-			item.enhance,
 			item.rate,
 			item.objClassExt,
 			item.class,
 			item.grade,
 			item.prefer,
-			item.ids,
-			item.tokens,
-			item.amounts,
+			item.major,
+			item.id,
+			item.minor,
+			item.amount,
 			now // solhint-disable-line
 		);
 		return tokenId;
@@ -1058,35 +928,22 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		(
 			uint16 class,
 			bool canDisenchant,
-			address[] memory majors,
-			uint256[] memory ids,
-			address[] memory minors,
-			uint256[] memory amounts
+			address major,
+			uint256 id,
+			address minor,
+			uint256 amount
 		) = getEnchantedInfo(_tokenId);
 		require(_depth > 0, "Furnace: INVALID_DEPTH");
 		require(canDisenchant == true, "Furnace: DISENCHANT_DISABLE");
 		require(class > 0, "Furnace: INVALID_CLASS");
-		require(ids.length == majors.length, "Furnace: INVALID_MAJORS_LENGTH.");
-		require(
-			amounts.length == minors.length,
-			"Furnace: INVALID_MINORS_LENGTH."
-		);
 		_disenchantItem(address(this), _tokenId);
-		for (uint256 i = 0; i < majors.length; i++) {
-			address major = majors[i];
-			uint256 id = ids[i];
-			if (_depth == 1 || class == 0) {
-				_safeTransfer(major, address(this), msg.sender, id);
-			} else {
-				_disenchant(id, _depth - 1);
-			}
+		if (_depth == 1 || class == 0) {
+			_safeTransfer(major, address(this), msg.sender, id);
+		} else {
+			_disenchant(id, _depth - 1);
 		}
-		for (uint256 i = 0; i < minors.length; i++) {
-			address minor = minors[i];
-			uint256 amount = amounts[i];
-			_safeTransfer(minor, address(this), msg.sender, amount);
-		}
-		emit Disenchanted(msg.sender, _tokenId, majors, ids, minors, amounts);
+		_safeTransfer(minor, address(this), msg.sender, amount);
+		emit Disenchanted(msg.sender, _tokenId, major, id, minor, amount);
 	}
 
 	function getRate(uint256 _tokenId, uint256 _element)
@@ -1097,13 +954,9 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	{
 		Item storage item = tokenId2Item[_tokenId];
 		if (uint256(item.prefer) & (1 << _element) > 0) {
-			uint128 realEnhanceRate =
-				item.base +
-					UQ128x128.mul128(item.rate, item.enhance) /
-					RATE_PRECISION;
-			return uint256(realEnhanceRate);
+			return uint256(item.rate);
 		}
-		return uint256(item.base / 2);
+		return uint256(item.rate / 2);
 	}
 
 	function getBaseInfo(uint256 _tokenId)
@@ -1120,7 +973,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		return (item.objClassExt, item.class, item.grade);
 	}
 
-	function getObjectClassExt(uint256 _tokenId) 
+	function getPrefer(uint256 _tokenId) public view override returns (uint16) {
+		return tokenId2Item[_tokenId].prefer;
+	}
+
+	function getObjectClassExt(uint256 _tokenId)
 		public
 		view
 		override
@@ -1135,21 +992,20 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		returns (
 			uint16,
 			bool,
-			address[] memory,
-			uint256[] memory,
-			address[] memory,
-			uint256[] memory
+			address,
+			uint256,
+			address,
+			uint256
 		)
 	{
 		Item storage item = tokenId2Item[_tokenId];
-		address formula = registry.addressOf(CONTRACT_FORMULA);
 		return (
 			item.class,
-			IFormula(formula).getDisenchant(item.index),
-			IFormula(formula).getMajorAddresses(item.index),
-			item.ids,
-			item.tokens,
-			item.amounts
+			IFormula(registry.addressOf(CONTRACT_FORMULA)).canDisenchant(item.index),
+			item.major,
+			item.id,
+			item.minor,
+			item.amount
 		);
 	}
 }

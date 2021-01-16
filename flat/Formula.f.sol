@@ -195,14 +195,6 @@ contract FurnaceSettingIds {
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
 
-	//0x434f4e54524143545f4c505f52494e475f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_RING_ERC20_TOKEN =
-		"CONTRACT_LP_RING_ERC20_TOKEN";
-
-	//0x434f4e54524143545f4c505f4b544f4e5f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_KTON_ERC20_TOKEN =
-		"CONTRACT_LP_KTON_ERC20_TOKEN";
-
 	//0x434f4e54524143545f4c505f454c454d454e545f544f4b454e00000000000000
 	bytes32 public constant CONTRACT_LP_ELEMENT_TOKEN = 
 		"CONTRACT_LP_ELEMENT_TOKEN";
@@ -260,71 +252,6 @@ contract FurnaceSettingIds {
 		"CONTRACT_SOIL_ERC20_TOKEN";
 }
 
-////// src/common/Input.sol
-/* pragma solidity ^0.6.7; */
-
-library Input {
-
-    struct Data {
-        uint256 offset;
-        bytes raw;
-    }
-
-    function from(bytes memory data) internal pure returns (Data memory) {
-        return Data({offset: 0, raw: data});
-    }
-
-    modifier shift(Data memory data, uint256 size) {
-        require(data.raw.length >= data.offset + size, "Input: Out of range");
-        _;
-        data.offset += size;
-    }
-
-    function finished(Data memory data) internal pure returns (bool) {
-        return data.offset == data.raw.length;
-    }
-
-    function decodeU8(Data memory data)
-        internal
-        pure
-        shift(data, 1)
-        returns (uint8 value)
-    {
-        value = uint8(data.raw[data.offset]);
-    }
-
-    function decodeU16(Data memory data) internal pure returns (uint16 value) {
-        value = uint16(decodeU8(data)) << 8;
-        value |= uint16(decodeU8(data));
-    }
-
-    function decodeU32(Data memory data) internal pure returns (uint32 value) {
-        value = uint32(decodeU16(data)) << 16;
-        value |= uint32(decodeU16(data));
-    }
-
-    function decodeU64(Data memory data) internal pure returns(uint64 value) {
-        value = uint64(decodeU32(data)) << 32;
-        value |= uint64(decodeU32(data));
-    }
-
-    function decodeU128(Data memory data) internal pure returns(uint128 value) {
-        value = uint128(decodeU64(data)) << 64;
-        value |= uint128(decodeU64(data));
-    }
-
-    function decodeBool(Data memory data) internal pure returns(bool value) {
-        value = (decodeU8(data) != 0);
-    }
-	
-    function decodeBytes20(Data memory data) internal pure returns(bytes20 value) {
-        for (uint i = 0; i < 20; i++) {
-            value |= bytes20(byte(decodeU8(data)) & 0xFF) >> (i * 8);
-        }
-    }
-
-}
-
 ////// src/interfaces/IFormula.sol
 /* pragma solidity ^0.6.7; */
 
@@ -336,10 +263,8 @@ interface IFormula {
 	struct FormulaEntry {
 		// item name
 		bytes32 name;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
+		// strength rate
+		uint128 rate;
 		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
@@ -350,28 +275,33 @@ interface IFormula {
 		// uint256 disenchantTime;
 		// uint256 loseRate;
 
+		bool disable;
+
+		// minor material info
+		bytes32 minor;
+		uint256 amount;
 		// major material info
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
-		bytes32[] majors;
-		// minor material info
-		bytes32[] minors;
-		// [uint128 min, uint128 max]
-		uint256[] limits;
-		bool disable;
+		address majorAddr;
+		uint16 majorObjClassExt;
+		uint16 majorClass;
+		uint16 majorGrade;
 	}
 
 	event AddFormula(
 		uint256 indexed index,
 		bytes32 name,
-		uint128 base,
-		uint128 enhance,
+		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
-		bytes32[] majors,
-		bytes32[] minors,
-		uint256[] limits
+		bytes32 minor,
+		uint256 amount,
+		address majorAddr,
+		uint16 majorObjClassExt,
+		uint16 majorClass,
+		uint16 majorGrade
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -382,22 +312,31 @@ interface IFormula {
         MUST revert if length of `_majors` is not the same as length of `_class`.
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name     New enchanted NFT name.
-        @param _majors   FT token addresses of major meterail for enchanting.
-        @param _minors   FT Token addresses of minor meterail for enchanting.
-        @param _limits   FT Token limits of minor meterail for enchanting.
+        @param _name         New enchanted NFT name.
+        @param _rate         New enchanted NFT rate.
+        @param _objClassExt  New enchanted NFT objectClassExt.
+        @param _class        New enchanted NFT class.
+        @param _grade        New enchanted NFT grade.
+        @param _minor        FT Token address of minor meterail for enchanting.
+        @param _amount       FT Token amount of minor meterail for enchanting.
+        @param _majorAddr    FT token address of major meterail for enchanting.
+        @param _majorObjClassExt   FT token objectClassExt of major meterail for enchanting.
+        @param _majorClass   FT token class of major meterail for enchanting.
+        @param _majorGrade   FT token grade of major meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		bytes32 _minor,
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external;
 
 	/**
@@ -428,17 +367,12 @@ interface IFormula {
 	function isDisable(uint256 _index) external view returns (bool);
 
 	/**
-        @dev returns the major material of the formula.
-     */
-	function getMajors(uint256 _index) external view returns (bytes32[] memory);
-
-	/**
         @dev returns the minor material of the formula.
      */
-	function getMinors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
-		returns (bytes32[] memory, uint256[] memory);
+		returns (bytes32, uint256);
 
 	/**
         @dev Decode major info of the major.
@@ -450,26 +384,15 @@ interface IFormula {
 			"grade": "Major token address."
 		}
      */
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		external
-		pure
+		view	
 		returns (
 			address,
 			uint16,
 			uint16,
 			uint16
 		);
-
-	/**
-        @dev Decode major info of limit.
-	         0x827d6320
-		@return {
-			"min": "Min amount of minor material.",
-			"max": "Max amount of minor material."
-
-		}
-     */
-	function getLimit(uint256 _limit) external pure returns (uint128, uint128);
 
 	/**
         @dev Returns meta info of the item.
@@ -489,29 +412,23 @@ interface IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		);
 
 	/**
-        @dev returns the minor addresses of the formula.
-		     0x762b8a4d
-     */
-	function getMajorAddresses(uint256 _index)
-		external
-		view
-		returns (address[] memory);
-
-	/**
         @dev returns canDisenchant of the formula.
      */
-	function getDisenchant(uint256 _index) external view returns (bool);
+	function canDisenchant(uint256 _index) external view returns (bool);
 }
 
 ////// src/interfaces/ISettingsRegistry.sol
 /* pragma solidity ^0.6.7; */
 
 interface ISettingsRegistry {
+    function uintOf(bytes32 _propertyName) external view returns (uint256);
+
+    function stringOf(bytes32 _propertyName) external view returns (string memory);
+
     function addressOf(bytes32 _propertyName) external view returns (address);
 
     function bytesOf(bytes32 _propertyName) external view returns (bytes memory);
@@ -544,18 +461,12 @@ interface ISettingsRegistry {
 /* import "ds-auth/auth.sol"; */
 /* import "./interfaces/IFormula.sol"; */
 /* import "./interfaces/ISettingsRegistry.sol"; */
-/* import "./common/Input.sol"; */
 /* import "./FurnaceSettingIds.sol"; */
 
 contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-	using Input for Input.Data;
-	event SetStrength(
-		uint256 indexed inde,
-		uint128 baseRate,
-		uint128 enhanceRate
-	);
+	event SetStrength(uint256 indexed inde, uint128 rate);
 
-	event SetLimits(uint256 indexed index, uint256[] limits);
+	event SetAmount(uint256 indexed index, uint256 amount);
 
 	/*** STORAGE ***/
 
@@ -568,43 +479,49 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		bytes32 _minor,
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
-				base: _base,
-				enhance: _enhance,
+				rate: _rate,
 				objClassExt: _objClassExt,
+				disable: false,
 				class: _class,
 				grade: _grade,
 				canDisenchant: _canDisenchant,
-				majors: _majors,
-				minors: _minors,
-				limits: _limits,
-				disable: false
+				minor: _minor,
+				amount: _amount,
+				majorAddr: _majorAddr,
+		        majorObjClassExt: _majorObjClassExt,
+		        majorClass: _majorClass,
+		        majorGrade:_majorGrade
 			});
 		formulas.push(formula);
 		emit AddFormula(
 			formulas.length - 1,
 			formula.name,
-			formula.base,
-			formula.enhance,
+			formula.rate,
 			formula.objClassExt,
 			formula.class,
 			formula.grade,
 			formula.canDisenchant,
-			formula.majors,
-			formula.minors,
-			formula.limits
+			formula.minor,
+			formula.amount,
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
 		);
 	}
 
@@ -620,26 +537,21 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		emit EnableFormula(_index);
 	}
 
-	function setStrengthRate(
-		uint256 _index,
-		uint128 _baseRate,
-		uint128 _enhanceRate
-	) external auth {
+	function setStrengthRate(uint256 _index, uint128 _rate) external auth {
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		formula.base = _baseRate;
-		formula.enhance = _enhanceRate;
-		emit SetStrength(_index, formula.base, formula.enhance);
+		formula.rate = _rate;
+		emit SetStrength(_index, formula.rate);
 	}
 
-	function setLimit(uint256 _index, uint256[] calldata _limits)
+	function setAmount(uint256 _index, uint256 _amount)
 		external
 		auth
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
 		FormulaEntry storage formula = formulas[_index];
-		formula.limits = _limits;
-		emit SetLimits(_index, formula.limits);
+		formula.amount = _amount;
+		emit SetAmount(_index, formula.amount);
 	}
 
 	function length() external view override returns (uint256) {
@@ -651,42 +563,17 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 		return formulas[_index].disable;
 	}
 
-	function getMajors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
 		override
-		returns (bytes32[] memory)
+		returns (bytes32, uint256)
 	{
 		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return formulas[_index].majors;
+		return (formulas[_index].minor, formulas[_index].amount);
 	}
 
-	function getMinors(uint256 _index)
-		external
-		view
-		override
-		returns (bytes32[] memory, uint256[] memory)
-	{
-		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
-		return (formulas[_index].minors, formulas[_index].limits);
-	}
-
-	function getMajorAddresses(uint256 _index)
-		external
-		view
-		override
-		returns (address[] memory)
-	{
-		FormulaEntry memory formula = formulas[_index];
-		address[] memory majorAddresses = new address[](formula.majors.length);
-		for (uint256 i = 0; i < formula.majors.length; i++) {
-			(address majorAddress, , , ) = getMajorInfo(formula.majors[i]);
-			majorAddresses[i] = majorAddress;
-		}
-		return majorAddresses;
-	}
-
-	function getDisenchant(uint256 _index)
+	function canDisenchant(uint256 _index)
 		external
 		view
 		override
@@ -704,7 +591,6 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		)
 	{
@@ -714,14 +600,13 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			formula.objClassExt,
 			formula.class,
 			formula.grade,
-			formula.base,
-			formula.enhance
+			formula.rate
 		);
 	}
 
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		public
-		pure
+		view	
 		override
 		returns (
 			address,
@@ -730,21 +615,14 @@ contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
 			uint16
 		)
 	{
-		Input.Data memory data = Input.from(abi.encodePacked(_major));
-		address majorAddress = address(data.decodeBytes20());
-		uint16 objectClassExt = data.decodeU16();
-		uint16 majorClass = data.decodeU16();
-		uint16 majorGrade = data.decodeU16();
-		return (majorAddress, objectClassExt, majorClass, majorGrade);
-	}
-
-	function getLimit(uint256 _limit)
-		public
-		pure
-		override
-		returns (uint128, uint128)
-	{
-		return (uint128(_limit >> 128), uint128((_limit << 128) >> 128));
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		return (
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
+		);
 	}
 }
 

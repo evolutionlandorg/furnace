@@ -60,14 +60,6 @@ contract FurnaceSettingIds {
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
 
-	//0x434f4e54524143545f4c505f52494e475f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_RING_ERC20_TOKEN =
-		"CONTRACT_LP_RING_ERC20_TOKEN";
-
-	//0x434f4e54524143545f4c505f4b544f4e5f45524332305f544f4b454e00000000
-	bytes32 public constant CONTRACT_LP_KTON_ERC20_TOKEN =
-		"CONTRACT_LP_KTON_ERC20_TOKEN";
-
 	//0x434f4e54524143545f4c505f454c454d454e545f544f4b454e00000000000000
 	bytes32 public constant CONTRACT_LP_ELEMENT_TOKEN = 
 		"CONTRACT_LP_ELEMENT_TOKEN";
@@ -136,10 +128,8 @@ interface IFormula {
 	struct FormulaEntry {
 		// item name
 		bytes32 name;
-		// base strength rate
-		uint128 base;
-		// enhance strength rate
-		uint128 enhance;
+		// strength rate
+		uint128 rate;
 		// extension of `ObjectClass`
 		uint16 objClassExt;
 		uint16 class;
@@ -150,28 +140,33 @@ interface IFormula {
 		// uint256 disenchantTime;
 		// uint256 loseRate;
 
+		bool disable;
+
+		// minor material info
+		bytes32 minor;
+		uint256 amount;
 		// major material info
 		// [address token, uint16 objectClassExt, uint16 class, uint16 grade]
-		bytes32[] majors;
-		// minor material info
-		bytes32[] minors;
-		// [uint128 min, uint128 max]
-		uint256[] limits;
-		bool disable;
+		address majorAddr;
+		uint16 majorObjClassExt;
+		uint16 majorClass;
+		uint16 majorGrade;
 	}
 
 	event AddFormula(
 		uint256 indexed index,
 		bytes32 name,
-		uint128 base,
-		uint128 enhance,
+		uint128 rate,
 		uint16 objClassExt,
 		uint16 class,
 		uint16 grade,
 		bool canDisenchant,
-		bytes32[] majors,
-		bytes32[] minors,
-		uint256[] limits
+		bytes32 minor,
+		uint256 amount,
+		address majorAddr,
+		uint16 majorObjClassExt,
+		uint16 majorClass,
+		uint16 majorGrade
 	);
 	event DisableFormula(uint256 indexed index);
 	event EnableFormula(uint256 indexed index);
@@ -182,22 +177,31 @@ interface IFormula {
         MUST revert if length of `_majors` is not the same as length of `_class`.
         MUST revert if length of `_minors` is not the same as length of `_mins` and `_maxs.
         MUST revert on any other error.        
-        @param _name     New enchanted NFT name.
-        @param _majors   FT token addresses of major meterail for enchanting.
-        @param _minors   FT Token addresses of minor meterail for enchanting.
-        @param _limits   FT Token limits of minor meterail for enchanting.
+        @param _name         New enchanted NFT name.
+        @param _rate         New enchanted NFT rate.
+        @param _objClassExt  New enchanted NFT objectClassExt.
+        @param _class        New enchanted NFT class.
+        @param _grade        New enchanted NFT grade.
+        @param _minor        FT Token address of minor meterail for enchanting.
+        @param _amount       FT Token amount of minor meterail for enchanting.
+        @param _majorAddr    FT token address of major meterail for enchanting.
+        @param _majorObjClassExt   FT token objectClassExt of major meterail for enchanting.
+        @param _majorClass   FT token class of major meterail for enchanting.
+        @param _majorGrade   FT token grade of major meterail for enchanting.
     */
 	function insert(
 		bytes32 _name,
-		uint128 _base,
-		uint128 _enhance,
+		uint128 _rate,
 		uint16 _objClassExt,
 		uint16 _class,
 		uint16 _grade,
 		bool _canDisenchant,
-		bytes32[] calldata _majors,
-		bytes32[] calldata _minors,
-		uint256[] calldata _limits
+		bytes32 _minor,
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
 	) external;
 
 	/**
@@ -228,17 +232,12 @@ interface IFormula {
 	function isDisable(uint256 _index) external view returns (bool);
 
 	/**
-        @dev returns the major material of the formula.
-     */
-	function getMajors(uint256 _index) external view returns (bytes32[] memory);
-
-	/**
         @dev returns the minor material of the formula.
      */
-	function getMinors(uint256 _index)
+	function getMinor(uint256 _index)
 		external
 		view
-		returns (bytes32[] memory, uint256[] memory);
+		returns (bytes32, uint256);
 
 	/**
         @dev Decode major info of the major.
@@ -250,26 +249,15 @@ interface IFormula {
 			"grade": "Major token address."
 		}
      */
-	function getMajorInfo(bytes32 _major)
+	function getMajorInfo(uint256 _index)
 		external
-		pure
+		view	
 		returns (
 			address,
 			uint16,
 			uint16,
 			uint16
 		);
-
-	/**
-        @dev Decode major info of limit.
-	         0x827d6320
-		@return {
-			"min": "Min amount of minor material.",
-			"max": "Max amount of minor material."
-
-		}
-     */
-	function getLimit(uint256 _limit) external pure returns (uint128, uint128);
 
 	/**
         @dev Returns meta info of the item.
@@ -289,23 +277,13 @@ interface IFormula {
 			uint16,
 			uint16,
 			uint16,
-			uint128,
 			uint128
 		);
 
 	/**
-        @dev returns the minor addresses of the formula.
-		     0x762b8a4d
-     */
-	function getMajorAddresses(uint256 _index)
-		external
-		view
-		returns (address[] memory);
-
-	/**
         @dev returns canDisenchant of the formula.
      */
-	function getDisenchant(uint256 _index) external view returns (bool);
+	function canDisenchant(uint256 _index) external view returns (bool);
 }
 
 ////// src/interfaces/IMetaDataTeller.sol
@@ -327,7 +305,7 @@ interface IMetaDataTeller {
 		returns (uint16, uint16, uint16);
 
     //0x7999a5cf
-	function getPrefer(address _token) external view returns (uint256);
+	function getPrefer(bytes32 _minor, address _token) external view returns (uint256);
 
 	//0x33281815
 	function getRate(
@@ -344,6 +322,10 @@ interface IMetaDataTeller {
 /* pragma solidity ^0.6.7; */
 
 interface ISettingsRegistry {
+    function uintOf(bytes32 _propertyName) external view returns (uint256);
+
+    function stringOf(bytes32 _propertyName) external view returns (string memory);
+
     function addressOf(bytes32 _propertyName) external view returns (address);
 
     function bytesOf(bytes32 _propertyName) external view returns (bytes memory);
@@ -380,8 +362,8 @@ interface ISettingsRegistry {
 contract FormulaInit is FurnaceSettingIds {
 
 	uint128 public constant RATE_DECIMALS = 10 ** 6;
-	// uint256 public constant UINT = 10 ** 18;
-	uint256 public constant UINT = 10 ** 14;
+	// uint256 public constant UNIT = 10 ** 18;
+	uint256 public constant UNIT = 10 ** 14;
 
 	bool public isInit;
 	ISettingsRegistry public registry;
@@ -404,178 +386,160 @@ contract FormulaInit is FurnaceSettingIds {
 		_initFormula6(CONTRACT_LP_ELEMENT_TOKEN);
 		_initFormula7(CONTRACT_LP_ELEMENT_TOKEN);
 
-		_initFormula8(CONTRACT_LP_ELEMENT_TOKEN, CONTRACT_LP_KTON_ERC20_TOKEN);
-		_initFormula9(CONTRACT_LP_ELEMENT_TOKEN, CONTRACT_LP_KTON_ERC20_TOKEN);
-		_initFormula10(CONTRACT_LP_ELEMENT_TOKEN, CONTRACT_LP_RING_ERC20_TOKEN);
-		_initFormula11(CONTRACT_LP_ELEMENT_TOKEN, CONTRACT_LP_RING_ERC20_TOKEN);
-		_initFormula12(CONTRACT_LP_ELEMENT_TOKEN, CONTRACT_LP_KTON_ERC20_TOKEN);
+		// _initFormula8(CONTRACT_LP_KTON_ERC20_TOKEN);
+		// _initFormula9(CONTRACT_LP_KTON_ERC20_TOKEN);
+		// _initFormula10(CONTRACT_LP_RING_ERC20_TOKEN);
+		// _initFormula11(CONTRACT_LP_RING_ERC20_TOKEN);
+		// _initFormula12(CONTRACT_LP_KTON_ERC20_TOKEN);
 		isInit = true;
 	}
 
 	function _initFormula0(bytes32 token) private {
 		bytes32 name = "合金镐";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_ERC721_GEGO), uint16(256), uint16(0), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((200 * UINT) << 128) | (350 * UINT);
-		IFormula(formula).insert(name, uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS), uint16(256), uint16(1), uint16(1), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 200 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_ERC721_GEGO);
+		uint16 objClassExt = 256;
+		uint16 class = 0;
+		uint16 grade = 1;
+		IFormula(formula).insert(name, uint128(4 * RATE_DECIMALS), uint16(256), uint16(1), uint16(1), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula1(bytes32 token) private {
 		bytes32 name = "人力铸铁钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(0), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((200 * UINT) << 128) | (350 * UINT);
-		IFormula(formula).insert(name,uint128(4 * RATE_DECIMALS), uint128(4 * RATE_DECIMALS), uint16(4), uint16(1), uint16(1), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 200 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt =  4;
+		uint16 class = 0;
+		uint16 grade = 1;
+		IFormula(formula).insert(name, uint128(4 * RATE_DECIMALS), uint16(4), uint16(1), uint16(1), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula2(bytes32 token) private {
 		bytes32 name = "人力钨钢钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(0), uint16(2), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((300 * UINT) << 128) | (550 * UINT);
-		IFormula(formula).insert(name, uint128(7 * RATE_DECIMALS), uint128(8 * RATE_DECIMALS),uint16(4), uint16(1), uint16(2), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 300 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 4;
+		uint16 class = 0;
+		uint16 grade = 2;
+		IFormula(formula).insert(name, uint128(7 * RATE_DECIMALS), uint16(4), uint16(1), uint16(2), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula3(bytes32 token) private {
 		bytes32 name = "人力金刚钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(0), uint16(3), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((800 * UINT) << 128) | (2200 * UINT);
-		IFormula(formula).insert(name, uint128(30 * RATE_DECIMALS), uint128(70 * RATE_DECIMALS), uint16(4), uint16(1), uint16(3), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 800 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 16;
+		uint16 class = 0;
+		uint16 grade = 3;
+		IFormula(formula).insert(name, uint128(30 * RATE_DECIMALS), uint16(4), uint16(1), uint16(3), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula4(bytes32 token) private {
 		bytes32 name = "高级合金镐";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(256), uint16(1), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((200 * UINT) << 128) | (380 * UINT);
-		IFormula(formula).insert(name, uint128(13 * RATE_DECIMALS), uint128(13 * RATE_DECIMALS), uint16(256), uint16(2), uint16(1), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 200 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 256;
+		uint16 class = 1;
+		uint16 grade = 1;
+		IFormula(formula).insert(name, uint128(13 * RATE_DECIMALS), uint16(256), uint16(2), uint16(1), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula5(bytes32 token) private {
 		bytes32 name = "燃油铸铁钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(1), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((200 * UINT) << 128) | (380 * UINT);
-		IFormula(formula).insert(name, uint128(13 * RATE_DECIMALS), uint128(13 * RATE_DECIMALS), uint16(4), uint16(2), uint16(1), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 200 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 4;
+		uint16 class = 1;
+		uint16 grade = 1;
+		IFormula(formula).insert(name, uint128(13 * RATE_DECIMALS), uint16(4), uint16(2), uint16(1), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula6(bytes32 token) private {
 		bytes32 name = "燃油钨钢钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(1), uint16(2), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((300 * UINT) << 128) | (580 * UINT);
-		IFormula(formula).insert(name, uint128(22 * RATE_DECIMALS), uint128(22 * RATE_DECIMALS), uint16(4), uint16(2), uint16(2), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 300 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 4;
+		uint16 class = 1;
+		uint16 grade = 2;
+		IFormula(formula).insert(name, uint128(22 * RATE_DECIMALS), uint16(4), uint16(2), uint16(2), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
 	function _initFormula7(bytes32 token) private {
 		bytes32 name = "燃油金刚钻机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](1);
-		uint256[] memory limits = new uint256[](1);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(1), uint16(3), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token;
-		limits[0] = ((800 * UINT) << 128) | (2100 * UINT);
-		IFormula(formula).insert(name, uint128(80 * RATE_DECIMALS), uint128(140 * RATE_DECIMALS), uint16(4), uint16(2), uint16(3), true, majors, minors, limits);
+		bytes32 minor = token;
+		uint256 limit = 800 * UNIT;
+		address majorAddr = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		uint16 objClassExt = 4;
+		uint16 class = 1;
+		uint16 grade = 3;
+		IFormula(formula).insert(name, uint128(80 * RATE_DECIMALS), uint16(4), uint16(2), uint16(3), true, minor, limit, majorAddr, objClassExt, class, grade);
 	}
 
-	function _initFormula8(bytes32 token1, bytes32 token2) private {
-		bytes32 name = "超级合金镐";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](2);
-		uint256[] memory limits = new uint256[](2);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(256), uint16(2), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token1;
-		minors[1] = token2;
-		limits[0] = ((150 * UINT) << 128) | (300 * UINT);
-		limits[1] = ((150 * UINT) << 128) | (300 * UINT);
-		IFormula(formula).insert(name, uint128(26 * RATE_DECIMALS), uint128(29 * RATE_DECIMALS), uint16(256), uint16(3), uint16(1), true, majors, minors, limits);
-	}
+	// function _initFormula8(bytes32 token1) private {
+	// 	bytes32 name = "超级合金镐";	
+	// 	bytes32 majors;
+	// 	bytes32 minors;
+	// 	uint256 limits;
+	// 	bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(256), uint16(2), uint16(1), bytes6(0)); 
+	// 	majors = abi.decode(majorData, (bytes32));
+	// 	minors = token1;
+	// 	limits = 150 * UNIT;
+	// 	IFormula(formula).insert(name, uint128(26 * RATE_DECIMALS), uint16(256), uint16(3), uint16(1), true, majors, minors, limits);
+	// }
 
-	function _initFormula9(bytes32 token1, bytes32 token2) private {
-		bytes32 name = "铸铁挖掘机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](2);
-		uint256[] memory limits = new uint256[](2);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(1), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token1;
-		minors[1] = token2;
-		limits[0] = ((150 * UINT) << 128) | (300 * UINT);
-		limits[1] = ((150 * UINT) << 128) | (300 * UINT);
-		IFormula(formula).insert(name, uint128(26 * RATE_DECIMALS), uint128(29 * RATE_DECIMALS), uint16(4), uint16(3), uint16(1), true, majors, minors, limits);
-	}
+	// function _initFormula9(bytes32 token1) private {
+	// 	bytes32 name = "铸铁挖掘机";	
+	// 	bytes32 majors;
+	// 	bytes32 minors;
+	// 	uint256 limits;
+	// 	bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(1), bytes6(0)); 
+	// 	majors = abi.decode(majorData, (bytes32));
+	// 	minors = token1;
+	// 	limits = 150 * UNIT;
+	// 	IFormula(formula).insert(name, uint128(26 * RATE_DECIMALS), uint16(4), uint16(3), uint16(1), true, majors, minors, limits);
+	// }
 
-	function _initFormula10(bytes32 token1, bytes32 token2) private {
-		bytes32 name = "钨钢挖掘机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](2);
-		uint256[] memory limits = new uint256[](2);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(2), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token1;
-		minors[1] = token2;
-		limits[0] = ((230 * UINT) << 128) | (580 * UINT);
-		limits[1] = ((230 * UINT) << 128) | (580 * UINT);
-		IFormula(formula).insert(name, uint128(44 * RATE_DECIMALS), uint128(76 * RATE_DECIMALS), uint16(4), uint16(3), uint16(2), true, majors, minors, limits);
-	}
+	// function _initFormula10(bytes32 token1) private {
+	// 	bytes32 name = "钨钢挖掘机";	
+	// 	bytes32 majors;
+	// 	bytes32 minors;
+	// 	uint256 limits;
+	// 	bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(2), bytes6(0)); 
+	// 	majors = abi.decode(majorData, (bytes32));
+	// 	minors = token1;
+	// 	limits = 230 * UNIT;
+	// 	IFormula(formula).insert(name, uint128(44 * RATE_DECIMALS), uint16(4), uint16(3), uint16(2), true, majors, minors, limits);
+	// }
 
-	function _initFormula11(bytes32 token1, bytes32 token2) private {
-		bytes32 name = "金刚挖掘机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](2);
-		uint256[] memory limits = new uint256[](2);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(3), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token1;
-		minors[1] = token2;
-		limits[0] = ((800 * UINT) << 128) | (1200 * UINT);
-		limits[1] = ((800 * UINT) << 128) | (1200 * UINT);
-		IFormula(formula).insert(name, uint128(180 * RATE_DECIMALS), uint128(140 * RATE_DECIMALS), uint16(4), uint16(3), uint16(3), true, majors, minors, limits);
-	}
+	// function _initFormula11(bytes32 token1) private {
+	// 	bytes32 name = "金刚挖掘机";	
+	// 	bytes32 majors;
+	// 	bytes32 minors;
+	// 	uint256 limits;
+	// 	bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(3), bytes6(0)); 
+	// 	majors = abi.decode(majorData, (bytes32));
+	// 	minors = token1;
+	// 	limits = 800 * UNIT;
+	// 	IFormula(formula).insert(name, uint128(180 * RATE_DECIMALS), uint16(4), uint16(3), uint16(3), true, majors, minors, limits);
+	// }
 
-	function _initFormula12(bytes32 token1, bytes32 token2) private {
-		bytes32 name = "蓝翔挖掘机";	
-		bytes32[] memory majors = new bytes32[](1);
-		bytes32[] memory minors = new bytes32[](2);
-		uint256[] memory limits = new uint256[](2);
-		bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(3), bytes6(0)); 
-		majors[0] = abi.decode(majorData, (bytes32));
-		minors[0] = token1;
-		minors[1] = token2;
-		limits[0] = ((900 * UINT) << 128) | (1600 * UINT);
-		limits[1] = ((900 * UINT) << 128) | (1600 * UINT);
-		IFormula(formula).insert(name, uint128(220 * RATE_DECIMALS), uint128(280 * RATE_DECIMALS), uint16(4), uint16(3), uint16(3), true, majors, minors, limits);
-	}
+	// function _initFormula12(bytes32 token1, bytes32 token2) private {
+	// 	bytes32 name = "蓝翔挖掘机";	
+	// 	bytes32 majors;
+	// 	bytes32 minors;
+	// 	uint256 limits;
+	// 	bytes memory majorData = abi.encodePacked(registry.addressOf(CONTRACT_OBJECT_OWNERSHIP), uint16(4), uint16(2), uint16(3), bytes6(0)); 
+	// 	majors = abi.decode(majorData, (bytes32));
+	// 	minors = token1;
+	// 	limits = 900 * UNIT;
+	// 	IFormula(formula).insert(name, uint128(220 * RATE_DECIMALS), uint16(4), uint16(3), uint16(3), true, majors, minors, limits);
+	// }
 }
 

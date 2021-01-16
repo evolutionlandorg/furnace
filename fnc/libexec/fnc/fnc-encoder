@@ -4,12 +4,7 @@
 ###
 ### Commands: encoder addr                InterstellarEncoder price info
 ###           encoder objc                InterstellarEncoder claim tokens
-###           encoder buy   <params>      InterstellarEncoder buy encoder
-###           encoder start               InterstellarEncoder start
-###           encoder stop                InterstellarEncoder stop
 ###
-### Example:  fnc encoder price
-###           fnc encoder buy
 set -e
 
 encoder="$(fnc --get-encoder)" 

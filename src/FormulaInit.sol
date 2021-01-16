@@ -20,6 +20,7 @@ contract FormulaInit is FurnaceSettingIds {
 		formula = registry.addressOf(CONTRACT_FORMULA);
 	}
 
+	//TODO:: change to formula constructor 
 	function initFormula() public {
 		require(isInit == false, "Furnace: ALREADY_INITED");
 		_initFormula0(CONTRACT_ELEMENT_TOKEN);
