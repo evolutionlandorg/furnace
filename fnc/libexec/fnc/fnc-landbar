@@ -3,7 +3,7 @@
 ### Usage: fnc landbar [<command>]
 ###
 ### Commands: landbar equip  <params>                LandItemBar equip item
-###           landbar unequip  <params>                LandItemBar unequip item
+###           landbar divest  <params>               LandItemBar divest item
 ###           landbar bar    <id> <index>            LandItemBar bar info  
 ###           landbar bars   <id>                    LandItemBar bars info  
 ###           landbar status <addr> <id>             LandItemBar status info
@@ -21,9 +21,9 @@ case $1 in
   equip)
     seth send $landbar "equip(uint256,address,uint256,address,uint256)" "${@:2}"
   ;;
-  unequip)
+  divest)
     index=$(seth --to-uint256 $3)
-    seth send $landbar "unequip(uint256,uint256)" "$2" "$index"
+    seth send $landbar "divest(uint256,uint256)" "$2" "$index"
   ;;
   bar)
     seth call $landbar "tokenId2Bars(uint256,uint256)(address,address,uint256)" "${@:2}"

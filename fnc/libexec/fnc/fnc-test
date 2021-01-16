@@ -12,8 +12,8 @@
 ###           test takeback           Test take back
 ###           test landbase-assign    Test landbase assign new land
 ###
-### Example:  fnc test formula
-###           fnc test drillbase
+### Example:  fnc test buybox 
+###           fnc test openbox
 set -e
 
 case $1 in

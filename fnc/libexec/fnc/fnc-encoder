@@ -2,9 +2,11 @@
 ### fnc-encoder -- Furnace InterstellarEncoder interactive
 ### Usage: fnc encoder [<command>]
 ###
-### Commands: encoder addr                InterstellarEncoder price info
-###           encoder objc                InterstellarEncoder claim tokens
+### Commands: encoder addr                InterstellarEncoder object to address 
+###           encoder objc                InterstellarEncoder object class
 ###
+### Example:  fnc encoder addr 
+###            
 set -e
 
 encoder="$(fnc --get-encoder)" 
