@@ -16,6 +16,3 @@
 [submodule "lib/land"]
 	path = lib/land
 	url = https://github.com/evolutionlandorg/land
-[submodule "lib/apostle"]
-	path = lib/apostle
-	url = https://github.com/evolutionlandorg/apostle
