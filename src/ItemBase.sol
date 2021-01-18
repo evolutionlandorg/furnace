@@ -31,8 +31,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	// rate precision
 	uint128 public constant RATE_PRECISION = 10**8;
 	// save about 200 gas when contract create
-	bytes4 private constant _SELECTOR =
+	bytes4 private constant _SELECTOR_TRANSFERFROM =
 		bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
+
+    bytes4 private constant _SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
 	/*** STORAGE ***/
 
@@ -54,19 +56,24 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		lastItemObjectId = 10000;
 	}
 
-	function _safeTransfer(
+	function _safeTransferFrom(
 		address token,
 		address from,
 		address to,
 		uint256 value
 	) private {
 		(bool success, bytes memory data) =
-			token.call(abi.encodeWithSelector(_SELECTOR, from, to, value)); // solhint-disable-line
+			token.call(abi.encodeWithSelector(_SELECTOR_TRANSFERFROM, from, to, value)); // solhint-disable-line
 		require(
 			success && (data.length == 0 || abi.decode(data, (bool))),
-			"Furnace: TRANSFER_FAILED"
+			"Furnace: TRANSFERFROM_FAILED"
 		);
 	}
+
+    function _safeTransfer(address token, address to, uint value) private {
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(_SELECTOR, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Furnace: TRANSFER_FAILED');
+    }
 
 	function enchant(
 		uint256 _index,
@@ -109,7 +116,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		);
 		require(class == majorClass, "Furnace: INVALID_CLASS");
 		require(grade == majorGrade, "Furnace: INVALID_GRADE");
-		_safeTransfer(majorAddress, msg.sender, address(this), _id);
+		_safeTransferFrom(majorAddress, msg.sender, address(this), _id);
 		uint16 prefer = 0;
 		if (class > 0) {
 			prefer = getPrefer(_id);
@@ -129,7 +136,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		require(element > 0 && element < 6, "Furnace: INVALID_MINOR");
 		prefer |= uint16(1 << element);
 		require(amount <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-		_safeTransfer(_token, msg.sender, address(this), amount);
+		_safeTransferFrom(_token, msg.sender, address(this), amount);
 		return (prefer, amount);
 	}
 
@@ -193,7 +200,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		override
 		stoppable
 	{
-		_safeTransfer(
+		_safeTransferFrom(
 			registry.addressOf(CONTRACT_OBJECT_OWNERSHIP),
 			msg.sender,
 			address(this),
@@ -204,7 +211,6 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 
 	function _disenchant(uint256 _tokenId, uint256 _depth)
 		private
-		returns (uint256)
 	{
 		(
 			uint16 class,
@@ -219,11 +225,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		require(class > 0, "Furnace: INVALID_CLASS");
 		_disenchantItem(address(this), _tokenId);
 		if (_depth == 1 || class == 0) {
-			_safeTransfer(major, address(this), msg.sender, id);
+			_safeTransferFrom(major, address(this), msg.sender, id);
 		} else {
 			_disenchant(id, _depth - 1);
 		}
-		_safeTransfer(minor, address(this), msg.sender, amount);
+		_safeTransfer(minor, msg.sender, amount);
 		emit Disenchanted(msg.sender, _tokenId, major, id, minor, amount);
 	}
 

@@ -12,6 +12,7 @@ import "./interfaces/IELIP002.sol";
 import "./FurnaceSettingIds.sol";
 
 contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
+	event AddLPToken(bytes32 _class, address _lpToken, uint8 _resourceId);
 	event AddInternalTokenMeta(
 		bytes32 indexed token,
 		uint16 grade,
@@ -23,6 +24,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		uint16 grade,
 		uint256 trengthRate
 	);
+	event RemoveLPToken(bytes32 _class, address _lpToken);
 	event RemoveExternalTokenMeta(address indexed token);
 	event RemoveInternalTokenMeta(bytes32 indexed token, uint16 grade);
 
@@ -40,7 +42,9 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	 * atrribute rate id starts from 1 to 15, NAN is 0.
 	 * goldrate is 1, woodrate is 2, waterrate is 3, firerate is 4, soilrate is 5
 	 */
-	mapping(address => uint8) public resourceLPToken2RateAttrId;
+	// (ID => (LP_TOKENA_TOKENB => resourceId))
+	mapping(bytes32 => mapping(address => uint8))
+		public resourceLPToken2RateAttrId;
 	mapping(address => Meta) public externalToken2Meta;
 	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
 
@@ -49,21 +53,34 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 
-		resourceLPToken2RateAttrId[
+		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
 			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
 		] = 1;
-		resourceLPToken2RateAttrId[
+		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
 			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
 		] = 2;
-		resourceLPToken2RateAttrId[
+		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
 			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
 		] = 3;
-		resourceLPToken2RateAttrId[
+		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
 			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
 		] = 4;
-		resourceLPToken2RateAttrId[
+		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
 			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
 		] = 5;
+	}
+
+	function addLPToken(
+		bytes32 _id,
+		address _lpToken,
+		uint8 _resourceId
+	) public auth {
+		require(
+			_resourceId > 0 && _resourceId < 6,
+			"Furnace: INVALID_RESOURCEID"
+		);
+		resourceLPToken2RateAttrId[_id][_lpToken] = _resourceId;
+		emit AddLPToken(_id, _lpToken, _resourceId);
 	}
 
 	function addInternalTokenMeta(
@@ -90,6 +107,15 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			_grade,
 			_strengthRate
 		);
+	}
+
+	function removeLPToken(bytes32 _id, address _lpToken) public auth {
+		require(
+			resourceLPToken2RateAttrId[_id][_lpToken] > 0,
+			"Furnace: EMPTY"
+		);
+		delete resourceLPToken2RateAttrId[_id][_lpToken];
+		emit RemoveLPToken(_id, _lpToken);
 	}
 
 	function removeExternalTokenMeta(address _token) public auth {
@@ -152,9 +178,14 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	{
 		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
+				IInterstellarEncoder(
+					registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)
+				)
+					.getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getBaseInfo(_id);
+				return
+					IELIP002(registry.addressOf(CONTRACT_ITEM_BASE))
+						.getBaseInfo(_id);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				return (
 					objectClass,
@@ -194,13 +225,17 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		return uint16(uint16(objectId >> 112) & 0x3FF);
 	}
 
-	function getPrefer(bytes32 _minor, address _token) external view returns (uint256) {
+	function getPrefer(bytes32 _minor, address _token)
+		external
+		view
+		returns (uint256)
+	{
 		if (_minor == CONTRACT_ELEMENT_TOKEN) {
-			return ILandBase(registry.addressOf(CONTRACT_LAND_BASE)).resourceToken2RateAttrId(_token);
-		} else if (_minor == CONTRACT_LP_ELEMENT_TOKEN) {
-			return resourceLPToken2RateAttrId[_token];
-		} {
-			return 0;
+			return
+				ILandBase(registry.addressOf(CONTRACT_LAND_BASE))
+					.resourceToken2RateAttrId(_token);
+		} else {
+			return resourceLPToken2RateAttrId[_minor][_token];
 		}
 	}
 
@@ -214,9 +249,16 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		}
 		if (_token == registry.addressOf(CONTRACT_OBJECT_OWNERSHIP)) {
 			uint8 objectClass =
-				IInterstellarEncoder(registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)).getObjectClass(_id);
+				IInterstellarEncoder(
+					registry.addressOf(CONTRACT_INTERSTELLAR_ENCODER)
+				)
+					.getObjectClass(_id);
 			if (objectClass == ITEM_OBJECT_CLASS) {
-				return IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getRate(_id, _element);
+				return
+					IELIP002(registry.addressOf(CONTRACT_ITEM_BASE)).getRate(
+						_id,
+						_element
+					);
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);
