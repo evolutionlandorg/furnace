@@ -18,6 +18,7 @@ make flatten
 | Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillTakeBack.abi) | [0x1c9B6cBaE6F6bA297A72d4680Dd099B1ea4a7874](https://ropsten.etherscan.io/address/0x1c9B6cBaE6F6bA297A72d4680Dd099B1ea4a7874) |
 | ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0x1e257d7AE1Cf0da031480C5fE75478eB2d638540](https://ropsten.etherscan.io/address/0x1e257d7AE1Cf0da031480C5fE75478eB2d638540) |
 | MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0x9bf7c6c4AB4Eb617d769560627198D58A3e1605e](https://ropsten.etherscan.io/address/0x9bf7c6c4AB4Eb617d769560627198D58A3e1605e) |
+| Gego | Gego | ERC721 | [0x956b94bEbeCa5736236463b131095f8005661B1f](https://ropsten.etherscan.io/address/0x956b94bEbeCa5736236463b131095f8005661B1f) |
 
 ### Mainnet
 
