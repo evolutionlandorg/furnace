@@ -9,7 +9,7 @@ FORMULA=$(dapp create src/Formula.sol:Formula)
 addAddress "FORMULA" "$FORMULA"
 echo >&2 "${0##*/}: info: Formula created."
 
-calldata=$(seth calldata "initialize()")
+calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
 FORMULA_PROXY=$(dapp create src/FormulaProxy.sol:FormulaProxy $FORMULA $FURNACEPROXYADMIN $calldata)
 addAddress "FORMULA_PROXY" "$FORMULA_PROXY"
 echo >&2 "${0##*/}: info: FormulaProxy inited."
@@ -22,12 +22,12 @@ if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $fml) != $F
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."
 
-FORMULAINIT=$(dapp create src/FormulaInit.sol:FormulaInit $ISETTINGSREGISTRY)
-addAddress "FORMULAINIT" "$FORMULAINIT"
+# FORMULAINIT=$(dapp create src/FormulaInit.sol:FormulaInit $ISETTINGSREGISTRY)
+# addAddress "FORMULAINIT" "$FORMULAINIT"
 
-FORMULA_AUTHORITY=$(dapp create src/FormulaAuthority.sol:FormulaAuthority [$FORMULAINIT])
-seth call $FORMULA_AUTHORITY "whiteList(address)" $FORMULAINIT
-seth send $FORMULA_PROXY "setAuthority(address)" $FORMULA_AUTHORITY
+# FORMULA_AUTHORITY=$(dapp create src/FormulaAuthority.sol:FormulaAuthority [$FORMULAINIT])
+# seth call $FORMULA_AUTHORITY "whiteList(address)" $FORMULAINIT
+# seth send $FORMULA_PROXY "setAuthority(address)" $FORMULA_AUTHORITY
 
-seth send $FORMULAINIT "initFormula()"
+# seth send $FORMULAINIT "initFormula()"
 
