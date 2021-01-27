@@ -61,9 +61,9 @@ interface IELIP002 {
         The `user` argument MUST be the address of an account/contract that is approved to make the disenchanted (SHOULD be msg.sender).
         The `tokenId` argument MUST be token Id of the item which it is disenchated.
         The `majors` argument MUST be major token addresses of major material.
-        The `ids` argument MUST be token ids of major material.
-        The `minors` argument MUST be token addresses of minor material.
-        The `amounts` argument MUST be token amounts of minor material.
+        The `id` argument MUST be token ids of major material.
+        The `minor` argument MUST be token addresses of minor material.
+        The `amount` argument MUST be token amounts of minor material.
     */
 	event Disenchanted(
 		address indexed user,
@@ -78,11 +78,10 @@ interface IELIP002 {
         @notice Caller must be owner of tokens to enchant.
         @dev Enchant function, Enchant a new NFT token from ERC721 tokens and ERC20 tokens. Enchant rule is according to `Formula`.
         MUST revert if `_index` is not in `formula`.
-        MUST revert if length of `_ids` is not the same as length of `formula` index rules.
-        MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
-        @param _id     ID of NFT tokens(order and length must match `formula` index rules).
-        @param _token  Address of FT tokens(order and length must match `formula` index rules).
+		@param _index  Index of formula to enchant.
+        @param _id     ID of NFT tokens.
+        @param _token  Address of FT token.
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
