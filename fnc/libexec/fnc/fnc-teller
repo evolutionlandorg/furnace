@@ -26,6 +26,10 @@ case $1 in
   rate)
     seth call $teller "getRate(address,uint256,uint256)(uint16)" $2 $3 $4
   ;;
+  inter)
+    seth call $teller "internalToken2Meta(bytes32,uint16)(uint256)" "${@:2}"
+    # fnc teller inter 0x434f4e54524143545f4452494c4c5f4241534500000000000000000000000000 0x0001
+  ;;
   addi)
     seth call $teller "addInternalTokenMeta(bytes32,uint16,uint256)" "${@:2}"
   ;;

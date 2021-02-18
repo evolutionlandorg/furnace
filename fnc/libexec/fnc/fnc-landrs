@@ -138,6 +138,8 @@ case $1 in
       barstrength=$(seth call $LANDRESOURCE_PROXY "getBarsMiningStrength(uint256,address)(uint256)" $tokenId $token)
       echo "landstrength:"   "$landstrength"       barstrength:  "$barstrength"
     done
+    echo "-----------------------------"
+    seth call $LANDRESOURCE_PROXY "land2ResourceMineState(uint256)" $tokenId 
   ;;
      *) fnc help landrs;    ;;
 esac
