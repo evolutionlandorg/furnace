@@ -95,6 +95,11 @@ fnc-init() {
         rpc-verify
         chain-verify "3"
         ;;
+      pangolin)
+        config-init "${0%/*}/conf/pangolin.json";
+        rpc-verify
+        chain-verify "43"
+        ;;
       kovan)
         config-init "${0%/*}/conf/kovan.json";
         rpc-verify

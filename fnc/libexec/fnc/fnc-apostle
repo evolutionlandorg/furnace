@@ -12,8 +12,8 @@ case $1 in
   strength)
     tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
     for token in "${tokens[@]}"; do
-      strength=$(seth call $apostlebase "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3)
-      seth estimate $apostlebase "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3
+      strength=$(seth call $apostle "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3)
+      seth estimate $apostle "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3
       seth --to-fix 18 $strength 
     done
   ;;

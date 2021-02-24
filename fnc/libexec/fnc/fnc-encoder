@@ -18,6 +18,12 @@ case $1 in
   objc)
     seth call $encoder "getObjectClass(uint256)(uint8)" $2
   ;;
+  contract)
+    seth call $encoder "getContractAddress(uint256)(address)" $2
+  ;;
+  origin)
+    seth call $encoder "getOriginAddress(uint256)(address)" $2
+  ;;
      *) fnc help encoder;    ;;
 esac
 	
