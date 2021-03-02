@@ -7,13 +7,6 @@ set -e
 
 loadAddresses
 
-registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ERC721_GEGO")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_GEGO
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $TOKEN_GEGO; then
-  (echo "check register ${registry} failed."; exit 1;)
-fi
-echo >&2 "${0##*/}: info: installerEncoder register finished."
-
 objclasext=$(seth --to-uint16 256)
 grade=$(seth --to-uint16 1)
 rate=$(seth --to-uint256 1000000)

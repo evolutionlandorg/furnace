@@ -34,10 +34,10 @@ case $1 in
     fnc deploy-registry
   ;;
   all)
-    # fnc deploy-drillbase
+    fnc deploy-drillbase
     fnc deploy-formula
     fnc deploy-itembase
-    fnc deploy-landbar
+    # fnc deploy-landbar
     fnc deploy-teller
     fnc deploy-registry
   ;;

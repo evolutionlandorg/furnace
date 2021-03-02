@@ -50,9 +50,15 @@ if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRIL
   (echo "check classAddress2Id failed."; exit 1;)
 fi
 
+# ropsten
 if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $IOBJECTOWNERSHIP_PROXY; then
   (echo "check ownershipId2Address failed."; exit 1;)
 fi
+
+# crab
+# if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 3)) != $IOBJECTOWNERSHIP_PROXY; then
+#   (echo "check ownershipId2Address failed."; exit 1;)
+# fi
   
 # setting registry
 drill=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_DRILL_BASE")))

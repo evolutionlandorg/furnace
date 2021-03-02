@@ -15,5 +15,5 @@ addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
 echo >&2 "${0##*/}: info: migration finished." 
 
 # fnc landrs refresh
-# fnc landrs setmaxminer $(seth --to-uint256 5)
-# fnc landrs setmaxamount $(seth --to-uint256 5)
+fnc landrs setmaxminer $(seth --to-uint256 5)
+fnc landrs setmaxamount $(seth --to-uint256 5)

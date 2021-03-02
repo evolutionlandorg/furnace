@@ -5,6 +5,7 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+# crab LPADDRESS
 registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_GOLD_ERC20_TOKEN"))
 seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_GOLD_RING
 registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WOOD_ERC20_TOKEN"))
