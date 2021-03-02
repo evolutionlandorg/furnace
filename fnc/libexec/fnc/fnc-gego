@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -ex
+
+total=$(seth call $TOKEN_GEGO "totalSupply()(uint256)")
+id=$(seth --to-uint256 $(($total + 1)))
+seth send $TOKEN_GEGO "safeMint(address,uint256)" 0x0E55c72781aCD923C4e3e7Ad9bB8363de15ef204 $id 
+

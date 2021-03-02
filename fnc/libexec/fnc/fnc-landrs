@@ -38,12 +38,12 @@ case $1 in
       barrs=$(seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" $itemToken $itemId $token)
       echo "land:"   "$landrss"       bar:  "$barrs"
     done
-    echo "-----------------------------"
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE4
-    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE5
+    # echo "-----------------------------"
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE4
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE5
   ;;
   claimbar)
     seth send $landrs "claimItemResource(address,uint256)" $2 $3  
@@ -139,7 +139,7 @@ case $1 in
       echo "landstrength:"   "$landstrength"       barstrength:  "$barstrength"
     done
     echo "-----------------------------"
-    seth call $LANDRESOURCE_PROXY "land2ResourceMineState(uint256)" $tokenId 
+    seth call $LANDRESOURCE_PROXY "land2ResourceMineState(uint256)(uint256,uint256,uint256,uint256,uint256,uint256)" $tokenId 
   ;;
      *) fnc help landrs;    ;;
 esac

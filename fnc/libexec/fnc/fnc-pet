@@ -13,6 +13,10 @@ case $1 in
     id=$(seth --to-uint256 $2)
     seth send -F $OWNER $ck "mint(address,uint256)" $AUTH $id
   ;;
+  transfer)
+    id=$(seth --to-uint256 $2)
+    seth send -F $OWNER $ck "transferFrom(address,address,uint256)" $OWNER $AUTH $id
+  ;;
      *) fnc help pet;    ;;
 esac
 

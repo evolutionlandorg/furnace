@@ -52,7 +52,7 @@ case $1 in
     for i in {0..4}; do
       echo "-----------------------------"
       index=$(seth --to-uint256 $i)
-      seth call $landbar "landId2Bars(uint256,uint256)(address,address,uint256)" $2 $index
+      seth call $landbar "landId2Bars(uint256,uint256)(address,address,uint256,address)" $2 $index
     done
   ;;
   status)
