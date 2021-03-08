@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+### fnc-landbar -- Furnace landitembar interactive
+### Usage: fnc landbar [<command>]
+###
+### Commands: landbar equip  <params>                LandItemBar equip item
+###           landbar divest  <params>               LandItemBar divest item
+###           landbar bar    <id> <index>            LandItemBar bar info  
+###           landbar bars   <id>                    LandItemBar bars info  
+###           landbar status <addr> <id>             LandItemBar status info
+###           landbar rate   <ele> <index>           LandItemBar rate info
+###           landbar index  <ele> <index>           LandItemBar rate info
+###
+### Example:  fnc landbar equip
+###           fnc landbar uneqp
+set -e
+
+# landbar="$(fnc --get-landbar)" 
+landbar="$LANDRESOURCE_PROXY" 
+
+case $1 in
+  equip)
+    seth send $landbar "equip(uint256,address,uint256,address,uint256)" "${@:2}"
+  ;;
+  divest)
+    index=$(seth --to-uint256 $3)
+    seth send $landbar "divest(uint256,uint256)" "$2" "$index"
+  ;;
+  bar)
+    seth call $landbar "tokenId2Bars(uint256,uint256)(address,address,uint256)" "${@:2}"
+  ;;
+  status)
+    seth call $landbar "getStatusByItem(address,uint256)(address,uint256,address,uint256)" "${@:2}"
+  ;;
+  max)
+    seth call $landbar "maxAmount()(uint256)" 
+  ;;
+  protect)
+    seth call $landbar "protectPeriod(address,uint256)(uint256)" "${@:2}"
+  ;;
+  index)
+    seth call $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		
+    seth estimate $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		
+  ;;
+  rate)
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      seth call $landbar "enhanceStrengthRateOf(address,uint256)(uint256)" $token $2
+      seth estimate $landbar "enhanceStrengthRateOf(address,uint256)(uint256)" $token $2
+    done
+  ;;
+  bars)
+    for i in {0..4}; do
+      echo "-----------------------------"
+      index=$(seth --to-uint256 $i)
+      seth call $landbar "landId2Bars(uint256,uint256)(address,address,uint256,address)" $2 $index
+    done
+  ;;
+  status)
+    seth call $landbar "getTokenIdByItem(address,uint256)(address,uint256)" "${@:2}"
+  ;;
+     *) fnc help landbar;    ;;
+esac
+	

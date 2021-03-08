@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+
+index=$(seth --to-uint256 $2)
+token=$IOBJECTOWNERSHIP_PROXY
+landId=$1
+seth send $IOBJECTOWNERSHIP_PROXY "setApprovalForAll(address,bool)" $LANDRESOURCE_PROXY $(seth --to-uint256 1)
+seth send $LANDRESOURCE_PROXY "equip(uint256,address,uint256,address,uint256)" $landId $4 $index $token $3

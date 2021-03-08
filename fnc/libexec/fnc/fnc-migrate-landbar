@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+LANDITEMBAR=$(dapp create src/LandItemBar.sol:LandItemBar)
+seth send $FURNACEPROXYADMIN "upgrade(address,address)" $LANDITEMBAR_PROXY $LANDITEMBAR
+addAddress "LANDITEMBAR" "$LANDITEMBAR"

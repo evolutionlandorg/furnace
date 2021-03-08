@@ -2,222 +2,219 @@ pragma solidity ^0.6.7;
 
 import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
-import "interfaces/IFormula.sol";
+import "./interfaces/IFormula.sol";
+import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 
-contract Formula is Initializable, DSAuth, FurnaceSettingIds, IFormula {
-	event AddFormula(
-		uint256 indexed index,
-		string name,
-		uint16 class,
-		uint16 grade,
-		bool canDisenchant,
-		uint16[] majorIndex,
-		bytes32[] tokens,
-		uint256[] mins,
-		uint256[] maxs
-	);
-	event RemoveFormula(uint256 indexed index);
-	event SetFurnaceStrength(
-		uint256 indexed objectClass,
-		uint256 indexed formulaIndex,
-		uint256 base,
-		uint256 enhance
-	);
+contract Formula is Initializable, DSAuth, IFormula {
+	event SetStrength(uint256 indexed inde, uint128 rate);
 
-	struct Strength {
-		uint256 base;
-		uint256 enhance;
-	}
+	event SetAmount(uint256 indexed index, uint256 amount);
 
+	// 0x434f4e54524143545f4552433732315f4745474f000000000000000000000000
+	bytes32 public constant CONTRACT_ERC721_GEGO = "CONTRACT_ERC721_GEGO";
+
+	// 0x434f4e54524143545f4f424a4543545f4f574e45525348495000000000000000
+	bytes32 public constant CONTRACT_OBJECT_OWNERSHIP =
+		"CONTRACT_OBJECT_OWNERSHIP";
+
+	//0x434f4e54524143545f454c454d454e545f544f4b454e00000000000000000000
+	bytes32 public constant CONTRACT_ELEMENT_TOKEN = 
+		"CONTRACT_ELEMENT_TOKEN";
+
+	//0x434f4e54524143545f4c505f454c454d454e545f544f4b454e00000000000000
+	bytes32 public constant CONTRACT_LP_ELEMENT_TOKEN = 
+		"CONTRACT_LP_ELEMENT_TOKEN";
+
+	uint128 public constant RATE_DECIMALS = 10 ** 6;
+	uint256 public constant UNIT = 10 ** 18;
+
+	/*** STORAGE ***/
+
+	ISettingsRegistry public registry;
 	FormulaEntry[] public formulas;
-	mapping(bytes32 => Strength) public strengths;
 
-	function initialize() public initializer {
-		// FormulaEntry memory f0 =
-		// 	FormulaEntry({
-		// 		name: "",
-		// 		class: 0,
-		// 		grade: 0,
-		// 		canDisenchant: false,
-		// 		disable: true,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f0);
-		// // setFurnaceStrength(0, 0, 0);
-		// FormulaEntry memory f1 =
-		// 	FormulaEntry({
-		// 		name: "普通GEGO镐",
-		// 		class: 0,
-		// 		grade: 1,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f1);
-		// // setFurnaceStrength(1, 100, 0);
-		// FormulaEntry memory f2 =
-		// 	FormulaEntry({
-		// 		name: "铸铁钻头",
-		// 		class: 0,
-		// 		grade: 1,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f2);
-		// // setFurnaceStrength(2, 150, 0);
-		// FormulaEntry memory f3 =
-		// 	FormulaEntry({
-		// 		name: "钨钢钻头",
-		// 		class: 0,
-		// 		grade: 2,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f3);
-		// // setFurnaceStrength(3, 200, 0);
-		// FormulaEntry memory f4 =
-		// 	FormulaEntry({
-		// 		name: "金刚钻头",
-		// 		class: 0,
-		// 		grade: 3,
-		// 		canDisenchant: false,
-		// 		disable: false,
-		// 		majorIndex: new uint16[](0),
-		// 		tokens: new bytes32[](0),
-		// 		mins: new uint256[](0),
-		// 		maxs: new uint256[](0)
-		// 	});
-		// formulas.push(f4);
-		// // setFurnaceStrength(4, 300, 0);
+	function initialize(address _registry) public initializer {
+		owner = msg.sender;
+		emit LogSetOwner(msg.sender);
+		registry = ISettingsRegistry(_registry);
+
+		_init();
 	}
 
-	function addFormula(
-        string calldata _name,
-        uint256 _class,
-        uint256 _grade,
-        bool _canDisenchant,
-        address[] calldata _nfts,
-        uint256[] calldata _classes,
-        uint256[] calldata _grades,
-        address[] calldata _fts,
-        uint256[] calldata _mins,
-        uint256[] calldata _maxs
-	) external auth returns {
-		require(_majorIndex.length > 0, "Major length invalid");
-		require(_tokens.length == _mins.length, "Token length invalid");
-		require(_mins.length == _maxs.length, "length invalid");
+	function _init() internal {
+		address gego = registry.addressOf(CONTRACT_ERC721_GEGO); 
+		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
+		// 0
+		insert("合金镐", uint128(5 * RATE_DECIMALS), uint16(256), uint16(1), uint16(1), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, gego, 256, 0, 1);
+
+		// 1
+		insert("人力铸铁钻机", uint128(5 * RATE_DECIMALS), uint16(4), uint16(1), uint16(1), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 1);
+
+		// 2
+		insert("人力镍钢钻机", uint128(12 * RATE_DECIMALS), uint16(4), uint16(1), uint16(2), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 2);
+
+		// 3
+		insert("人力金刚钻机", uint128(21 * RATE_DECIMALS), uint16(4), uint16(1), uint16(3), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 3);
+
+		// 4
+		insert("高级合金镐", uint128(28 * RATE_DECIMALS), uint16(256), uint16(2), uint16(1), true, CONTRACT_LP_ELEMENT_TOKEN, 450 * UNIT, ownership, 256, 1, 1);
+
+		// 5
+		insert("燃油铸铁钻机", uint128(28 * RATE_DECIMALS), uint16(4), uint16(2), uint16(1), true, CONTRACT_LP_ELEMENT_TOKEN, 450 * UNIT, ownership, 4, 1, 1);
+
+		// 6
+		insert("燃油钨钢钻机", uint128(68 * RATE_DECIMALS), uint16(4), uint16(2), uint16(2), true, CONTRACT_LP_ELEMENT_TOKEN, 450 * UNIT, ownership, 4, 1, 2);
+
+		// 7
+		insert("燃油金刚钻机", uint128(120 * RATE_DECIMALS), uint16(4), uint16(2), uint16(3), true, CONTRACT_LP_ELEMENT_TOKEN, 450 * UNIT, ownership, 4, 1, 3);
+	}
+
+	function insert(
+		bytes32 _name,
+		uint128 _rate,
+		uint16 _objClassExt,
+		uint16 _class,
+		uint16 _grade,
+		bool _canDisenchant,
+		bytes32 _minor,
+		uint256 _amount,
+		address _majorAddr,
+		uint16 _majorObjClassExt,
+		uint16 _majorClass,
+		uint16 _majorGrade
+	) public override auth {
 		FormulaEntry memory formula =
 			FormulaEntry({
 				name: _name,
+				rate: _rate,
+				objClassExt: _objClassExt,
+				disable: false,
 				class: _class,
 				grade: _grade,
 				canDisenchant: _canDisenchant,
-				disable: false,
-				majorIndex: _majorIndex,
-				tokens: _tokens,
-				mins: _mins,
-				maxs: _maxs
+				minor: _minor,
+				amount: _amount,
+				majorAddr: _majorAddr,
+		        majorObjClassExt: _majorObjClassExt,
+		        majorClass: _majorClass,
+		        majorGrade:_majorGrade
 			});
 		formulas.push(formula);
 		emit AddFormula(
 			formulas.length - 1,
 			formula.name,
+			formula.rate,
+			formula.objClassExt,
 			formula.class,
 			formula.grade,
 			formula.canDisenchant,
-			formula.majorIndex,
-			formula.tokens,
-			formula.mins,
-			formula.maxs
+			formula.minor,
+			formula.amount,
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
 		);
 	}
 
-	function remove(uint256 index) public auth {
-		require(index < formulas.length, "Formula: out of range");
-		formulas[index].disable = true;
-		emit RemoveFormula(index);
+	function disable(uint256 _index) external override auth {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		formulas[_index].disable = true;
+		emit DisableFormula(_index);
 	}
 
-	function length() public view returns (uint256) {
+	function enable(uint256 _index) external override auth {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		formulas[_index].disable = false;
+		emit EnableFormula(_index);
+	}
+
+	function setStrengthRate(uint256 _index, uint128 _rate) external auth {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		formula.rate = _rate;
+		emit SetStrength(_index, formula.rate);
+	}
+
+	function setAmount(uint256 _index, uint256 _amount)
+		external
+		auth
+	{
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		formula.amount = _amount;
+		emit SetAmount(_index, formula.amount);
+	}
+
+	function length() external view override returns (uint256) {
 		return formulas.length;
 	}
 
-	function at(uint256 index)
-		public
+	function isDisable(uint256 _index) external view override returns (bool) {
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return formulas[_index].disable;
+	}
+
+	function getMinor(uint256 _index)
+		external
 		view
+		override
+		returns (bytes32, uint256)
+	{
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return (formulas[_index].minor, formulas[_index].amount);
+	}
+
+	function canDisenchant(uint256 _index)
+		external
+		view
+		override
+		returns (bool)
+	{
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		return formulas[_index].canDisenchant;
+	}
+
+	function getMetaInfo(uint256 _index)
+		external
+		view
+		override
 		returns (
-			string memory name,
-			uint16 class,
-			uint16 grade,
-			bool canDisenchant,
-			uint16[] memory majorIndex,
-			bytes32[] memory tokens,
-			uint256[] memory mins,
-			uint256[] memory maxs
+			uint16,
+			uint16,
+			uint16,
+			uint128
 		)
 	{
-		require(index < formulas.length, "Formula: out of range");
-		FormulaEntry memory formula = formulas[index];
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
 		return (
-			formula.name,
+			formula.objClassExt,
 			formula.class,
 			formula.grade,
-			formula.canDisenchant,
-			formula.majorIndex,
-			formula.tokens,
-			formula.mins,
-			formula.maxs
+			formula.rate
 		);
 	}
 
-	// util to get key based on object class + formula index + appkey
-	function _getKey(
-		uint8 _objectClass,
-		uint256 _formulaIndex,
-		bytes32 _appKey
-	) internal pure returns (bytes32) {
-		return
-			keccak256(abi.encodePacked(_objectClass, _formulaIndex, _appKey));
-	}
-
-	function getFurnaceStrength(uint256 _formulaIndex)
+	function getMajorInfo(uint256 _index)
 		public
-		view
-		returns (uint256, uint256)
+		view	
+		override
+		returns (
+			address,
+			uint16,
+			uint16,
+			uint16
+		)
 	{
-		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
-		Strength memory s = strengths[key];
-		return (s.base, s.enhance);
-	}
-
-	function setFurnaceStrength(
-		uint256 _formulaIndex,
-		uint256 _base,
-		uint256 _enhance
-	) public auth {
-		bytes32 key = _getKey(DRILL_OBJECT_CLASS, _formulaIndex, FURNACE_APP);
-		Strength memory s = Strength({ base: _base, enhance: _enhance });
-		strengths[key] = s;
-		emit SetFurnaceStrength(
-			DRILL_OBJECT_CLASS,
-			_formulaIndex,
-			_base,
-			_enhance
+		require(_index < formulas.length, "Formula: OUT_OF_RANGE");
+		FormulaEntry storage formula = formulas[_index];
+		return (
+			formula.majorAddr,
+			formula.majorObjClassExt,
+			formula.majorClass,
+			formula.majorGrade
 		);
 	}
 }

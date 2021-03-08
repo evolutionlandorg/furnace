@@ -1,5 +1,12 @@
 pragma solidity ^0.6.7;
 
+/**
+ * @title ObjectOwnershipAuthority
+ * @dev ObjectOwnershipAuthority is authority that manage ObjectOwnership.
+ * difference between ObjectOwnershipAuthority whiteList:
+[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY] ==> [$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
+ */
+
 contract ObjectOwnershipAuthorityV3 {
 	mapping(address => bool) public whiteList;
 

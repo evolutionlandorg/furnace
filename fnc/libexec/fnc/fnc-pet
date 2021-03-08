@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+### fnc-apostle -- Furnace pet interactive
+### Usage: fnc pet [<command>]
+###
+### Commands: pet mint <id>          mint pet
+###
+set -e
+
+ck="${CK?}" 
+
+case $1 in
+  mint)
+    id=$(seth --to-uint256 $2)
+    seth send -F $OWNER $ck "mint(address,uint256)" $AUTH $id
+  ;;
+  transfer)
+    id=$(seth --to-uint256 $2)
+    seth send -F $OWNER $ck "transferFrom(address,address,uint256)" $OWNER $AUTH $id
+  ;;
+     *) fnc help pet;    ;;
+esac
+

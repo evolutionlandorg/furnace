@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ERC721_GEGO")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_GEGO
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $TOKEN_GEGO; then
+  (echo "check register ${registry} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+
+FORMULA=$(dapp create src/Formula.sol:Formula)
+addAddress "FORMULA" "$FORMULA"
+echo >&2 "${0##*/}: info: Formula created."
+
+calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
+FORMULA_PROXY=$(dapp create src/FormulaProxy.sol:FormulaProxy $FORMULA $FURNACEPROXYADMIN $calldata)
+addAddress "FORMULA_PROXY" "$FORMULA_PROXY"
+echo >&2 "${0##*/}: info: FormulaProxy inited."
+
+# setting registry
+fml=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_FORMULA")))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $fml $FORMULA_PROXY 
+if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $fml) != $FORMULA_PROXY; then
+  (echo "check register ${fml} failed."; exit 1;)
+fi
+echo >&2 "${0##*/}: info: installerEncoder register finished."
+
+# FORMULAINIT=$(dapp create src/FormulaInit.sol:FormulaInit $ISETTINGSREGISTRY)
+# addAddress "FORMULAINIT" "$FORMULAINIT"
+
+# FORMULA_AUTHORITY=$(dapp create src/FormulaAuthority.sol:FormulaAuthority [$FORMULAINIT])
+# seth call $FORMULA_AUTHORITY "whiteList(address)" $FORMULAINIT
+# seth send $FORMULA_PROXY "setAuthority(address)" $FORMULA_AUTHORITY
+
+# seth send $FORMULAINIT "initFormula()"
+

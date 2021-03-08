@@ -1,8 +1,6 @@
 pragma solidity ^0.6.7;
 
 interface ISettingsRegistry {
-    enum SettingsValueTypes { NONE, UINT, STRING, ADDRESS, BYTES, BOOL, INT }
-
     function uintOf(bytes32 _propertyName) external view returns (uint256);
 
     function stringOf(bytes32 _propertyName) external view returns (string memory);

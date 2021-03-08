@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-. $(PWD)/bin/init
-
-seth send -F $AUTH $DRILLLUCKYBOX "stop()"  

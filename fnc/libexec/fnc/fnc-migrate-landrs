@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+LANDRESOURCEV5=$(dapp create one/LandResourceV5.f.sol:LandResourceV5)
+seth send -F $OWNER $LANDRESOURCE_PROXY "upgradeTo(address)" $LANDRESOURCEV5
+
+if test $(seth call $LANDRESOURCE_PROXY "implementation()(address)") != $LANDRESOURCEV5; then
+  (echo "check migration failed."; exit 1;)
+fi
+addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
+echo >&2 "${0##*/}: info: migration finished." 
+
+# fnc landrs refresh
+fnc landrs setmaxminer $(seth --to-uint256 5)
+fnc landrs setmaxamount $(seth --to-uint256 5)

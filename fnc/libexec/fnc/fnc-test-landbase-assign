@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+. $(PWD)/bin/init
+
+x=$(seth --to-int256 -76)
+y=$(seth --to-int256 21)
+attr=0x0000000000000000000000000000000000000000000000010f040f850f02005f
+mask=0x0000000000000000000000000000000000000000000000000000000000000000
+seth send -F $OWNER $LANDBASE_PROXY  "assignNewLand(int256,int256,address,uint256,uint256)" $x $y $AUTH $attr $mask

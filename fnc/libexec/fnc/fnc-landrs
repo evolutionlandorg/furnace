@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+### fnc-landrs -- Furnace landrs interactive
+### Usage: fnc landrs [<command>]
+###
+### Commands: landrs availables          LandResource availables info
+###           landrs claimall            LandResource claim resources
+###           landrs claimbar            LandResource bar resources
+###           landrs claimland           LandResource land resources
+###           landrs speed               LandResource speed
+###           landrs itemrs              LandResource item bar mined balance
+###           landrs state               LandResource item to resource state 
+###           landrs mine                LandResource mine 
+###           landrs miner               LandResource miner on land 
+###           landrs setmaxminer         LandResource set max miner
+###           landrs start               LandResource start mining
+###           landrs stop                LandResource stop mining
+###           landrs bar                 LandResource bar 
+###
+### Example:  fnc landrs speed 
+###           fnc landrs claimbar
+set -e
+
+landrs="${LANDRESOURCE_PROXY?}" 
+
+case $1 in
+  availables)
+    landId=$2
+    itemId=$3
+    itemToken=$4
+    resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
+    seth call $landrs "availableLandResources(uint256,address[])(uint256[])" "$landId" "$resources"
+    echo "-----------------------------"
+    seth call $landrs "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
+    echo "-----------------------------"
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      landrss=$(seth call $landrs "getLandMinedBalance(uint256,address)(uint256)" $landId $token)
+      barrs=$(seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" $itemToken $itemId $token)
+      echo "land:"   "$landrss"       bar:  "$barrs"
+    done
+    # echo "-----------------------------"
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE1 
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE2 
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE3
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE4
+    # seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $APOSTLE5
+  ;;
+  claimbar)
+    seth send $landrs "claimItemResource(address,uint256)" $2 $3  
+  ;;
+  claimland)
+    seth send $landrs "claimLandResource(uint256)" $2  
+  ;;
+  mine)
+    seth send $landrs "mine(uint256)" $2  
+  ;;
+  start)
+    seth send $landrs "startMining(uint256,uint256,address)" $2 $3 $4  
+  ;;
+  stop)
+    seth send $landrs "stopMining(uint256)" $2   
+  ;;
+  setmaxminer)
+    seth send -F $OWNER $landrs "setMaxMiners(uint256)" $2  
+  ;;
+  setmaxamount)
+    seth send -F $OWNER $landrs "setMaxAmount(uint256)" $2  
+  ;;
+  refresh)
+    seth send -F $OWNER $landrs "refresh()"  
+  ;;
+  miner)
+    for i in {0..4}; do
+      index=$(seth --to-uint256 $i)
+      seth call $landrs "getMinerOnLand(uint256,address,uint256)(uint256)" $2 $3 $index  
+    done
+  ;;
+  worker)
+    seth call $landrs "miner2Index(uint256)(uint256,address,uint64)" $2 
+  ;;
+  barrs)
+    seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" "${@:2}"
+  ;;
+  bar)
+    # seth call $landrs "land2Bar(uint256,address,uint256)(uint256,uint256)" "${@:2}"
+    seth call $landrs "getBarMiningStrength(uint256,address,uint256)(uint256)" "${@:2}"
+    seth call $landrs "getBarLastUpdateTime(uint256,address,uint256)(uint256)" "${@:2}"
+  ;;
+  bars)
+    seth call $landrs "getBarsMiningStrength(uint256,address)(uint256)" "${@:2}" 
+  ;;
+  state)
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      echo "-----------------------------"
+      seth call $landrs "land2RSState(uint256,address)(uint256,uint256,uint256)" $2 $token
+    done
+  ;;
+  itemrs)
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      echo "-----------------------------"
+      seth call $landrs "getBarMinedBalance(uint256,address,address)(uint256)" $2 $3 $token
+    done
+  ;;
+  speed)
+    startTime=$(seth call $LANDRESOURCE_PROXY "resourceReleaseStartTime()(uint256)")
+    tokenId=$2
+    currentTime=$(date '+%s')
+    num=$(((currentTime - startTime) / 86400))
+    attr=$(seth call $LANDBASE_PROXY "getResourceRateAttr(uint256)" $tokenId)
+    echo $attr
+    gold_rate=$(seth --to-dec ${attr:62:4})
+    gold_crate=$(bc <<< "$gold_rate - $gold_rate * 0.0001 * $num")
+    echo "gold_rate"   "$gold_rate"   "$gold_crate"
+    wood_rate=$(seth --to-dec ${attr:58:4})
+    wood_crate=$(bc <<< "$wood_rate - $wood_rate * 0.0001 * $num")
+    echo "wood_rate"   "$wood_rate"   "$wood_crate"
+    water_rate=$(seth --to-dec ${attr:54:4})
+    water_crate=$(bc <<< "$water_rate - $water_rate * 0.0001 * $num")
+    echo "water_rate" "$water_rate"   "$water_crate"
+    fire_rate=$(seth --to-dec ${attr:50:4})
+    fire_crate=$(bc <<< "$fire_rate - $fire_rate * 0.0001 * $num")
+    echo "fire_rate"   "$fire_rate"   "$fire_crate"
+    soil_rate=$(seth --to-dec ${attr:46:4})
+    soil_crate=$(bc <<< "$soil_rate - $soil_rate * 0.0001 * $num")
+    echo "soil_rate"   "$soil_rate"   "$soil_crate"
+    currentTime=$(seth --to-uint256 $currentTime)
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_GOLD $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_WOOD $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_WATER $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_FIRE $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_SOIL $currentTime
+    echo "-----------------------------"
+    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    for token in "${tokens[@]}"; do
+      landstrength=$(seth call $LANDRESOURCE_PROXY "getLandMiningStrength(uint256,address)(uint256)" $tokenId $token)
+      barstrength=$(seth call $LANDRESOURCE_PROXY "getBarsMiningStrength(uint256,address)(uint256)" $tokenId $token)
+      echo "landstrength:"   "$landstrength"       barstrength:  "$barstrength"
+    done
+    echo "-----------------------------"
+    seth call $LANDRESOURCE_PROXY "land2ResourceMineState(uint256)(uint256,uint256,uint256,uint256,uint256,uint256)" $tokenId 
+  ;;
+     *) fnc help landrs;    ;;
+esac
+	

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+export FNC_TEL=${FNC_TEL-CONTRACT_METADATA_TELLER}
+id=$(seth --to-bytes32 "$(seth --from-ascii "$FNC_TEL")")
+fnc --get-addr "$id"

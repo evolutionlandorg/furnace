@@ -4,9 +4,6 @@
 [submodule "lib/zeppelin-solidity"]
 	path = lib/zeppelin-solidity
 	url = https://github.com/OpenZeppelin/zeppelin-solidity
-[submodule "lib/common-contracts"]
-	path = lib/common-contracts
-	url = https://github.com/evolutionlandorg/common-contracts
 [submodule "lib/ds-auth"]
 	path = lib/ds-auth
 	url = https://github.com/dapphub/ds-auth
@@ -16,3 +13,6 @@
 [submodule "lib/ds-math"]
 	path = lib/ds-math
 	url = https://github.com/dapphub/ds-math
+[submodule "lib/land"]
+	path = lib/land
+	url = https://github.com/evolutionlandorg/land

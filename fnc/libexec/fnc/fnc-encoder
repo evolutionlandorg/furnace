@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+### fnc-encoder -- Furnace InterstellarEncoder interactive
+### Usage: fnc encoder [<command>]
+###
+### Commands: encoder addr                InterstellarEncoder object to address 
+###           encoder objc                InterstellarEncoder object class
+###
+### Example:  fnc encoder addr 
+###            
+set -e
+
+encoder="$(fnc --get-encoder)" 
+
+case $1 in
+  addr)
+    seth call $encoder "getObjectAddress(uint256)(address)" $2
+  ;;
+  objc)
+    seth call $encoder "getObjectClass(uint256)(uint8)" $2
+  ;;
+  contract)
+    seth call $encoder "getContractAddress(uint256)(address)" $2
+  ;;
+  origin)
+    seth call $encoder "getOriginAddress(uint256)(address)" $2
+  ;;
+     *) fnc help encoder;    ;;
+esac
+	

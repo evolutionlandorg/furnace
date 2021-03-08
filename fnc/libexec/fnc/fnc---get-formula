@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+export FNC_FML=${FNC_FML-CONTRACT_FORMULA}
+id=$(seth --to-bytes32 "$(seth --from-ascii "$FNC_FML")")
+fnc --get-addr "$id"

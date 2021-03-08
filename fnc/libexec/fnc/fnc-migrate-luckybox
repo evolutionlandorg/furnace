@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck source=lib/common.sh
+. "${0%/*}/../../lib/common.sh"
+
+DRILLLUCKYBOX=$(dapp create src/DrillLuckyBox.sol:DrillLuckyBox $ISETTINGSREGISTRY $DRILLTAKEBACK $(seth --to-uint256 1605657600))
+addAddress "DRILLLUCKYBOX" "$DRILLLUCKYBOX"

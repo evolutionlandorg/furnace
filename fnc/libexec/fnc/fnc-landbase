@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+### fnc-landbase -- Furnace landbase interactive
+### Usage: fnc landbase [<command>]
+###
+### Commands: landbase rate              MetaDatalandbase rate info
+###           landbase assign            MetaDatalandbase assign new land
+###
+### Example:  fnc landbase rate 
+set -e
+
+landbase="${LANDBASE_PROXY?}" 
+
+case $1 in
+  rate)
+    tokenId=$2
+    attr=$(seth call $landbase "getResourceRateAttr(uint256)" $tokenId)
+    echo $attr
+    gold_rate=$(seth --to-dec ${attr:62:4})
+    echo "gold_rate"   "$gold_rate"
+    wood_rate=$(seth --to-dec ${attr:58:4})
+    echo "wood_rate"   "$wood_rate"
+    water_rate=$(seth --to-dec ${attr:54:4})
+    echo "water_rate" "$water_rate"
+    fire_rate=$(seth --to-dec ${attr:50:4})
+    echo "fire_rate"   "$fire_rate"
+    soil_rate=$(seth --to-dec ${attr:46:4})
+    echo "soil_rate"   "$soil_rate"
+  ;;
+  assign)
+    # x=$(seth --to-int256 $2)
+    # y=$(seth --to-int256 $3)
+    # attr=$4
+    # mask=$5
+    x=$(seth --to-int256 -75)
+    y=$(seth --to-int256 19)
+    attr=0x0000000000000000000000000000000000000000000000010f0400850102005f
+    mask=0x0000000000000000000000000000000000000000000000000000000000000000
+    seth send -F $OWNER $LANDBASE_PROXY  "assignNewLand(int256,int256,address,uint256,uint256)" $x $y $AUTH $attr $mask
+  ;;
+     *) fnc help landbase;    ;;
+esac
+	
