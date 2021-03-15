@@ -7,6 +7,17 @@ make flatten
 
 ## Addresses
 
+### Pangolin
+
+| Name    |      Source      |  ABI |  Address |
+|:--------:|:----------------:|:------:|:-----------:|
+| DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0x9F2a6eE94f71CdB922960E98aC2C346ed81a11d6] |
+| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x10357233222A7A233C461922f673FAdb1eC50193] |
+| Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/Formula.abi) | [0x9635D2d7E99f7284548cc64CCDe2A35AD940FDC3] |
+| ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0x576e824ECD104c8296a3f37427967Dd9B7C9A8B8] |
+| MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0xEAb3756d002F3494c5c4940080Cb8d3d717DB206] |
+| GegoToken | GegoToken | [GegoToken](https://github.com/hujw77/furnance/tree/main/abi/GegoToken.abi)) | [0x5c5c9cd986a459194500642f69d10330870b8947] |
+
 ### Ropsten
 
 | Name    |      Source      |  ABI |  Address |
