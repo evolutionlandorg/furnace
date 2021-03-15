@@ -16,6 +16,9 @@ case $1 in
   ready)
     seth call $tokenuse "isObjectReadyToUse(uint256)(bool)" $2
   ;;
+  status)
+    seth call $tokenuse "tokenId2UseStatus(uint256)(address,address,uint48,uint48,uint256,address)" $2
+  ;;
      *) fnc help tokenuse;    ;;
 esac
 	

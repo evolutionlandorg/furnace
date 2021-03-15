@@ -2,6 +2,8 @@
 
 set -e
 
+if [ "$FNC_VERBOSE" ]; then set -x; fi
+
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
@@ -40,16 +42,10 @@ if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $ITEM
   (echo "check classAddress2Id failed."; exit 1;)
 fi
 
-# ropsten
 if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $IOBJECTOWNERSHIP_PROXY; then
   (echo "check ownershipId2Address failed."; exit 1;)
 fi
 
-# crab
-# if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 3)) != $IOBJECTOWNERSHIP_PROXY; then
-#   (echo "check ownershipId2Address failed."; exit 1;)
-# fi
-  
 # setting registry
 item=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ITEM_BASE")))
 seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
