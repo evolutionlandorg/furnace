@@ -60,10 +60,16 @@ case $1 in
   stop)
     seth send $landrs "stopMining(uint256)" $2   
   ;;
-  setmaxminer)
+  get-maxminer)
+    seth call $landrs "maxMiners()(uint256)"
+  ;;
+  get-maxamount)
+    seth call $landrs "maxAmount()(uint256)"
+  ;;
+  set-maxminer)
     seth send -F $OWNER $landrs "setMaxMiners(uint256)" $2  
   ;;
-  setmaxamount)
+  set-maxamount)
     seth send -F $OWNER $landrs "setMaxAmount(uint256)" $2  
   ;;
   refresh)

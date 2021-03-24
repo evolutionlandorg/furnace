@@ -24,6 +24,9 @@ case $1 in
   origin)
     seth call $encoder "getOriginAddress(uint256)(address)" $2
   ;;
+  id)
+    seth call $encoder "ownershipAddress2Id(address)(uint8)" $2
+  ;;
      *) fnc help encoder;    ;;
 esac
 	

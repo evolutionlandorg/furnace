@@ -31,8 +31,11 @@ case $1 in
     seth call $itembase "getRate(uint256,uint256)(uint256)" "$id" "$ele" 
     seth estimate $itembase  "getRate(uint256,uint256)(uint256)" "$id" "$ele"
   ;;
-  item)
-    seth call $itembase "getObjectClassExt(uint256)(uint16)" $2
+  prefer)
+    seth call $itembase "getPrefer(uint256)(uint16)" $2
+  ;;
+  ent-info)
+    seth call $itembase "getEnchantedInfo(uint256)(uint16,bool,address,uint256,address,uint256)" $2
   ;;
   ent)
     seth send $itembase "enchant(uint256,uint256[],address[],uint256[])" "${@:2}"

@@ -20,27 +20,30 @@ case $1 in
   meta)
     seth call $teller "getMetaData(address,uint256)(uint16,uint16,uint16)" $2 $3
   ;;
-  objc)
-    seth call $teller "getObjClassExt(address,uint256)(uint16)" $2 $3
-  ;;
   rate)
-    seth call $teller "getRate(address,uint256,uint256)(uint16)" $2 $3 $4
+    seth call $teller "getRate(address,uint256,uint256)(uint256)" $2 $3 $4
   ;;
   inter)
     seth call $teller "internalToken2Meta(bytes32,uint16)(uint256)" "${@:2}"
     # fnc teller inter 0x434f4e54524143545f4452494c4c5f4241534500000000000000000000000000 0x0001
   ;;
+  exter-objc)
+    seth call $teller "getExternalObjectClassExt(address)(uint256)" "${@:2}"
+  ;;
+  exter-rate)
+    seth call $teller "getExternalStrengthRate(address,uint16)(uint256)" "${@:2}"
+  ;;
   addi)
-    seth call $teller "addInternalTokenMeta(bytes32,uint16,uint256)" "${@:2}"
+    seth send $teller "addInternalTokenMeta(bytes32,uint16,uint256)" "${@:2}"
   ;;
   addx)
-    seth call $teller "addExternalTokenMeta(address,uint16,uint16,uint256)" "${@:2}"
+    seth send $teller "addExternalTokenMeta(address,uint16,uint16,uint256)" "${@:2}"
   ;;
   rmi)
-    seth call $teller "removeInternalTokenMeta(bytes32,uint16)" "${@:2}"
+    seth send $teller "removeInternalTokenMeta(bytes32,uint16)" "${@:2}"
   ;;
   rmx)
-    seth call $teller "removeExternalTokenMeta(address)" "${@:2}"
+    seth send $teller "removeExternalTokenMeta(address)" "${@:2}"
   ;;
      *) fnc help teller;    ;;
 esac

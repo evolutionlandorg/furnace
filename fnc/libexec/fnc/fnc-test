@@ -20,6 +20,9 @@ case $1 in
   equip-drill)
     fnc test-equip-drill "${@:2}"
   ;;
+  equip-amb)
+    fnc test-equip-amb "${@:2}"
+  ;;
   equip-gego)
     fnc test-equip-gego "${@:2}"
   ;;

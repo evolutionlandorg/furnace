@@ -24,14 +24,35 @@ case $1 in
   at)
     seth call $formula "formulas(uint256)(bytes32,uint128,uint16,uint16,uint16,bool,bool,bytes32,uint256,address,uint16,uint16,uint16)" $(seth --to-uint256 $2)
   ;;
+  get-disable)
+    seth call $formula "isDisable(uint256)(bool)" "${@:2}"
+  ;;
+  get-minor)
+    seth call $formula "getMinor(uint256)(bytes32,uint256)" "${@:2}"
+  ;;
+  get-major)
+    seth call $formula "getMajorInfo(uint256)(address,uint16,uint16,uint16)" "${@:2}"
+  ;;
+  get-meta)
+    seth call $formula "getMetaInfo(uint256)(uint16,uint16,uint16,uint128)" "${@:2}"
+  ;;
+  can-dis)
+    seth call $formula "canDisenchant(uint256)(bool)" "${@:2}"
+  ;;
   disable)
     seth send $formula "disable(uint256)" "${@:2}"
   ;;
   enable)
     seth send $formula "enable(uint256)" "${@:2}"
   ;;
+  set-amount)
+    seth send $formula "setAmount(uint256,uint256)" "${@:2}"
+  ;;
+  set-rate)
+    seth send $formula "setStrengthRate(uint256,uint128)" "${@:2}"
+  ;;
   length)
-    seth call $formula "length()" "${@:2}"
+    seth call $formula "length()(uint256)" "${@:2}"
   ;;
      *) fnc help formula;    ;;
 esac

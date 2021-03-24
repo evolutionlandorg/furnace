@@ -164,6 +164,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		view
 		returns (uint256)
 	{
+        require(internalToken2Meta[_token][_grade] > 0, "Furnace: NOT_SUPPORT");
 		return uint256(internalToken2Meta[_token][_grade]);
 	}
 
@@ -192,15 +193,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 					_EXTERNAL_DEFAULT_CLASS,
 					getDrillGrade(_id)
 				);
-			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
-				//TODO:: check ONLY_AMBASSADOR
-				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
-				return (
-					objectClass,
-					_EXTERNAL_DEFAULT_CLASS,
-					getDarwiniaGrade(_id)
-				);
-			}
+			} 
 		}
 		// external token
 		return (
@@ -213,16 +206,6 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	function getDrillGrade(uint256 _tokenId) public pure returns (uint16) {
 		uint128 objectId = uint128(_tokenId);
 		return uint16(objectId >> 112);
-	}
-
-	function isAmbassador(uint256 _tokenId) public pure returns (bool) {
-		uint128 objectId = uint128(_tokenId);
-		return uint16(uint16(objectId >> 112) & 0xFC00) > 0;
-	}
-
-	function getDarwiniaGrade(uint256 _tokenId) public pure returns (uint16) {
-		uint128 objectId = uint128(_tokenId);
-		return uint16(uint16(objectId >> 112) & 0x3FF);
 	}
 
 	function getPrefer(bytes32 _minor, address _token)
@@ -262,13 +245,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 			} else if (objectClass == DRILL_OBJECT_CLASS) {
 				uint16 grade = getDrillGrade(_id);
 				return getInternalStrengthRate(CONTRACT_DRILL_BASE, grade);
-			} else if (objectClass == DARWINIA_OBJECT_CLASS) {
-				//TODO:: check ONLY_AMBASSADOR
-				require(isAmbassador(_id), "Furnace: ONLY_AMBASSADOR");
-				uint16 grade = getDarwiniaGrade(_id);
-				return
-					getInternalStrengthRate(CONTRACT_DARWINIA_ITO_BASE, grade);
-			}
+			} 
 		}
 		return getExternalStrengthRate(_token, _EXTERNAL_DEFAULT_GRADE);
 	}

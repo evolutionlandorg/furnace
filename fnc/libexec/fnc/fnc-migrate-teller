@@ -9,4 +9,4 @@ loadAddresses
 
 METADATATELLER=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
 seth send $FURNACEPROXYADMIN "upgrade(address,address)" $METADATATELLER_PROXY $METADATATELLER
-addAddress "DRILLLUCKYBOX" "$DRILLLUCKYBOX"
+addAddress "METADATATELLER" "$METADATATELLER"

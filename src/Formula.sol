@@ -55,7 +55,7 @@ contract Formula is Initializable, DSAuth, IFormula {
 		insert("人力镍钢钻机", uint128(12 * RATE_DECIMALS), uint16(4), uint16(1), uint16(2), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 2);
 
 		// 3
-		insert("人力金刚钻机", uint128(21 * RATE_DECIMALS), uint16(4), uint16(1), uint16(3), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 3);
+		insert("人力金刚钻机", uint128(25 * RATE_DECIMALS), uint16(4), uint16(1), uint16(3), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 3);
 
 		// 4
 		insert("高级合金镐", uint128(28 * RATE_DECIMALS), uint16(256), uint16(2), uint16(1), true, CONTRACT_LP_ELEMENT_TOKEN, 450 * UNIT, ownership, 256, 1, 1);

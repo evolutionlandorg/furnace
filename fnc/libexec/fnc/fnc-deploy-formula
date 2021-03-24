@@ -30,13 +30,3 @@ if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" "$fml") != 
   (echo "check register ${fml} failed."; exit 1;)
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."
-
-# FORMULAINIT=$(dapp create src/FormulaInit.sol:FormulaInit $ISETTINGSREGISTRY)
-# addAddress "FORMULAINIT" "$FORMULAINIT"
-
-# FORMULA_AUTHORITY=$(dapp create src/FormulaAuthority.sol:FormulaAuthority [$FORMULAINIT])
-# seth call $FORMULA_AUTHORITY "whiteList(address)" $FORMULAINIT
-# seth send $FORMULA_PROXY "setAuthority(address)" $FORMULA_AUTHORITY
-
-# seth send $FORMULAINIT "initFormula()"
-

@@ -53,7 +53,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test
-		lastItemObjectId = 10000;
+		// lastItemObjectId = 1000000;
 	}
 
 	function _safeTransferFrom(
@@ -193,6 +193,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			to,
 			tokenId
 		);
+        delete tokenId2Item[tokenId];
 	}
 
 	function disenchant(uint256 _id, uint256 _depth)
@@ -206,6 +207,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			address(this),
 			_id
 		);
+
 		_disenchant(_id, _depth);
 	}
 

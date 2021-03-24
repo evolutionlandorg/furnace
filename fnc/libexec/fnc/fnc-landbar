@@ -14,6 +14,8 @@
 ###           fnc landbar uneqp
 set -e
 
+if [ "$FNC_VERBOSE" ]; then set -x; fi
+
 # landbar="$(fnc --get-landbar)" 
 landbar="$LANDRESOURCE_PROXY" 
 
@@ -29,7 +31,7 @@ case $1 in
     seth call $landbar "tokenId2Bars(uint256,uint256)(address,address,uint256)" "${@:2}"
   ;;
   status)
-    seth call $landbar "getStatusByItem(address,uint256)(address,uint256,address,uint256)" "${@:2}"
+    seth call $landbar "getLandIdByItem(address,uint256)(address,uint256)" "${@:2}"
   ;;
   max)
     seth call $landbar "maxAmount()(uint256)" 
@@ -54,9 +56,6 @@ case $1 in
       index=$(seth --to-uint256 $i)
       seth call $landbar "landId2Bars(uint256,uint256)(address,address,uint256,address)" $2 $index
     done
-  ;;
-  status)
-    seth call $landbar "getTokenIdByItem(address,uint256)(address,uint256)" "${@:2}"
   ;;
      *) fnc help landbar;    ;;
 esac
