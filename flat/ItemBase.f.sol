@@ -374,9 +374,9 @@ interface IELIP002 {
         The `user` argument MUST be the address of an account/contract that is approved to make the disenchanted (SHOULD be msg.sender).
         The `tokenId` argument MUST be token Id of the item which it is disenchated.
         The `majors` argument MUST be major token addresses of major material.
-        The `ids` argument MUST be token ids of major material.
-        The `minors` argument MUST be token addresses of minor material.
-        The `amounts` argument MUST be token amounts of minor material.
+        The `id` argument MUST be token ids of major material.
+        The `minor` argument MUST be token addresses of minor material.
+        The `amount` argument MUST be token amounts of minor material.
     */
 	event Disenchanted(
 		address indexed user,
@@ -391,11 +391,10 @@ interface IELIP002 {
         @notice Caller must be owner of tokens to enchant.
         @dev Enchant function, Enchant a new NFT token from ERC721 tokens and ERC20 tokens. Enchant rule is according to `Formula`.
         MUST revert if `_index` is not in `formula`.
-        MUST revert if length of `_ids` is not the same as length of `formula` index rules.
-        MUST revert if length of `_values` is not the same as length of `formula` index rules.
         MUST revert on any other error.        
-        @param _id     ID of NFT tokens(order and length must match `formula` index rules).
-        @param _token  Address of FT tokens(order and length must match `formula` index rules).
+		@param _index  Index of formula to enchant.
+        @param _id     ID of NFT tokens.
+        @param _token  Address of FT token.
 		@return {
 			"tokenId": "New Token ID of Enchanting."
 		}
@@ -750,8 +749,10 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	// rate precision
 	uint128 public constant RATE_PRECISION = 10**8;
 	// save about 200 gas when contract create
-	bytes4 private constant _SELECTOR =
+	bytes4 private constant _SELECTOR_TRANSFERFROM =
 		bytes4(keccak256(bytes("transferFrom(address,address,uint256)")));
+
+    bytes4 private constant _SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
 	/*** STORAGE ***/
 
@@ -770,22 +771,27 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test
-		lastItemObjectId = 10000;
+		// lastItemObjectId = 1000000;
 	}
 
-	function _safeTransfer(
+	function _safeTransferFrom(
 		address token,
 		address from,
 		address to,
 		uint256 value
 	) private {
 		(bool success, bytes memory data) =
-			token.call(abi.encodeWithSelector(_SELECTOR, from, to, value)); // solhint-disable-line
+			token.call(abi.encodeWithSelector(_SELECTOR_TRANSFERFROM, from, to, value)); // solhint-disable-line
 		require(
 			success && (data.length == 0 || abi.decode(data, (bool))),
-			"Furnace: TRANSFER_FAILED"
+			"Furnace: TRANSFERFROM_FAILED"
 		);
 	}
+
+    function _safeTransfer(address token, address to, uint value) private {
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(_SELECTOR, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Furnace: TRANSFER_FAILED');
+    }
 
 	function enchant(
 		uint256 _index,
@@ -828,7 +834,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		);
 		require(class == majorClass, "Furnace: INVALID_CLASS");
 		require(grade == majorGrade, "Furnace: INVALID_GRADE");
-		_safeTransfer(majorAddress, msg.sender, address(this), _id);
+		_safeTransferFrom(majorAddress, msg.sender, address(this), _id);
 		uint16 prefer = 0;
 		if (class > 0) {
 			prefer = getPrefer(_id);
@@ -848,7 +854,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		require(element > 0 && element < 6, "Furnace: INVALID_MINOR");
 		prefer |= uint16(1 << element);
 		require(amount <= uint128(-1), "Furnace: VALUE_OVERFLOW");
-		_safeTransfer(_token, msg.sender, address(this), amount);
+		_safeTransferFrom(_token, msg.sender, address(this), amount);
 		return (prefer, amount);
 	}
 
@@ -905,6 +911,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 			to,
 			tokenId
 		);
+        delete tokenId2Item[tokenId];
 	}
 
 	function disenchant(uint256 _id, uint256 _depth)
@@ -912,18 +919,18 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		override
 		stoppable
 	{
-		_safeTransfer(
+		_safeTransferFrom(
 			registry.addressOf(CONTRACT_OBJECT_OWNERSHIP),
 			msg.sender,
 			address(this),
 			_id
 		);
+
 		_disenchant(_id, _depth);
 	}
 
 	function _disenchant(uint256 _tokenId, uint256 _depth)
 		private
-		returns (uint256)
 	{
 		(
 			uint16 class,
@@ -938,11 +945,11 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 		require(class > 0, "Furnace: INVALID_CLASS");
 		_disenchantItem(address(this), _tokenId);
 		if (_depth == 1 || class == 0) {
-			_safeTransfer(major, address(this), msg.sender, id);
+			_safeTransferFrom(major, address(this), msg.sender, id);
 		} else {
 			_disenchant(id, _depth - 1);
 		}
-		_safeTransfer(minor, address(this), msg.sender, amount);
+		_safeTransfer(minor, msg.sender, amount);
 		emit Disenchanted(msg.sender, _tokenId, major, id, minor, amount);
 	}
 

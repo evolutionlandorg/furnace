@@ -2,7 +2,7 @@
 
 ## flatten
 ```
-make flatten
+make flat
 ```
 
 ## Addresses
