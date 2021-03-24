@@ -22,34 +22,42 @@ OBJECTOWNERSHIPV4_AUTHORITY=$(dapp create src/ObjectOwnershipAuthorityV4.sol:Obj
 addAddress "OBJECTOWNERSHIPV4_AUTHORITY" "$OBJECTOWNERSHIPV4_AUTHORITY"
 echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV4 created."
 
-seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV4_AUTHORITY 
-if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV4_AUTHORITY ; then
-  (echo "migrate ObjectOwnershipAuthorityV4 failed ${auth}"; exit 1;)
-fi
 
-allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
-for allow in "${allowlist[@]}"; do
-  res=$(seth call $OBJECTOWNERSHIPV4_AUTHORITY "whiteList(address)(bool)" $allow)
-  if test "$res" != true; then
-    (echo "migrate OWNERSHIPV4WHITELIST failed ${allow}"; exit 1;)
-  fi
-done
+# denny execute
+# seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV4_AUTHORITY 
+# AUTHV4_ADDR=$(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)")
+# if test "$AUTHV4_ADDR" != $(seth --to-checksum-address $OBJECTOWNERSHIPV4_AUTHORITY) ; then
+#   (echo "migrate ObjectOwnershipAuthorityV4 failed ${auth}"; exit 1;)
+# fi
 
-echo >&2 "${0##*/}: info: setAuthority finished."
+# allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
+# for allow in "${allowlist[@]}"; do
+#   res=$(seth call $OBJECTOWNERSHIPV4_AUTHORITY "whiteList(address)(bool)" $allow)
+#   if test "$res" != true; then
+#     (echo "migrate OWNERSHIPV4WHITELIST failed ${allow}"; exit 1;)
+#   fi
+# done
 
-seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $ITEMBASE_PROXY $(seth --to-hex 5) 
-if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $ITEMBASE_PROXY) != 5; then
-  (echo "check classAddress2Id failed."; exit 1;)
-fi
+# echo >&2 "${0##*/}: info: setAuthority finished."
 
-if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $IOBJECTOWNERSHIP_PROXY; then
+# seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $ITEMBASE_PROXY $(seth --to-hex 5) 
+# ITEM_ID=$(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $ITEMBASE_PROXY)
+# if test "$ITEM_ID"  != 5; then
+#   (echo "check classAddress2Id failed."; exit 1;)
+# fi
+
+OWNERSHIP_ADDR=$(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1))
+if test "$OWNERSHIP_ADDR" != $(seth --to-checksum-address $IOBJECTOWNERSHIP_PROXY); then
   (echo "check ownershipId2Address failed."; exit 1;)
 fi
 
 # setting registry
 item=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ITEM_BASE")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $item) != $ITEMBASE_PROXY; then
+
+# denny execute
+# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $item $ITEMBASE_PROXY 
+ITEM_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $item)
+if test "$ITEM_ADDR" != $(seth --to-checksum-address $ITEMBASE_PROXY); then
   (echo "check regist ${item} failed."; exit 1;)
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."
