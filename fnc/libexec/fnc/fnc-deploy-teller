@@ -8,17 +8,16 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 . "${0%/*}/../../lib/common.sh"
 
 # crab LPADDRESS
-# denny execute
-# registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_GOLD_ERC20_TOKEN"))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_GOLD_RING
-# registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WOOD_ERC20_TOKEN"))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WOOD_RING
-# registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WATER_ERC20_TOKEN"))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WATER_RING
-# registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_FIRE_ERC20_TOKEN"))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_FIRE_RING
-# registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_SOIL_ERC20_TOKEN"))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_SOIL_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_GOLD_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_GOLD_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WOOD_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WOOD_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_WATER_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_WATER_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_FIRE_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_FIRE_RING
+registry=$(seth --to-bytes32  $(seth --from-ascii "CONTRACT_LP_SOIL_ERC20_TOKEN"))
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $TOKEN_LP_SOIL_RING
 
 METADATATELLER=$(dapp create src/MetaDataTeller.sol:MetaDataTeller)
 addAddress "METADATATELLER" "$METADATATELLER"
@@ -32,8 +31,7 @@ echo >&2 "${0##*/}: info: MetaDataTellerProxy inited."
 
 # setting registry
 registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_METADATA_TELLER")))
-# denny execute
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $METADATATELLER_PROXY
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $METADATATELLER_PROXY
 TELLER_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry)
 if test "$TELLER_ADDR" != $METADATATELLER_PROXY; then
   (echo "check register ${registry} failed."; exit 1;)

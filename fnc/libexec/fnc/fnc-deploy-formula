@@ -8,8 +8,7 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 . "${0%/*}/../../lib/common.sh"
 
 registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_ERC721_GEGO")))
-# denny execute
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" "$registry" "$TOKEN_GEGO"
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" "$registry" "$TOKEN_GEGO"
 
 GEGO_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" "$registry")
 if test "$GEGO_ADDR" != $(seth --to-checksum-address "$TOKEN_GEGO"); then
@@ -28,7 +27,6 @@ echo >&2 "${0##*/}: info: FormulaProxy inited."
 
 # setting registry
 fml=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_FORMULA")))
-# denny execute
 # seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" "$fml" "$FORMULA_PROXY"
 
 FML_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" "$fml")
