@@ -32,7 +32,8 @@ echo >&2 "${0##*/}: info: MetaDataTellerProxy inited."
 # setting registry
 registry=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_METADATA_TELLER")))
 seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $registry $METADATATELLER_PROXY
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry) != $METADATATELLER_PROXY; then
+TELLER_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $registry)
+if test "$TELLER_ADDR" != $METADATATELLER_PROXY; then
   (echo "check register ${registry} failed."; exit 1;)
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."
