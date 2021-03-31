@@ -27,25 +27,25 @@ echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 # seth send $FURNACEPROXYADMIN "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
 # seth send $DRILLBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
 
-OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
-allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY)
-OBJECTOWNERSHIPV3_AUTHORITY=$(dapp create src/ObjectOwnershipAuthorityV3.sol:ObjectOwnershipAuthorityV3 $OWNERSHIPV3WHITELIST)
-addAddress "OBJECTOWNERSHIPV3_AUTHORITY" "$OBJECTOWNERSHIPV3_AUTHORITY"
-echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV3 created."
+# OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
+# allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY)
+# OBJECTOWNERSHIPV3_AUTHORITY=$(dapp create src/ObjectOwnershipAuthorityV3.sol:ObjectOwnershipAuthorityV3 $OWNERSHIPV3WHITELIST)
+# addAddress "OBJECTOWNERSHIPV3_AUTHORITY" "$OBJECTOWNERSHIPV3_AUTHORITY"
+# echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV3 created."
 
-seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV3_AUTHORITY
-if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV3_AUTHORITY ; then
-  (echo "migrate ObjectOwnershipAuthorityV3 failed ${auth}"; exit 1;)
-fi
+# seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV3_AUTHORITY
+# if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV3_AUTHORITY ; then
+#   (echo "migrate ObjectOwnershipAuthorityV3 failed ${auth}"; exit 1;)
+# fi
 
-for allow in "${allowlist[@]}"; do
-  res=$(seth call $OBJECTOWNERSHIPV3_AUTHORITY "whiteList(address)(bool)" $allow)
-  if test "$res" != true; then
-    (echo "migrate OWNERSHIPV3WHITELIST failed ${allow}"; exit 1;)
-  fi
-done
+# for allow in "${allowlist[@]}"; do
+#   res=$(seth call $OBJECTOWNERSHIPV3_AUTHORITY "whiteList(address)(bool)" $allow)
+#   if test "$res" != true; then
+#     (echo "migrate OWNERSHIPV3WHITELIST failed ${allow}"; exit 1;)
+#   fi
+# done
 
-echo >&2 "${0##*/}: info: setauthority finished."
+# echo >&2 "${0##*/}: info: setauthority finished."
 
 seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 4) 
 if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 4; then
