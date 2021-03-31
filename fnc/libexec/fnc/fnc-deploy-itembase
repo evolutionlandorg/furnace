@@ -7,6 +7,8 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+loadAddresses
+
 ITEMBASE=$(dapp create src/ItemBase.sol:ItemBase)
 addAddress "ITEMBASE" "$ITEMBASE"
 echo >&2 "${0##*/}: info: ItemBase created."

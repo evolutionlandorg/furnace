@@ -105,6 +105,11 @@ fnc-init() {
         rpc-verify
         chain-verify "42"
         ;;
+      heco-test)
+        config-init "${0%/*}/conf/heco-test.json";
+        rpc-verify
+        chain-verify "256"
+        ;;
       testnet) # local dapp testnet
         config-init "${FNC_CONFIG:-$TESTNET/8545/config/addresses.json}"
         export ETH_RPC_URL="${ETH_RPC_URL:-http://127.0.0.1:8545}"
