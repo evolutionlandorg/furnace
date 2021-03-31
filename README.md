@@ -7,6 +7,17 @@ make flat
 
 ## Addresses
 
+### Hect Testnet
+
+| Name    |      Source      |  ABI |  Address |
+|:--------:|:----------------:|:------:|:-----------:|
+| DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0x7921f57e52f87eD500DD77e235442645c3432474](https://testnet.hecoinfo.com/address/0x7921f57e52f87eD500DD77e235442645c3432474) |
+| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x10357233222A7A233C461922f673FAdb1eC50193](https://testnet.hecoinfo.com/address/0x7921f57e52f87eD500DD77e235442645c3432474) |
+| Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/Formula.abi) | [0x7304a5222C643893D2DC87114Fd3f5240e506c8b](https://testnet.hecoinfo.com/address/0x7304a5222C643893D2DC87114Fd3f5240e506c8b) |
+| ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0xF09FE18d3f4b4345b47c098C8B8Fba7743418aA4](https://testnet.hecoinfo.com/address/0xF09FE18d3f4b4345b47c098C8B8Fba7743418aA4) |
+| MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0x9C112639339016674979BE9352aE472789f21100](https://testnet.hecoinfo.com/address/0x9C112639339016674979BE9352aE472789f21100) |
+| GegoToken | GegoToken | [GegoToken](https://github.com/hujw77/furnance/tree/main/abi/GegoToken.abi) | [0x59ea974b74ec6a49338438bcc5d0388e294e4e20](https://testnet.hecoinfo.com/address/0x59ea974b74ec6a49338438bcc5d0388e294e4e20) |
+
 ### Pangolin
 
 | Name    |      Source      |  ABI |  Address |
