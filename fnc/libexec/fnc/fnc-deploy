@@ -37,7 +37,6 @@ case $1 in
     fnc deploy-gego
   ;;
   all)
-    fnc deploy-gego
     fnc deploy-drillbase
     fnc deploy-formula
     fnc deploy-itembase

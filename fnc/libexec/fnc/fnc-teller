@@ -20,6 +20,9 @@ case $1 in
   meta)
     seth call $teller "getMetaData(address,uint256)(uint16,uint16,uint16)" $2 $3
   ;;
+  prefer)
+    seth call $teller "getPrefer(bytes32,address)(uint16)" $2 $3 
+  ;;
   rate)
     seth call $teller "getRate(address,uint256,uint256)(uint256)" $2 $3 $4
   ;;

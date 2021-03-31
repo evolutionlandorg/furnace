@@ -14,7 +14,7 @@ GEGO_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" "$registr
 if test "$GEGO_ADDR" != $(seth --to-checksum-address "$TOKEN_GEGO"); then
   (echo "check register ${registry} failed."; exit 1;)
 fi
-echo >&2 "${0##*/}: info: installerEncoder register finished."
+echo >&2 "${0##*/}: info: Gego register finished."
 
 FORMULA=$(dapp create src/Formula.sol:Formula)
 addAddress "FORMULA" "$FORMULA"
@@ -27,7 +27,7 @@ echo >&2 "${0##*/}: info: FormulaProxy inited."
 
 # setting registry
 fml=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_FORMULA")))
-# seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" "$fml" "$FORMULA_PROXY"
+seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" "$fml" "$FORMULA_PROXY"
 
 FML_ADDR=$(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" "$fml")
 if test "$FML_ADDR" != $(seth --to-checksum-address "$FORMULA_PROXY") ; then
