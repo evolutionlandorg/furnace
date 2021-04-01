@@ -12,7 +12,7 @@ make flat
 | Name    |      Source      |  ABI |  Address |
 |:--------:|:----------------:|:------:|:-----------:|
 | DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0x7921f57e52f87eD500DD77e235442645c3432474](https://testnet.hecoinfo.com/address/0x7921f57e52f87eD500DD77e235442645c3432474) |
-| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x10357233222A7A233C461922f673FAdb1eC50193](https://testnet.hecoinfo.com/address/0x7921f57e52f87eD500DD77e235442645c3432474) |
+| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0xE14Ca2D7C5323F370c4f79D2c97f974b15D7853b](https://testnet.hecoinfo.com/address/0xE14Ca2D7C5323F370c4f79D2c97f974b15D7853b) |
 | Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/Formula.abi) | [0x7304a5222C643893D2DC87114Fd3f5240e506c8b](https://testnet.hecoinfo.com/address/0x7304a5222C643893D2DC87114Fd3f5240e506c8b) |
 | ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0xF09FE18d3f4b4345b47c098C8B8Fba7743418aA4](https://testnet.hecoinfo.com/address/0xF09FE18d3f4b4345b47c098C8B8Fba7743418aA4) |
 | MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0x9C112639339016674979BE9352aE472789f21100](https://testnet.hecoinfo.com/address/0x9C112639339016674979BE9352aE472789f21100) |
@@ -23,7 +23,7 @@ make flat
 | Name    |      Source      |  ABI |  Address |
 |:--------:|:----------------:|:------:|:-----------:|
 | DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0xE69C61AF1D1c9DD48bde7e4e671EC6B5F76CCD8E] |
-| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x10357233222A7A233C461922f673FAdb1eC50193] |
+| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x38a0b8907729d57AaA05D4BdFCFc1Ec7FF00228c] |
 | Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/Formula.abi) | [0x286979170bB820801EB6148a00d2D15De63E780F] |
 | ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0x2B79b866280CE6a0b140E0673e92d1763a1953fA] |
 | MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0x1061AF3a9974F23bD3e4E718fF2e1Fd1d7740c2A] |
