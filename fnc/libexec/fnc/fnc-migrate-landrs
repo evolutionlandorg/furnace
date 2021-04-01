@@ -11,6 +11,11 @@ seth send -F $OWNER $LANDRESOURCE_PROXY "upgradeTo(address)" $LANDRESOURCEV5
 if test $(seth call $LANDRESOURCE_PROXY "implementation()(address)") != $LANDRESOURCEV5; then
   (echo "check migration failed."; exit 1;)
 fi
+
+# resource release start time 1544083267
+# starttime=$(seth --to-uint256 $(date +%s))
+# seth send $LANDRESOURCE_PROXY "initializeContract(address,uint256)" $SETTINGSREGISTRY $starttime  
+
 addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
 echo >&2 "${0##*/}: info: migration finished." 
 

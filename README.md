@@ -12,7 +12,7 @@ make flat
 | Name    |      Source      |  ABI |  Address |
 |:--------:|:----------------:|:------:|:-----------:|
 | DrillBase_Proxy | DrillBase.sol |[DrillBase.abi](https://github.com/hujw77/furnance/tree/main/abi/DrillBase.abi) | [0x8bB7e28Fe89037e2695aec1f28DAc94398580b37] |
-| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x10357233222A7A233C461922f673FAdb1eC50193] |
+| LandResourceV5_Proxy | LandResourceV5.f.sol |[LandResourceV5.abi](https://github.com/hujw77/furnance/tree/main/abi/LandResourceV5.abi) | [0x38a0b8907729d57AaA05D4BdFCFc1Ec7FF00228c] |
 | Formula_Proxy | Formula.sol |[Formula.abi](https://github.com/hujw77/furnance/tree/main/abi/Formula.abi) | [0x97Bb5Fae11605c4C5eee5e149Fa8E4C77C135F04] |
 | ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0xA10D0C6e04845A5e998d1936249A30563c553417] |
 | MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0xCBec9a30F62EEa4e412BfF7BFe7F510Aa3693B2B] |
