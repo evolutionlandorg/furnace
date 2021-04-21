@@ -43,11 +43,7 @@ contract Formula is Initializable, DSAuth, IFormula {
 	}
 
 	function _init() internal {
-		address gego = registry.addressOf(CONTRACT_ERC721_GEGO); 
 		address ownership = registry.addressOf(CONTRACT_OBJECT_OWNERSHIP);
-		// 0
-		insert("合金镐", uint128(5 * RATE_DECIMALS), uint16(256), uint16(1), uint16(1), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, gego, 256, 0, 1);
-
 		// 1
 		insert("人力铸铁钻机", uint128(5 * RATE_DECIMALS), uint16(4), uint16(1), uint16(1), true, CONTRACT_ELEMENT_TOKEN, 500 * UNIT, ownership, 4, 0, 1);
 
