@@ -5,14 +5,14 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
-LANDRESOURCEV4_AUTHORITY=$(dapp create src/LandResourceAuthorityV4.sol:LandResourceAuthorityV4 [$PETBASE_PROXY,$TOKENUSE_PROXY,$LANDITEMBAR_PROXY])
+LANDRESOURCEV4_AUTHORITY=$(dapp create src/LandResourceAuthorityV4.sol:LandResourceAuthorityV4 [$PETBASE_PROXY,$TOKENUSE_PROXY])
 
 seth send -F $OWNER $LANDRESOURCE_PROXY "setAuthority(address)" $LANDRESOURCEV4_AUTHORITY 
 if test $(seth call $LANDRESOURCE_PROXY "authority()(address)") != $LANDRESOURCEV4_AUTHORITY ; then
   (echo "migrate LandResourceAuthorityV4 failed ${auth}"; exit 1;)
 fi
 
-allowlist=($PETBASE_PROXY $TOKENUSE_PROXY $LANDITEMBAR_PROXY)
+allowlist=($PETBASE_PROXY $TOKENUSE_PROXY)
 for allow in "${allowlist[@]}"; do
   res=$(seth call $LANDRESOURCEV4_AUTHORITY "whiteList(address)(bool)" $allow)
   if test "$res" != true; then
