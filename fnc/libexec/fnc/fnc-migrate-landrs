@@ -5,6 +5,8 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+loadAddresses
+
 LANDRESOURCEV5=$(dapp create one/LandResourceV5.f.sol:LandResourceV5)
 seth send -F $OWNER $LANDRESOURCE_PROXY "upgradeTo(address)" $LANDRESOURCEV5
 
@@ -14,7 +16,7 @@ fi
 
 #resource release start time 1544083267
 starttime=$(seth --to-uint256 $(date +%s))
-seth send $LANDRESOURCE_PROXY "initializeContract(address,uint256)" $SETTINGSREGISTRY $starttime  
+seth send $LANDRESOURCE_PROXY "initializeContract(address,uint256)" $ISETTINGSREGISTRY $starttime  
 
 addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
 echo >&2 "${0##*/}: info: migration finished." 
