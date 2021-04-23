@@ -1,4 +1,5 @@
-all     :; dapp build
+all     :;
+	source .env && dapp build
 buildone:; dapp --use solc:0.4.24 buildone
 clean   :; dapp clean
 test    :; dapp test
