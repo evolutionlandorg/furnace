@@ -6,19 +6,19 @@
 ###
 set -e
 
-gene="${IGENESCIENCE?}" 
+gene="${GENESCIENCEV8?}" 
 
 case $1 in
   strength)
     landId=$2
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       info=$(seth call $APOSTLEBASE_PROXY "getApostleInfo(uint256)(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)" $3)
       talent=$(echo $info | cut -d' ' -f 2)
       talent=$(seth --to-uint256 $talent)
-      strength=$(seth call $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId)
+      strength=$(seth call $GENESCIENCEV8 "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId)
       seth --to-fix 18 $strength 
-      seth estimate $IGENESCIENCE "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId
+      seth estimate $GENESCIENCEV8 "getStrength(uint256,address,uint256)(uint256)" $talent $token $landId
     done
   ;;
      *) fnc help gene;    ;;

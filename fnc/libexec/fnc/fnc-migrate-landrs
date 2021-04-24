@@ -16,7 +16,7 @@ fi
 
 #resource release start time 1544083267
 starttime=$(seth --to-uint256 $(date +%s))
-seth send $LANDRESOURCE_PROXY "initializeContract(address,uint256)" $ISETTINGSREGISTRY $starttime  
+seth send $LANDRESOURCE_PROXY "initializeContract(address,uint256)" $SETTINGSREGISTRY $starttime  
 
 addAddress "LANDRESOURCEV5" "$LANDRESOURCEV5"
 echo >&2 "${0##*/}: info: migration finished." 

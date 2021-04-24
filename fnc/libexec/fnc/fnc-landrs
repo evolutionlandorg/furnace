@@ -27,12 +27,12 @@ case $1 in
     landId=$2
     itemId=$3
     itemToken=$4
-    resources=[$TOKEN_GOLD,$TOKEN_WOOD,$TOKEN_WATER,$TOKEN_FIRE,$TOKEN_SOIL]
+    resources=[$TOKEN_ERC20_GOLD,$TOKEN_ERC20_WOOD,$TOKEN_ERC20_WATER,$TOKEN_ERC20_FIRE,$TOKEN_ERC20_SOIL]
     seth call $landrs "availableLandResources(uint256,address[])(uint256[])" "$landId" "$resources"
     echo "-----------------------------"
     seth call $landrs "availableItemResources(address,uint256,address[])(uint256[])" $itemToken $itemId $resources 
     echo "-----------------------------"
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       landrss=$(seth call $landrs "getLandMinedBalance(uint256,address)(uint256)" $landId $token)
       barrs=$(seth call $landrs "getItemMinedBalance(address,uint256,address)(uint256)" $itemToken $itemId $token)
@@ -96,14 +96,14 @@ case $1 in
     seth call $landrs "getBarsMiningStrength(uint256,address)(uint256)" "${@:2}" 
   ;;
   state)
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       echo "-----------------------------"
       seth call $landrs "land2RSState(uint256,address)(uint256,uint256,uint256)" $2 $token
     done
   ;;
   itemrs)
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       echo "-----------------------------"
       seth call $landrs "getBarMinedBalance(uint256,address,address)(uint256)" $2 $3 $token
@@ -132,13 +132,13 @@ case $1 in
     soil_crate=$(bc <<< "$soil_rate - $soil_rate * 0.0001 * $num")
     echo "soil_rate"   "$soil_rate"   "$soil_crate"
     currentTime=$(seth --to-uint256 $currentTime)
-    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_GOLD $currentTime
-    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_WOOD $currentTime
-    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_WATER $currentTime
-    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_FIRE $currentTime
-    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_SOIL $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_ERC20_GOLD $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_ERC20_WOOD $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_ERC20_WATER $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_ERC20_FIRE $currentTime
+    seth call $LANDRESOURCE_PROXY "getReleaseSpeed(uint256,address,uint256)(uint256)" $tokenId $TOKEN_ERC20_SOIL $currentTime
     echo "-----------------------------"
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       landstrength=$(seth call $LANDRESOURCE_PROXY "getLandMiningStrength(uint256,address)(uint256)" $tokenId $token)
       barstrength=$(seth call $LANDRESOURCE_PROXY "getBarsMiningStrength(uint256,address)(uint256)" $tokenId $token)

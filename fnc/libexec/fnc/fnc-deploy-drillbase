@@ -16,7 +16,7 @@ addAddress "DRILLBASE" "$DRILLBASE"
 echo >&2 "${0##*/}: info: DrillBase created."
 
 # 1
-calldata=$(seth calldata "initialize(address)" $ISETTINGSREGISTRY)
+calldata=$(seth calldata "initialize(address)" $SETTINGSREGISTRY)
 DRILLBASE_PROXY=$(dapp create src/DrillBaseProxy.sol:DrillBaseProxy $DRILLBASE $FURNACEPROXYADMIN $calldata)
 addAddress "DRILLBASE_PROXY" "$DRILLBASE_PROXY"
 echo >&2 "${0##*/}: info: DrillBaseProxy inited."
@@ -25,7 +25,7 @@ echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 # seth send $FURNACEPROXYADMIN "upgradeAndCall(address,address,bytes)" $DRILLBASE_PROXY $DRILLBASE $calldata 
 # 3
 # seth send $FURNACEPROXYADMIN "upgrade(address,address)" $DRILLBASE_PROXY $DRILLBASE
-# seth send $DRILLBASE_PROXY "initialize(address)" $ISETTINGSREGISTRY
+# seth send $DRILLBASE_PROXY "initialize(address)" $SETTINGSREGISTRY
 
 # OWNERSHIPV3WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
 # allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY)
@@ -33,8 +33,8 @@ echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 # addAddress "OBJECTOWNERSHIPV3_AUTHORITY" "$OBJECTOWNERSHIPV3_AUTHORITY"
 # echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV3 created."
 
-# seth send -F $OWNER $IOBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV3_AUTHORITY
-# if test $(seth call $IOBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV3_AUTHORITY ; then
+# seth send -F $OWNER $OBJECTOWNERSHIP_PROXY "setAuthority(address)" $OBJECTOWNERSHIPV3_AUTHORITY
+# if test $(seth call $OBJECTOWNERSHIP_PROXY "authority()(address)") != $OBJECTOWNERSHIPV3_AUTHORITY ; then
 #   (echo "migrate ObjectOwnershipAuthorityV3 failed ${auth}"; exit 1;)
 # fi
 
@@ -47,19 +47,19 @@ echo >&2 "${0##*/}: info: DrillBaseProxy inited."
 
 # echo >&2 "${0##*/}: info: setauthority finished."
 
-seth send -F $OWNER $INTERSTELLARENCODER "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 4) 
-if test $(seth call $INTERSTELLARENCODER "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 4; then
+seth send -F $OWNER $INTERSTELLARENCODERV4 "registerNewObjectClass(address,uint8)" $DRILLBASE_PROXY $(seth --to-hex 4) 
+if test $(seth call $INTERSTELLARENCODERV4 "classAddress2Id(address)(uint8)" $DRILLBASE_PROXY) != 4; then
   (echo "check classAddress2Id failed."; exit 1;)
 fi
 
-if test $(seth call $INTERSTELLARENCODER "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $IOBJECTOWNERSHIP_PROXY; then
+if test $(seth call $INTERSTELLARENCODERV4 "ownershipId2Address(uint8)(address)" $(seth --to-hex 1)) != $OBJECTOWNERSHIP_PROXY; then
   (echo "check ownershipId2Address failed."; exit 1;)
 fi
 
 # setting registry
 drill=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "CONTRACT_DRILL_BASE")))
-seth send -F $OWNER $ISETTINGSREGISTRY "setAddressProperty(bytes32,address)" $drill $DRILLBASE_PROXY 
-if test $(seth call $ISETTINGSREGISTRY "addressOf(bytes32)(address)" $drill) != $DRILLBASE_PROXY; then
+seth send -F $OWNER $SETTINGSREGISTRY "setAddressProperty(bytes32,address)" $drill $DRILLBASE_PROXY 
+if test $(seth call $SETTINGSREGISTRY "addressOf(bytes32)(address)" $drill) != $DRILLBASE_PROXY; then
   (echo "check regist ${drill} failed."; exit 1;)
 fi
 echo >&2 "${0##*/}: info: installerEncoder register finished."

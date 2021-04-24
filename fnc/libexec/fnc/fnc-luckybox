@@ -22,7 +22,7 @@ case $1 in
     seth send $luckybox "claimTokens(address)" "${@:2}"
   ;;
   buy)
-    seth send ${TOKEN_RING?} "transfer(address,uint256,bytes)" $luckybox "${@:2}"
+    seth send ${TOKEN_ERC20_RING?} "transfer(address,uint256,bytes)" $luckybox "${@:2}"
   ;;
   start)
     seth send $luckybox "start()"

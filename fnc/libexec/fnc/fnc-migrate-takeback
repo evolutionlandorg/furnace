@@ -5,7 +5,7 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
-DRILLTAKEBACK=$(dapp create src/DrillTakeBack.sol:DrillTakeBack $ISETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $CHAINID))
+DRILLTAKEBACK=$(dapp create src/DrillTakeBack.sol:DrillTakeBack $SETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $(seth rpc net_version)))
 addAddress "DRILLTAKEBACK" "$DRILLTAKEBACK"
 
 DRILLBASE_AUTHORITY=$(dapp create src/DrillBaseAuthority.sol:DrillBaseAuthority [$DRILLTAKEBACK])

@@ -10,7 +10,7 @@ apostle="${APOSTLEBASE_PROXY?}"
 
 case $1 in
   strength)
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       strength=$(seth call $apostle "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3)
       seth estimate $apostle "strengthOf(uint256,address,uint256)(uint256)" $2 $token $3

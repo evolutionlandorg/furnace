@@ -44,7 +44,7 @@ case $1 in
     seth estimate $landbar "enhanceStrengthRateByIndex(address,uint256,uint256)(uint256)" "${@:2}"		
   ;;
   rate)
-    tokens=($TOKEN_GOLD $TOKEN_WOOD $TOKEN_WATER $TOKEN_FIRE $TOKEN_SOIL)
+    tokens=($TOKEN_ERC20_GOLD $TOKEN_ERC20_WOOD $TOKEN_ERC20_WATER $TOKEN_ERC20_FIRE $TOKEN_ERC20_SOIL)
     for token in "${tokens[@]}"; do
       seth call $landbar "enhanceStrengthRateOf(address,uint256)(uint256)" $token $2
       seth estimate $landbar "enhanceStrengthRateOf(address,uint256)(uint256)" $token $2

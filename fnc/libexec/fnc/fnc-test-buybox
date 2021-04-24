@@ -7,5 +7,5 @@ amount=$(seth --to-uint256 $(seth --to-wei 7500 ether))
 goldBox=$(seth --to-uint256 4)
 silverBox=$(seth --to-uint256 2)
 data=$goldBox${silverBox:2}
-seth send -F $AUTH $TOKEN_RING "transfer(address,uint256,bytes)" $DRILLLUCKYBOX $amount $data 
+seth send -F $AUTH $TOKEN_ERC20_RING "transfer(address,uint256,bytes)" $DRILLLUCKYBOX $amount $data 
 

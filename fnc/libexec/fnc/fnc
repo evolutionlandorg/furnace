@@ -46,7 +46,6 @@ elif [[ $1 = -* ]] && command -v "${0##*/}-$1" &>/dev/null; then
 fi
 
 export SETH_CHAIN=${SETH_CHAIN-ropsten}
-export CHAINID=${CHAINID-3}
 
 eval "$(git rev-parse --parseopt -- "$@" <<<"$OPTS" || echo exit $?)"
 
@@ -87,27 +86,22 @@ fnc-init() {
     case "$SETH_CHAIN" in
       mainnet)
         config-init "${0%/*}/conf/mainnet.json";
-        rpc-verify
         chain-verify "1"
         ;;
       ropsten)
         config-init "${0%/*}/conf/ropsten.json";
-        rpc-verify
         chain-verify "3"
         ;;
       pangolin)
         config-init "${0%/*}/conf/pangolin.json";
-        rpc-verify
         chain-verify "43"
         ;;
       kovan)
         config-init "${0%/*}/conf/kovan.json";
-        rpc-verify
         chain-verify "42"
         ;;
-      heco-test)
+      hecotest)
         config-init "${0%/*}/conf/heco-test.json";
-        rpc-verify
         chain-verify "256"
         ;;
       testnet) # local dapp testnet
@@ -129,18 +123,9 @@ fnc-init() {
   fi
 }
 
-rpc-verify() {
-  if test -z "$ETH_RPC_URL"
-  then
-    echo "Please set the ETH_RPC_URL to an ethereum endpoint."
-    exit 1
-  fi
-}
-
 chain-verify() {
   EXPECTED="$1"
   ACTUAL="$(seth rpc net_version)"
-  export CHAINID=$ACTUAL
   if [ "$EXPECTED" != "$ACTUAL" ]; then
     echo "Ethereum network version is incorrect."
     echo "Verify ETH_RPC_URL is set to $FNC_CHAIN (Expected $EXPECTED, got $ACTUAL)"

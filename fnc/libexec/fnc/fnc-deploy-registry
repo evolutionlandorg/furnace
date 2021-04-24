@@ -29,9 +29,9 @@ seth send $METADATATELLER_PROXY "addInternalTokenMeta(bytes32,uint16,uint256)" $
 
 fee=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "FURNACE_ITEM_MINE_FEE")))
 feeRate=$(seth --to-uint256 5000000)
-seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $fee $feeRate
+seth send -F $OWNER $SETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $fee $feeRate
 
 protect=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "UINT_ITEMBAR_PROTECT_PERIOD")))
 period=$(seth --to-uint256 604800)
 # period=$(seth --to-uint256 300)
-seth send -F $OWNER $ISETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $protect $period
+seth send -F $OWNER $SETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $protect $period
