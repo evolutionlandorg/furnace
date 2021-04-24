@@ -96,6 +96,10 @@ fnc-init() {
         config-init "${0%/*}/conf/pangolin.json";
         chain-verify "43"
         ;;
+      crab)
+        config-init "${0%/*}/conf/crab.json";
+        chain-verify "44"
+        ;;
       kovan)
         config-init "${0%/*}/conf/kovan.json";
         chain-verify "42"

@@ -43,6 +43,8 @@ case $1 in
     # fnc deploy-landbar
     fnc deploy-teller
     fnc deploy-registry
+    fnc migrate-takeback
+    fnc migrate-luckybox
   ;;
      *) fnc help deploy;    ;;
 esac
