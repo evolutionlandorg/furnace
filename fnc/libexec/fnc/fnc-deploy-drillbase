@@ -7,10 +7,6 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
-FURNACEPROXYADMIN=$(dapp create src/FurnaceProxyAdmin.sol:FurnaceProxyAdmin)
-addAddress "FURNACEPROXYADMIN" "$FURNACEPROXYADMIN"
-echo >&2 "${0##*/}: info: FurnaceProxyAdmin created."
-
 DRILLBASE=$(dapp create src/DrillBase.sol:DrillBase)
 addAddress "DRILLBASE" "$DRILLBASE"
 echo >&2 "${0##*/}: info: DrillBase created."

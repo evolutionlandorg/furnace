@@ -5,6 +5,8 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
-timestamp=$(seth block "latest" timestamp)
-DRILLLUCKYBOX=$(dapp create src/DrillLuckyBox.sol:DrillLuckyBox $SETTINGSREGISTRY $DRILLTAKEBACK $(seth --to-uint256 1617280889))
+loadAddresses
+
+timestamp="$DRILLLUCKYBOX_RELEASE_TIME"
+DRILLLUCKYBOX=$(dapp create src/DrillLuckyBox.sol:DrillLuckyBox $SETTINGSREGISTRY $DRILLTAKEBACK $(seth --to-uint256 $timestamp))
 addAddress "DRILLLUCKYBOX" "$DRILLLUCKYBOX"

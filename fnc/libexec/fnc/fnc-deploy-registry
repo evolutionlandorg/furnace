@@ -28,10 +28,10 @@ rate3=$(seth --to-uint256 12000000)
 seth send $METADATATELLER_PROXY "addInternalTokenMeta(bytes32,uint16,uint256)" $drill $drillgrade3 $rate3
 
 fee=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "FURNACE_ITEM_MINE_FEE")))
-feeRate=$(seth --to-uint256 5000000)
+feeRate=$(seth --to-uint256 "$FURNACE_ITEM_MINE_FEE")
 seth send -F $OWNER $SETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $fee $feeRate
 
 protect=$(seth --to-bytes32 $(seth --to-hex $(seth --from-ascii "UINT_ITEMBAR_PROTECT_PERIOD")))
-period=$(seth --to-uint256 604800)
+period=$(seth --to-uint256 "$UINT_ITEMBAR_PROTECT_PERIOD")
 # period=$(seth --to-uint256 300)
 seth send -F $OWNER $SETTINGSREGISTRY "setUintProperty(bytes32,uint256)" $protect $period
