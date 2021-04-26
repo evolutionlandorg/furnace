@@ -1,8 +1,8 @@
 { pkgs ? import <nixpkgs> {}
 , dappPkgs ? import (pkgs.fetchgit {
     url = "https://github.com/hujw77/dapptools";
-    rev = "seth/0.10.3";
-    sha256 = "1zr4mjypzx9p1xrj22bprlp6lna3jjg990dqn3g1mh293brj4mig";
+    rev = "seth/crab-rc";
+    sha256 = "01cj6d6sddynhpyf0lyg2aic8xbksf2xcfcc97290i8kvlxhhcwc";
     fetchSubmodules = true;
   }) {}
 }:

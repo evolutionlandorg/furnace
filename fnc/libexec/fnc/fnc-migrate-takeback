@@ -5,6 +5,8 @@ set -e
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+loadAddresses
+
 DRILLTAKEBACK=$(dapp create src/DrillTakeBack.sol:DrillTakeBack $SETTINGSREGISTRY $SUPERVISOR $(seth --to-uint256 $(seth rpc net_version)))
 addAddress "DRILLTAKEBACK" "$DRILLTAKEBACK"
 
