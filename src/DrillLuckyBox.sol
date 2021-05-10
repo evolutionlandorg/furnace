@@ -105,6 +105,10 @@ contract DrillLuckyBox is DSMath, DSStop, IERC223Recipient, DrillBoxPrice {
 		priceSilverBox = mul(priceSilverBox, DECIMALS);
 	}
 
+    function setBeginTime(uint256 _priceIncreaseBeginTime) public auth {
+        priceIncreaseBeginTime = _priceIncreaseBeginTime;
+    }
+
 	//////////
 	// Safety Methods
 	//////////
