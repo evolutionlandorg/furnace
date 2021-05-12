@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "tronbox compile",
+    "deploy:shasta": "tronbox migrate --network shasta --reset"
+  },
+  "dependencies": {
+    "tronweb": "^3.2.6"
+  }
+}

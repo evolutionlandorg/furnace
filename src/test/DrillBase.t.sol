@@ -8,7 +8,6 @@ contract DrillBaseTest is DSTest {
     DrillBase item;
 
     function setUp() public {
-        item = new DrillBase();
     }
 
     function testFail_basic_sanity() public {

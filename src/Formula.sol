@@ -1,12 +1,11 @@
 pragma solidity ^0.6.7;
 
-import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./FurnaceSettingIds.sol";
 
-contract Formula is Initializable, DSAuth, IFormula {
+contract Formula is DSAuth, IFormula {
 	event SetStrength(uint256 indexed inde, uint128 rate);
 
 	event SetAmount(uint256 indexed index, uint256 amount);
@@ -34,11 +33,8 @@ contract Formula is Initializable, DSAuth, IFormula {
 	ISettingsRegistry public registry;
 	FormulaEntry[] public formulas;
 
-	function initialize(address _registry) public initializer {
-		owner = msg.sender;
-		emit LogSetOwner(msg.sender);
+	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
-
 		_init();
 	}
 

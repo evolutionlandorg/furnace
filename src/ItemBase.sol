@@ -2,14 +2,13 @@ pragma solidity ^0.6.7;
 
 import "ds-math/math.sol";
 import "ds-stop/stop.sol";
-import "zeppelin-solidity/proxy/Initializable.sol";
 import "./interfaces/IELIP002.sol";
 import "./interfaces/IFormula.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IMetaDataTeller.sol";
 import "./interfaces/IObjectOwnership.sol";
 
-contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
+contract ItemBase is DSStop, DSMath, IELIP002 {
 	// 0x434f4e54524143545f4d455441444154415f54454c4c45520000000000000000
 	bytes32 public constant CONTRACT_METADATA_TELLER =
 		"CONTRACT_METADATA_TELLER";
@@ -47,9 +46,7 @@ contract ItemBase is Initializable, DSStop, DSMath, IELIP002 {
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
-	function initialize(address _registry) public initializer {
-		owner = msg.sender;
-		emit LogSetOwner(msg.sender);
+	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
 
 		// trick test

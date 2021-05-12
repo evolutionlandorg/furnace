@@ -2,7 +2,6 @@ pragma solidity ^0.6.7;
 
 import "ds-math/math.sol";
 import "ds-auth/auth.sol";
-import "zeppelin-solidity/proxy/Initializable.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 import "./interfaces/IELIP002.sol";
@@ -11,7 +10,7 @@ import "./interfaces/ILandBase.sol";
 import "./interfaces/IELIP002.sol";
 import "./FurnaceSettingIds.sol";
 
-contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
+contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	event AddLPToken(bytes32 _class, address _lpToken, uint8 _resourceId);
 	event AddInternalTokenMeta(
 		bytes32 indexed token,
@@ -48,9 +47,7 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 	mapping(address => Meta) public externalToken2Meta;
 	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
 
-	function initialize(address _registry) public initializer {
-		owner = msg.sender;
-		emit LogSetOwner(msg.sender);
+	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
 
 		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][

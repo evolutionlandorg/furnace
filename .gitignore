@@ -2,6 +2,9 @@
 /conf
 /one
 /flat
+/build
 .dapprc
 .sethrc
 .fncrc
+node_modules
+package-lock.json

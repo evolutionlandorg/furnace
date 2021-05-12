@@ -1,11 +1,10 @@
 pragma solidity ^0.6.7;
 
-import "zeppelin-solidity/proxy/Initializable.sol";
 import "ds-auth/auth.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
 
-contract DrillBase is Initializable, DSAuth {
+contract DrillBase is DSAuth {
 	event Create(
 		address indexed owner,
 		uint256 indexed tokenId,
@@ -29,10 +28,7 @@ contract DrillBase is Initializable, DSAuth {
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
-	function initialize(address _registry) public initializer {
-		owner = msg.sender;
-		emit LogSetOwner(msg.sender);
-
+	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
 	}
 

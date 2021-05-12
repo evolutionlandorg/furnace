@@ -1,13 +1,19 @@
-pragma solidity ^0.6.7;
+// hevm: flattened sources of src/ObjectOwnershipAuthorityV4.sol
+
+pragma solidity =0.6.0;
+
+////// src/ObjectOwnershipAuthorityV4.sol
+/* pragma solidity ^0.6.7; */
 
 /**
  * @title ObjectOwnershipAuthority
  * @dev ObjectOwnershipAuthority is authority that manage ObjectOwnership.
  * difference between ObjectOwnershipAuthority whiteList:
-[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY] ==> [$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY]
+[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY] ==> 
+[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
  */
 
-contract ObjectOwnershipAuthorityV3 {
+contract ObjectOwnershipAuthorityV4 {
 	mapping(address => bool) public whiteList;
 
 	constructor(address[] memory _whitelists) public {
@@ -32,3 +38,4 @@ contract ObjectOwnershipAuthorityV3 {
 				_sig == bytes4(keccak256("burn(address,uint256)")));
 	}
 }
+
