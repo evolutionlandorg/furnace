@@ -1,6 +1,7 @@
 /out
 /conf
 /one
+/flat
 .dapprc
 .sethrc
 .fncrc

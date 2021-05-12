@@ -3,7 +3,7 @@ buildone :; dapp --use solc:0.4.24 buildone
 clean    :; dapp clean
 test     :; dapp test
 deploy   :; dapp create Furnance
-flat     :; bash flat.sh
+flat     :; source .env && dapp flat
 lint     :; solhint --max-warnings 0 'src/**/*.sol'
 link     :;
 	rm -rf 'one'
