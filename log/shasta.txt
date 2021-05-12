@@ -1,0 +1,38 @@
+> deploy:shasta
+> tronbox migrate --network shasta --reset
+
+Using network 'shasta'.
+
+Running migration: 1_initial_migration.js
+shasta
+  Deploying Migrations...
+  Migrations:
+    (base58) TBKV9eoyRWPSwXEb831eeng3zLVJxnho6P
+    (hex) 410ecdecc1b7ddd8f88e15831ff2705bee87e331d3
+Saving artifacts...
+Running migration: 2_deploy_furnace.js
+  Deploying DrillBase...
+  DrillBase:
+    (base58) TQKsmGhJ3qTmg4atwGgUM4iFHXuZPjE1Bw
+    (hex) 419d7a6ff50f20a23ee14ae1c72e718fad6821e39d
+  Deploying ItemBase...
+  ItemBase:
+    (base58) TZDLhbyK4yvZpaKHChW2qP8HNVSBrEgyU9
+    (hex) 41fef724b17d09cb1b68ef6b837b4303bb43a4d642
+  Deploying Formula...
+  Formula:
+    (base58) TJtqW6YrnRkR62Uf5nPzbYTn4bX6UHjPYy
+    (hex) 4161e5857dc441cd093b798b7ed44a05489f207f8d
+  Deploying MetaDataTeller...
+  MetaDataTeller:
+    (base58) TTMd4zcpR7c76oeJypFCiWsi3gawbzHeS4
+    (hex) 41beb7615c1ebd20d465f9c486e986e496bddd716c
+  Deploying DrillTakeBack...
+  DrillTakeBack:
+    (base58) TLUGyWWEh37hWTkoarVo67RXqzX5xwfrLa
+    (hex) 417330a3309ed374ee687a136ab8071ebc787ad60b
+  Deploying DrillLuckyBox...
+  DrillLuckyBox:
+    (base58) TGpWi2LnE3QvJA4vSCwgyERvtYw7KC2Ppb
+    (hex) 414b23ead414b68922ba26a8cbcc40a9264cc6b601
+Saving artifacts...

@@ -500,31 +500,7 @@ interface ILandBase {
 interface ISettingsRegistry {
     function uintOf(bytes32 _propertyName) external view returns (uint256);
 
-    function stringOf(bytes32 _propertyName) external view returns (string memory);
-
     function addressOf(bytes32 _propertyName) external view returns (address);
-
-    function bytesOf(bytes32 _propertyName) external view returns (bytes memory);
-
-    function boolOf(bytes32 _propertyName) external view returns (bool);
-
-    function intOf(bytes32 _propertyName) external view returns (int);
-
-    function setUintProperty(bytes32 _propertyName, uint _value) external;
-
-    function setStringProperty(bytes32 _propertyName, string calldata _value) external;
-
-    function setAddressProperty(bytes32 _propertyName, address _value) external;
-
-    function setBytesProperty(bytes32 _propertyName, bytes calldata _value) external;
-
-    function setBoolProperty(bytes32 _propertyName, bool _value) external;
-
-    function setIntProperty(bytes32 _propertyName, int _value) external;
-
-    function getValueTypeOf(bytes32 _propertyName) external view returns (uint /* SettingsValueTypes */ );
-
-    event ChangeProperty(bytes32 indexed _propertyName, uint256 _type);
 }
 
 ////// src/interfaces/IUniswapV2Pair.sol
@@ -640,21 +616,21 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	constructor(address _registry) public {
 		registry = ISettingsRegistry(_registry);
 
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
-		] = 1;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
-		] = 2;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
-		] = 3;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
-		] = 4;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
-		] = 5;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
+		// ] = 1;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
+		// ] = 2;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
+		// ] = 3;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
+		// ] = 4;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
+		// ] = 5;
 	}
 
 	function addLPToken(
