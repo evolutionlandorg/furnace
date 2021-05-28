@@ -9,6 +9,7 @@ import "./DrillBoxPrice.sol";
 contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
+	event RingRefunded(address indexed buyer, uint256 value);
 	event ClaimedTokens(
 		address indexed token,
 		address indexed to,
@@ -41,11 +42,13 @@ contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 	 * @param _from - person who transfer token in for buying box.
 	 * @param goldBoxAmount - buy gold box amount.
 	 * @param silverBoxAmount - buy silver box amount.
+	 * @param amountMax - buy box max amount.
 	 */
     function buyBox(
 		address _from,
         uint256 goldBoxAmount,
-        uint256 silverBoxAmount
+        uint256 silverBoxAmount,
+        uint256 amountMax
 	) external stoppable {
 		(uint256 priceGoldBox, uint256 priceSilverBox) = getPrice();
 		uint256 chargeGoldBox = mul(goldBoxAmount, priceGoldBox);
@@ -65,6 +68,12 @@ contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 		}
 		if (silverBoxAmount > 0) {
 			emit SilverBoxSale(_from, silverBoxAmount, priceSilverBox);
+		}
+
+		if (amountMax > charge) {
+			uint256 ringToRefund = sub(amountMax, charge);
+			IERC20(ring).transfer(_from, ringToRefund);
+			emit RingRefunded(_from, ringToRefund);
 		}
 	}
 
