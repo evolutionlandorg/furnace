@@ -9,7 +9,6 @@ import "./DrillBoxPrice.sol";
 contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
-	event RingRefunded(address indexed buyer, uint256 value);
 	event ClaimedTokens(
 		address indexed token,
 		address indexed to,
@@ -69,12 +68,6 @@ contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 		}
 		if (silverBoxAmount > 0) {
 			emit SilverBoxSale(_from, silverBoxAmount, priceSilverBox);
-		}
-
-		if (amountMax > charge) {
-			uint256 ringToRefund = sub(amountMax, charge);
-			IERC20(ring).transfer(_from, ringToRefund);
-			emit RingRefunded(_from, ringToRefund);
 		}
 	}
 
