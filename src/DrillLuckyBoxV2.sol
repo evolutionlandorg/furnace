@@ -60,7 +60,7 @@ contract DrillLuckyBoxV2 is DSMath, DSStop, DrillBoxPrice {
 			goldBoxAmount > 0 || silverBoxAmount > 0,
 			"Buy gold or silver box"
 		);
-		require(_amount >= charge, "No enough ring for buying lucky boxes.");
+		require(amountMax >= charge, "No enough ring for buying lucky boxes.");
 
 		IERC20(ring).transferFrom(msg.sender, wallet, charge);
 
