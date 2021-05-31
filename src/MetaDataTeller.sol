@@ -53,21 +53,21 @@ contract MetaDataTeller is Initializable, DSAuth, DSMath, FurnaceSettingIds {
 		emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
-		] = 1;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
-		] = 2;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
-		] = 3;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
-		] = 4;
-		resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
-			registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
-		] = 5;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_GOLD_ERC20_TOKEN)
+		// ] = 1;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_WOOD_ERC20_TOKEN)
+		// ] = 2;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_WATER_ERC20_TOKEN)
+		// ] = 3;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_FIRE_ERC20_TOKEN)
+		// ] = 4;
+		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][
+		// 	registry.addressOf(CONTRACT_LP_SOIL_ERC20_TOKEN)
+		// ] = 5;
 	}
 
 	function addLPToken(
