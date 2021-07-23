@@ -38,8 +38,8 @@ Running migration: 2_deploy_furnace.js
     (hex) 412111e584fb1e7040ca6b25a4e457564cc51cc3f9
   Replacing LandResourceV6...
   LandResourceV6:
-    (base58) TAkpDPHGuYqAmZ65G1FUixSg9AvippoXew
-    (hex) 4108a01cb9bd0b9290d004e64dc546561b360180b9
+    (base58) TGV7Bj7w1brkhB2bsa17XuVvbdFGSgPeXY
+    (hex) 41477860E86FA0451EA1A85E7663826A4EAA78A572
 LandResourceV6 setAuthority succeed.
   Replacing DrillBaseAuthority...
   DrillBaseAuthority:
