@@ -35,6 +35,7 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	uint16 internal constant _EXTERNAL_DEFAULT_CLASS = 0;
 	uint16 internal constant _EXTERNAL_DEFAULT_GRADE = 1;
 
+    bool private singletonLock = false;
 	ISettingsRegistry public registry;
 	/**
 	 * @dev mapping from resource lptoken address to resource atrribute rate id.
@@ -47,7 +48,15 @@ contract MetaDataTeller is DSAuth, DSMath, FurnaceSettingIds {
 	mapping(address => Meta) public externalToken2Meta;
 	mapping(bytes32 => mapping(uint16 => uint256)) public internalToken2Meta;
 
-	constructor(address _registry) public {
+	modifier singletonLockCall() {
+		require(!singletonLock, "Only can call once");
+		_;
+		singletonLock = true;
+	}
+
+	function initializeContract(address _registry) public singletonLockCall {
+        owner = msg.sender;
+        emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 
 		// resourceLPToken2RateAttrId[CONTRACT_LP_ELEMENT_TOKEN][

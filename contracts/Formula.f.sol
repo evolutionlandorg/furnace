@@ -399,10 +399,19 @@ contract Formula is DSAuth, IFormula {
 
 	/*** STORAGE ***/
 
+	bool private singletonLock = false;
 	ISettingsRegistry public registry;
 	FormulaEntry[] public formulas;
 
-	constructor(address _registry) public {
+	modifier singletonLockCall() {
+		require(!singletonLock, "Only can call once");
+		_;
+		singletonLock = true;
+	}
+
+	function initializeContract(address _registry) public singletonLockCall {
+        owner = msg.sender;
+        emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 		_init();
 	}

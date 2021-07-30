@@ -1,63 +1,51 @@
-> deploy:shasta
-> tronbox migrate --network shasta --reset
-
 Using network 'shasta'.
 
-Running migration: 1_initial_migration.js
-shasta
-  Deploying Migrations...
-  Migrations:
-    (base58) TDUFbtpJBriWHTftYpP3gsN16eEgCkJtQB
-    (hex) 4126669c72621ade22f53fd9d696b121c530bd5075
-Saving artifacts...
-Running migration: 2_deploy_furnace.js
-  Running step...
-  Replacing DrillBase...
+  DrillBaseProxy:
+    (base58) TLLtWmNc2iAGqavCzZ1TM6qEEZW7NGZREy
+    (hex) 4171caf9e4d9eafb4f17e54dedbfe8243e2c9630ba
   DrillBase:
-    (base58) TDcrwu6G1e1NR1UfdpHdK8jarWdishyABf
-    (hex) 41280771796f45588231ae40c3a3bc6c30630731f2
+    (base58) TPctSCdHQXgXJUFx6ppVfGMdoGLsSuQkuH
+    (hex) 4195b9f175140e39610fb7537ac513da34571c1cf0
+  ItemBaseProxy:
+    (base58) TXJfykAfhsbBp2BC8ocJtjzv49WA87PE1j
+    (hex) 41ea09107529069a04cbe4886a8ec6e56e6fe333c2
   Replacing ItemBase...
   ItemBase:
-    (base58) TQMuxzcPAnL5vLanhBApNKYCZiSn3vM7dg
-    (hex) 419ddd1b84732f2c5c3cbc38d4dbe9d678e85c462d
-  Replacing Formula...
+    (base58) TRD1tAdyChdwFJwCXJXZR4PQMA7toihVqP
+    (hex) 41a7266dbebaebd60f43f3535b50dea7511b61cbbd
+  FormulaProxy:
+    (base58) TPWNSSvC5ByP7n1Ue7qx9zRB7wTe4mEeDU
+    (hex) 41947e6881ba5ffbdb775898e97aaab9af3dd8b7ce
   Formula:
-    (base58) TVySJtbSJSKoRMavq6sK2AifA9krD65Zje
-    (hex) 41db6d9fc943bb2fe1f2b4a400f6f4c3d6e03bfe9c
-  Replacing MetaDataTeller...
+    (base58) TRT2Yp87G2r9LzEFpCiv9xRNS6jARVv2f6
+    (hex) 41a9cccef140d7dc860a490eedae6342d7a863861b
+  MetaDataTellerProxy:
+    (base58) TYp2L6V1REoMcsNV5wpsubooXf5qooQy4Z
+    (hex) 41fa8e3db2eee8864909ebe6b06f4aabe236d759cf
   MetaDataTeller:
-    (base58) TRNQjPe5rLmRCEZkRZe1zssb5QMAN6tboN
-    (hex) 41a8ed3ed77fa8380c9a21e0025eb01c75411a410b
-  Replacing DrillTakeBack...
+    (base58) TGVAtNSzqm2y1qgvxt6oEf4x9CLfqZztBp
+    (hex) 41477b77c0574acca273b933b0b0afbb1abd5ef710
   DrillTakeBack:
-    (base58) TZBbes42jT3Mo6BoYn7UotxAcieHf8NNmy
-    (hex) 41fea2cb189d1e0ff042e841a34db61a43503ffd94
-  Replacing DrillLuckyBox...
+    (base58) TMGaikcn62JefxoVXL2s9kJhbso42Qtv7V
+    (hex) 417bf295c01baf447989b8998a9ecef00a902f368d
   DrillLuckyBox:
-    (base58) TCz4js5UwYhCqfKJPcFeqebGXsgMQRW3ZB
-    (hex) 412111e584fb1e7040ca6b25a4e457564cc51cc3f9
-  Replacing LandResourceV6...
-  LandResourceV6:
-    (base58) TGV7Bj7w1brkhB2bsa17XuVvbdFGSgPeXY
-    (hex) 41477860E86FA0451EA1A85E7663826A4EAA78A572
-LandResourceV6 setAuthority succeed.
-  Replacing DrillBaseAuthority...
+    (base58) TNckxrhJQ7TamK2x7e8uAdhff2TEm5DfFe
+    (hex) 418abb949fcba9cab83a1014a1a8f952690bea3ba8
   DrillBaseAuthority:
-    (base58) TYzKYEVtzW5AFwZuFi7qQ1aRsL8iVanRN6
-    (hex) 41fc80c4267d4f55554dd011a78f754ec5e957baad
-DrillBase setAuthority succeed.
-  Replacing ObjectOwnershipAuthorityV4...
+    (base58) TPwhgsvQZeyQ1NEuv6KpCYeyaT2GQ2vb2n
+    (hex) 419948e0187781ec3f7217974be56671d3d68fdb27
   ObjectOwnershipAuthorityV4:
-    (base58) TPATakbamPxaqmXfVBjJhxaq1kZNnozeB4
-    (hex) 4190ba61df099642e35a3d1b9e1d051864e8b68ce1
-ObjectOwnership setAuthority succeed.
-encoder registerNewObjectClass DrillBase succeed.
-encoder registerNewObjectClass ItemBase succeed.
-registry CONTRACT_DRILL_BASE succeed.
-registry CONTRACT_ITEM_BASE succeed.
-registry CONTRACT_FORMULA succeed.
-registry CONTRACT_METADATA_TELLER succeed.
-metaDataTeller addInternalTokenMeta succeed.
-registry FURNACE_ITEM_MINE_FEE succeed.
-registry UINT_ITEMBAR_PROTECT_PERIOD succeed.
-Saving artifacts...
+    (base58) TVdt5SpAKX8vtecTB9cTteiHhnfmczx3Qp
+    (hex) 41d7bad0acdebfb0ae3d2db7ce32bbbdc6813ce2f5
+  LandResourceProxy:
+    (base58) TSKyF5JbqxPT8fXYJpAqjFrFqz3uqF1QjP
+    (hex) 41b36f434a28fcbc921b92182ca79af872b476cdc1
+  LandResourceV6:
+    (base58) TXVDDVtHLRaKxBMaE44GHbabZQG15Ae1Jo
+    (hex) 41ec074ca24e9db3c8b3f378e3e65d0d0bd35c9824
+  TokenUseAuthority:
+    (base58) TAPKf2k9gsk93d8m6vzxqswiPdeMJjQofL
+    (hex) 41048f89c34fc7540ca3d49fc0335a31a14efe0f57
+  MintAndBurnAuthority:
+    (base58) TV9C9MTCagM9csAGcY9LqwqPbtx1jGqiMC
+    (hex) 41d24dd5896f1ed81ea4dac7e9070a8789260bddd9

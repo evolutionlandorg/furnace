@@ -21,14 +21,24 @@ contract DrillBase is DSAuth {
 		"CONTRACT_OBJECT_OWNERSHIP";
 
 	/*** STORAGE ***/
+	bool private singletonLock = false;
+
 	uint128 public lastDrillObjectId;
 
 	ISettingsRegistry public registry;
 
+	modifier singletonLockCall() {
+		require(!singletonLock, "Only can call once");
+		_;
+		singletonLock = true;
+	}
+
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
-	constructor(address _registry) public {
+	function initializeContract(address _registry) public singletonLockCall {
+        owner = msg.sender;
+        emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
 	}
 

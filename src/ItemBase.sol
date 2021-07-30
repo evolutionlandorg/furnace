@@ -37,20 +37,24 @@ contract ItemBase is DSStop, DSMath, IELIP002 {
 
 	/*** STORAGE ***/
 
+    bool private singletonLock = false;
 	uint128 public lastItemObjectId;
 	ISettingsRegistry public registry;
 	mapping(uint256 => Item) public tokenId2Item;
 
-	// mapping(uint256 => mapping(uint256 => uint256)) public tokenId2Rate;
+	modifier singletonLockCall() {
+		require(!singletonLock, "Only can call once");
+		_;
+		singletonLock = true;
+	}
 
 	/**
 	 * @dev Same with constructor, but is used and called by storage proxy as logic contract.
 	 */
-	constructor(address _registry) public {
+	function initializeContract(address _registry) public singletonLockCall {
+        owner = msg.sender;
+        emit LogSetOwner(msg.sender);
 		registry = ISettingsRegistry(_registry);
-
-		// trick test
-		// lastItemObjectId = 1000000;
 	}
 
 	function _safeTransferFrom(
