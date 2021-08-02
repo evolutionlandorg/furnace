@@ -4,8 +4,8 @@ Using network 'shasta'.
     (base58) TAAxxdpgahayFisHfe1bbneT2YCrf9S2t5
     (hex) 41023945222c34b091d5cc5eb0ff3975fd80d4afc9
   DrillBase:
-    (base58) TJd8SzG3qRVnezo72aJK8JTAsGdQLvqV46
-    (hex) 415eed032022b82dae1c6e850bafb2c12143d70112
+    (base58) TRFCiX5zxro3WYEEhm38WA88YKBv8ANxWN
+    (hex) 41A7904DD9B4E9012E13C40E621533ED9BEDCF0207
   ItemBaseProxy:
     (base58) TKnQuzSQ2ZoMPb7QmLTE8FMPUeZZcRm4Yi
     (hex) 416ba6a05cb98df548490ff1b4c2de50e5659edeb0
