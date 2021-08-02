@@ -32,8 +32,8 @@ Using network 'shasta'.
     (base58) TNckxrhJQ7TamK2x7e8uAdhff2TEm5DfFe
     (hex) 418abb949fcba9cab83a1014a1a8f952690bea3ba8
   DrillBaseAuthority:
-    (base58) TPwhgsvQZeyQ1NEuv6KpCYeyaT2GQ2vb2n
-    (hex) 419948e0187781ec3f7217974be56671d3d68fdb27
+    (base58) TU4hWMMGmm6Er3QAR4UZzAnA2ue1ft7eQj
+    (hex) 41c67c2383e1716c4e56db4667ac1b242482fd315e
   ObjectOwnershipAuthorityV4:
     (base58) TVdt5SpAKX8vtecTB9cTteiHhnfmczx3Qp
     (hex) 41d7bad0acdebfb0ae3d2db7ce32bbbdc6813ce2f5

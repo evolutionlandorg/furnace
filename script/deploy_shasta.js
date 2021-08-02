@@ -5,44 +5,44 @@ const SETTINGSREGISTRY = {
   hex: "41d1fd927d8bf55bff2dfb8248047bc9881e710cc7"
 }
 const DrillBaseProxy = {
-    base58: "TWNk96NpUTZvEeT47MDQ97zmHxgWe69taB",
-    hex: "41dfd61370192c21a50ad23d7c9c923412f473a1df"
+    base58: "TAAxxdpgahayFisHfe1bbneT2YCrf9S2t5",
+    hex: "41023945222c34b091d5cc5eb0ff3975fd80d4afc9"
 }
 const DrillBase = {
-    base58: "TUhiEK1h94E7zoSboFSjxFtPT3aGKAwxjs",
-    hex: "41cd7c221a84ad4ec4a1aafd806e0ed37bd1b97744"
+    base58: "TJd8SzG3qRVnezo72aJK8JTAsGdQLvqV46",
+    hex: "415eed032022b82dae1c6e850bafb2c12143d70112"
 }
 const ItemBaseProxy = {
-    base58: "TZJCVbWW2uKPBSGxbUbrVcF69L7c5HSw3T",
-    hex: "41ffe25f4c1ee40c1634ac1090576a230491edd1a1"
+    base58: "TKnQuzSQ2ZoMPb7QmLTE8FMPUeZZcRm4Yi",
+    hex: "416ba6a05cb98df548490ff1b4c2de50e5659edeb0"
 } 
 const ItemBase = {
-    base58: "TJWcz2uhk5vBX9Md87ZhwfAJktg8TkrxdJ",
-    hex: "415db1eba73d75a230b9fbe6b5eb42e04df721af4d"
+    base58: "TTZXrEwwE6DNzGZUDom1Asih4PrzRiGRew",
+    hex: "41c0f803b77b1043e30e35e9c3aec20190bec5d94e"
 }
 const FormulaProxy = {
-    base58: "TKxg7wV5DaLwhpnFKYEntcDeqbbuERSiq8",
-    hex: "416d977ab88003b7b6274af72e9ecf3ad4f6c698ec"
+    base58: "TSyoTUJ8jQQsvoYKWQQgMzzEYx2W72FPKS",
+    hex: "41ba96e675a47fd2cfd7d17ae5a7eb3e3cd8006bd4"
 } 
 const Formula = {
-    base58: "TC6oAAvsxDx51sNRyauHfYqeUjRQ3agSH5",
-    hex: "41175fad1d518b90885a4c35659e6cd42fcb10a325"
+    base58: "TLRHVejup8uTJqZSEgW4KeCDXuA2Q2kCWv",
+    hex: "41729fd2c9b4c1bbdbfac6e05adc0edb400bfc2440"
 }
 const MetaDataTellerProxy = {
-    base58: "TXSxj55WTMPAhCnbozfh5Qdv9xnrDLitVN",
-    hex: "41eb9a5f260d5da64ffde842f4cd8569a1eba70cb8"
+    base58: "TP7c8ETm1ezDZQ6winReC5XdVoqJDFjvkK",
+    hex: "41903043fc250232692f17fe2d07855056d2a1cac5"
 }
 const MetaDataTeller = {
-    base58: "TEDrVmbDFpNjpuK8M4ZMUpnoYstAnmVvPt",
-    hex: "412ea5a0384666e85d6f3209a9492a5c056ee0d20b"
+    base58: "TZFWdktim7BjCDTssTGE9kXRmYD6VzZvQH",
+    hex: "41ff6044799bc1a3fe80d535d511e65816690b72f6"
 }
 const DrillBaseAuthority = {
-    base58: "TRpyoteHBZbsFohYoxMRdZ41scsVPamBSV",
-    hex: "41adf3ac1955425df68b49a4022a650a7b566cd450"
+    base58: "TUk51ZC7qVhgiEVKrH5QtgX5DgdyGHHf5V",
+    hex: "41cdee4fbcddc18d66aa15d536478df5d13766bddd"
 }
 const ObjectOwnershipAuthorityV4 = {
-    base58: "TUMgJUGK3ZBxFJRQwRw3sXZBfZiPXoYp2K",
-    hex: "41c9b2344f05c2f05a61187016542f476eede0430c"
+    base58: "TEAzt1iF62HQa2UH7Qk6tDHt2owUYnZG5V",
+    hex: "412e1b604ce74250366492d1c676bddfc5114b413b"
 }
 
 const tronWeb = new TronWeb({
@@ -79,7 +79,7 @@ const app = async () => {
       callValue:0,
       userFeePercentage:1,
       originEnergyLimit:100_000_000,
-      shouldPollResponse:true
+      shouldPollResponse: false
     }))
    
   let meta_teller_proxy = await tronWeb.contract().at(MetaDataTellerProxy.hex)
