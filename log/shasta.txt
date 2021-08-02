@@ -1,42 +1,41 @@
 Using network 'shasta'.
 
   DrillBaseProxy:
-    (base58) TLLtWmNc2iAGqavCzZ1TM6qEEZW7NGZREy
-    (hex) 4171caf9e4d9eafb4f17e54dedbfe8243e2c9630ba
+    (base58) TAAxxdpgahayFisHfe1bbneT2YCrf9S2t5
+    (hex) 41023945222c34b091d5cc5eb0ff3975fd80d4afc9
   DrillBase:
-    (base58) TPctSCdHQXgXJUFx6ppVfGMdoGLsSuQkuH
-    (hex) 4195b9f175140e39610fb7537ac513da34571c1cf0
+    (base58) TJd8SzG3qRVnezo72aJK8JTAsGdQLvqV46
+    (hex) 415eed032022b82dae1c6e850bafb2c12143d70112
   ItemBaseProxy:
-    (base58) TXJfykAfhsbBp2BC8ocJtjzv49WA87PE1j
-    (hex) 41ea09107529069a04cbe4886a8ec6e56e6fe333c2
-  Replacing ItemBase...
+    (base58) TKnQuzSQ2ZoMPb7QmLTE8FMPUeZZcRm4Yi
+    (hex) 416ba6a05cb98df548490ff1b4c2de50e5659edeb0
   ItemBase:
-    (base58) TRD1tAdyChdwFJwCXJXZR4PQMA7toihVqP
-    (hex) 41a7266dbebaebd60f43f3535b50dea7511b61cbbd
+    (base58) TTZXrEwwE6DNzGZUDom1Asih4PrzRiGRew
+    (hex) 41c0f803b77b1043e30e35e9c3aec20190bec5d94e
   FormulaProxy:
-    (base58) TPWNSSvC5ByP7n1Ue7qx9zRB7wTe4mEeDU
-    (hex) 41947e6881ba5ffbdb775898e97aaab9af3dd8b7ce
+    (base58) TSyoTUJ8jQQsvoYKWQQgMzzEYx2W72FPKS
+    (hex) 41ba96e675a47fd2cfd7d17ae5a7eb3e3cd8006bd4
   Formula:
-    (base58) TRT2Yp87G2r9LzEFpCiv9xRNS6jARVv2f6
-    (hex) 41a9cccef140d7dc860a490eedae6342d7a863861b
+    (base58) TLRHVejup8uTJqZSEgW4KeCDXuA2Q2kCWv
+    (hex) 41729fd2c9b4c1bbdbfac6e05adc0edb400bfc2440
   MetaDataTellerProxy:
-    (base58) TYp2L6V1REoMcsNV5wpsubooXf5qooQy4Z
-    (hex) 41fa8e3db2eee8864909ebe6b06f4aabe236d759cf
+    (base58) TP7c8ETm1ezDZQ6winReC5XdVoqJDFjvkK
+    (hex) 41903043fc250232692f17fe2d07855056d2a1cac5
   MetaDataTeller:
-    (base58) TGVAtNSzqm2y1qgvxt6oEf4x9CLfqZztBp
-    (hex) 41477b77c0574acca273b933b0b0afbb1abd5ef710
+    (base58) TZFWdktim7BjCDTssTGE9kXRmYD6VzZvQH
+    (hex) 41ff6044799bc1a3fe80d535d511e65816690b72f6
   DrillTakeBack:
-    (base58) TMGaikcn62JefxoVXL2s9kJhbso42Qtv7V
-    (hex) 417bf295c01baf447989b8998a9ecef00a902f368d
+    (base58) TV89n1Hk5QbnmdjSLnAn15DiijNmiyTNML
+    (hex) 41d21b710011d64717e3c59543af54a6e159bebb62
   DrillLuckyBox:
-    (base58) TNckxrhJQ7TamK2x7e8uAdhff2TEm5DfFe
-    (hex) 418abb949fcba9cab83a1014a1a8f952690bea3ba8
+    (base58) TFi2CU7PN7w2fp1ifWc28828sfNHQWCgK9
+    (hex) 413ef17f44d85a8b72b1e9f866f5b8eb1a730a7e95
   DrillBaseAuthority:
-    (base58) TU4hWMMGmm6Er3QAR4UZzAnA2ue1ft7eQj
-    (hex) 41c67c2383e1716c4e56db4667ac1b242482fd315e
+    (base58) TUk51ZC7qVhgiEVKrH5QtgX5DgdyGHHf5V
+    (hex) 41cdee4fbcddc18d66aa15d536478df5d13766bddd
   ObjectOwnershipAuthorityV4:
-    (base58) TVdt5SpAKX8vtecTB9cTteiHhnfmczx3Qp
-    (hex) 41d7bad0acdebfb0ae3d2db7ce32bbbdc6813ce2f5
+    (base58) TEAzt1iF62HQa2UH7Qk6tDHt2owUYnZG5V
+    (hex) 412e1b604ce74250366492d1c676bddfc5114b413b
   LandResourceProxy:
     (base58) TSKyF5JbqxPT8fXYJpAqjFrFqz3uqF1QjP
     (hex) 41b36f434a28fcbc921b92182ca79af872b476cdc1
