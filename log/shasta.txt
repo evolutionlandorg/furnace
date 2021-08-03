@@ -43,8 +43,8 @@ Using network 'shasta'.
     (base58) TXVDDVtHLRaKxBMaE44GHbabZQG15Ae1Jo
     (hex) 41ec074ca24e9db3c8b3f378e3e65d0d0bd35c9824
   TokenUseAuthority:
-    (base58) TAPKf2k9gsk93d8m6vzxqswiPdeMJjQofL
-    (hex) 41048f89c34fc7540ca3d49fc0335a31a14efe0f57
+    (base58) TMFVEHzryA7WtYcc5k66wBKdcYD9bCJ7w9
+    (hex) 417bbd95eb1ff47f75d8c2c09d910072b50ce061f1
   MintAndBurnAuthority:
     (base58) TV9C9MTCagM9csAGcY9LqwqPbtx1jGqiMC
     (hex) 41d24dd5896f1ed81ea4dac7e9070a8789260bddd9
