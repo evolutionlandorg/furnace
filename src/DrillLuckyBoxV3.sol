@@ -5,9 +5,9 @@ import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/IERC223Recipient.sol";
 import "./interfaces/ISettingsRegistry.sol";
-import "./DrillBoxPrice.sol";
+import "./DrillBoxPriceV3.sol";
 
-contract DrillLuckyBoxV2 is DSMath, DSStop, IERC223Recipient, DrillBoxPrice {
+contract DrillLuckyBoxV3 is DSMath, DSStop, IERC223Recipient, DrillBoxPriceV3 {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event RingRefunded(address indexed buyer, uint256 value);
