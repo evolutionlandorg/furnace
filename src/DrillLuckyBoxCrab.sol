@@ -4,9 +4,9 @@ import "ds-stop/stop.sol";
 import "ds-math/math.sol";
 import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/ISettingsRegistry.sol";
-import "./DrillBoxPriceV3.sol";
+import "./DrillBoxPriceCrab.sol";
 
-contract DrillLuckyBoxV3 is DSMath, DSStop, DrillBoxPriceV3 {
+contract DrillLuckyBoxCrab is DSMath, DSStop, DrillBoxPriceCrab {
 	event GoldBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event SilverBoxSale(address indexed buyer, uint256 amount, uint256 price);
 	event ClaimedTokens(
