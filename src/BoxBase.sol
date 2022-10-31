@@ -7,9 +7,9 @@ import "zeppelin-solidity/token/ERC20/IERC20.sol";
 import "./interfaces/ISettingsRegistry.sol";
 import "./interfaces/IObjectOwnership.sol";
 import "./interfaces/IDrillBase.sol";
-import "./DrillBoxPriceCrab.sol";
+import "./DrillBoxPrice.sol";
 
-contract BoxBaseCrab is Initializable, DSMath, DSStop, DrillBoxPriceCrab {
+contract BoxBase is Initializable, DSMath, DSStop, DrillBoxPrice {
 	event Create(
 		address indexed owner,
 		uint256 indexed tokenId,
