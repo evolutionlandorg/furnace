@@ -7,6 +7,8 @@ if [ "$FNC_VERBOSE" ]; then set -x; fi
 # shellcheck source=lib/common.sh
 . "${0%/*}/../../lib/common.sh"
 
+loadAddresses
+
 ITEMBASE=$(dapp create src/ItemBase.sol:ItemBase)
 addAddress "ITEMBASE" "$ITEMBASE"
 echo >&2 "${0##*/}: info: ItemBase created."
@@ -17,7 +19,8 @@ ITEMBASE_PROXY=$(dapp create src/ItemBaseProxy.sol:ItemBaseProxy $ITEMBASE $FURN
 addAddress "ITEMBASE_PROXY" "$ITEMBASE_PROXY"
 echo >&2 "${0##*/}: info: ItemBaseProxy inited."
 
-OWNERSHIPV4WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
+# OWNERSHIPV4WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$ERC721BRIDGE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
+OWNERSHIPV4WHITELIST=[$LANDBASE_PROXY,$APOSTLEBASE_PROXY,$DRILLBASE_PROXY,$ITEMBASE_PROXY]
 OBJECTOWNERSHIPV4_AUTHORITY=$(dapp create src/ObjectOwnershipAuthorityV4.sol:ObjectOwnershipAuthorityV4 $OWNERSHIPV4WHITELIST)
 addAddress "OBJECTOWNERSHIPV4_AUTHORITY" "$OBJECTOWNERSHIPV4_AUTHORITY"
 echo >&2 "${0##*/}: info: ObjectOwnershipAuthorityV4 created."
@@ -29,7 +32,8 @@ if test "$AUTHV4_ADDR" != $(seth --to-checksum-address $OBJECTOWNERSHIPV4_AUTHOR
   (echo "migrate ObjectOwnershipAuthorityV4 failed ${auth}"; exit 1;)
 fi
 
-allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
+# allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $ERC721BRIDGE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
+allowlist=($LANDBASE_PROXY $APOSTLEBASE_PROXY $DRILLBASE_PROXY $ITEMBASE_PROXY)
 for allow in "${allowlist[@]}"; do
   res=$(seth call $OBJECTOWNERSHIPV4_AUTHORITY "whiteList(address)(bool)" $allow)
   if test "$res" != true; then

@@ -7,7 +7,7 @@ make flat
 
 ## Addresses
 
-### Hect Testnet
+### Heco Testnet
 
 | Name    |      Source      |  ABI |  Address |
 |:--------:|:----------------:|:------:|:-----------:|
@@ -57,3 +57,4 @@ make flat
 | ItemBase_Proxy | ItemBase.sol |[ItemBase.abi](https://github.com/hujw77/furnance/tree/main/abi/ItemBase.abi) | [0xfd9C2B86f71C1484Bc51F97Bd9E323cB2Cd475C9](https://ropsten.etherscan.io/address/0xfd9C2B86f71C1484Bc51F97Bd9E323cB2Cd475C9) |
 | MetaDataTeller_Proxy | MetaDataTeller.sol |[MetaDataTeller.abi](https://github.com/hujw77/furnance/tree/main/abi/MetaDataTeller.abi) | [0x86c85A9bf5DEAfdeD40D9C70517883D95F50Df03](https://etherscan.io/address/0x86c85A9bf5DEAfdeD40D9C70517883D95F50Df03) |
 | GegoToken | [GegoToken](https://etherscan.io/address/0x27b4bc90fbe56f02ef50f2e2f79d7813aa8941a7#code) | [GegoToken](https://github.com/hujw77/furnance/tree/main/abi/GegoToken.abi) | [0x27b4bc90fbe56f02ef50f2e2f79d7813aa8941a7](https://etherscan.io/address/0x27b4bc90fbe56f02ef50f2e2f79d7813aa8941a7) |
+
